@@ -2,7 +2,7 @@
   "name": "aegis-alpha",
   "display_name": "Aegis Alpha",
   "version": "0.1.0",
-  "private": true,
+  "private": false,
   "description": "Research-only multi-agent investment skillpack with fail-closed data, provenance, screening, research, paper planning, portfolio review, advice lifecycle, and report evolution workflows.",
   "canonical_source": "skills/aegis-alpha",
   "public_skill_limit": 15,

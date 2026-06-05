@@ -1,6 +1,6 @@
 # Aegis Alpha
 
-Aegis Alpha is a private, multi-agent investment skillpack. It keeps one
+Aegis Alpha is a public, multi-agent investment skillpack. It keeps one
 canonical skill source under `skills/aegis-alpha` and uses lightweight adapters
 to install that source into Codex, Hermes, OpenClaw, Claude Code, or another
 agent runtime.
@@ -139,8 +139,8 @@ python3 tools/smoke_investment_closed_loop.py --output-dir audit
 python3 tools/check_final_acceptance.py --audit-dir audit
 ```
 
-## GitHub
+## Repository Hygiene
 
-This repository is intended to be pushed as a private GitHub repository. Do not
-commit `.env`, local workspace state, prewarm artifacts, positions, ledgers, or
-runtime memory.
+This repository is public. Do not commit `.env`, API keys, local workspace
+state, prewarm artifacts, positions, ledgers, reports, runtime memory, or any
+other personal/account data.
