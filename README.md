@@ -40,6 +40,9 @@ provider selection, and automation guidance:
   `AEGIS_ALPHA_WORKSPACE`.
 - `scripts/provider_resolver.py` selects between `agent_native`, `skill_api`,
   and `workspace_cache` evidence paths by runtime profile and capability.
+- `data/capability-guide.json` explains what the skillpack can do, what
+  agent-native tools can and cannot cover, and which API groups unlock each
+  capability.
 - `references/automation-playbook.md` tells the current agent how to configure
   recurring work with its own automation capability when available.
 - `data/automation-jobs.json` defines standard morning, heartbeat, nightly, and
@@ -77,6 +80,34 @@ use it to reuse or prepare auditable data before a workflow. Manual user input
 is also not a provider; it only controls whether the conductor may ask the user
 for explicit files, holdings, or facts when configured channels cannot prove a
 critical input.
+
+## Capability And API Discovery
+
+Do not ask users to guess API names. On first run, the agent should read
+`data/capability-guide.json` or inspect `profile.onboarding` from
+`scripts/bootstrap_runtime.py`. That onboarding block tells the agent:
+
+- what Aegis Alpha can start doing without API keys.
+- what the current agent can usually cover with `agent_native` tools.
+- which API groups are recommended for the selected preset.
+- which specific tasks require matching APIs, cache, or user-provided evidence.
+- what remains unavailable and must fail closed.
+
+API groups are capability-specific:
+
+| API group | Env vars | Unlocks | Required when |
+|---|---|---|---|
+| `research_search` | `TAVILY_API_KEYS`, `QVERIS_API_KEY` | source discovery and search expansion | current agent lacks usable web/search tools or the user requests API-backed search |
+| `document_parse` | `MINERU_API_KEY` | complex PDF/report parsing | agent-native file reading cannot parse the document reliably |
+| `market_data` | `TUSHARE_TOKEN`, `FINNHUB_API_KEY` | quotes, historical bars, fundamentals, screening and quant inputs | the task needs structured market datasets |
+| `market_intel` | `JIN10_API_KEY`, `TAVILY_API_KEYS`, `QVERIS_API_KEY` | news, macro events, theme catalysts | the task needs provider-backed market intelligence |
+| `external_push` | `FEISHU_APP_ID`, `FEISHU_APP_SECRET`, `FEISHU_RECEIVE_ID`, `FEISHU_CHAT_ID` | confirmed Feishu delivery | the user explicitly enables confirmed external push |
+
+The full skillpack can install and start without API keys. APIs are not a
+global prerequisite; they are evidence feeds for capabilities that need
+repeatable data. For example, `quick-research` can often run with agent-native
+web/search tools, while structured screening or quant validation needs
+`market_data` API, cache, or a user-provided dataset.
 
 Presets are default operating profiles, not feature gates. All 15 public skills
 remain available after any preset is selected. If a user asks for work outside

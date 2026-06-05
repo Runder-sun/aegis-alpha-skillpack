@@ -1,0 +1,173 @@
+{
+  "schema_version": 1,
+  "purpose": "Explain Aegis Alpha capabilities, agent-native limits, API groups, and what remains usable without APIs.",
+  "provider_model": {
+    "agent_native": {
+      "label": "Agent-native tools",
+      "can_do": [
+        "Use the current agent's own web/search/browser/file/document tools when available.",
+        "Collect public evidence, inspect pages or filings, read local files, compare sources, and draft research outputs.",
+        "Run Aegis Alpha dispatch scripts and validate fail-closed contracts."
+      ],
+      "cannot_guarantee": [
+        "Reliable structured market time series, fundamentals, or real-time quotes without a configured data feed.",
+        "External push delivery without the target service credentials.",
+        "Recurring wakeups unless the current agent exposes native automation."
+      ]
+    },
+    "skill_api": {
+      "label": "Configured skill APIs",
+      "can_do": [
+        "Provide structured or provider-backed data for capabilities that need repeatable evidence.",
+        "Improve market data, news/search, document parsing, and external push workflows when matching API groups are configured."
+      ],
+      "cannot_guarantee": [
+        "Investment decisions or live trading authorization.",
+        "Capabilities outside the configured API group."
+      ]
+    },
+    "workspace_cache": {
+      "label": "Workspace cache and prewarm artifacts",
+      "can_do": [
+        "Reuse auditable evidence prepared by prewarm jobs.",
+        "Reduce repeated API or web calls for scheduled desk workflows."
+      ],
+      "cannot_guarantee": [
+        "Fresh evidence when artifacts are missing or stale.",
+        "A substitute for missing critical data."
+      ]
+    },
+    "manual_input": {
+      "label": "User-supplied evidence",
+      "can_do": [
+        "Let the user provide holdings, ledgers, reports, filings, or facts when configured acquisition channels cannot prove them."
+      ],
+      "cannot_guarantee": [
+        "Automatic data acquisition.",
+        "A fallback for external push, live trading, or missing critical evidence."
+      ]
+    }
+  },
+  "api_groups": {
+    "research_search": {
+      "label": "Research search and source discovery",
+      "env": ["TAVILY_API_KEYS", "QVERIS_API_KEY"],
+      "unlocks": ["information retrieval", "source discovery", "fresh research expansion"],
+      "required_when": "The current agent lacks usable web/search tools or the user requests API-backed search.",
+      "without_api": "Use agent-native search/browser tools when available, or ask the user for source files and links."
+    },
+    "document_parse": {
+      "label": "Document parsing",
+      "env": ["MINERU_API_KEY"],
+      "unlocks": ["large PDF parsing", "report extraction", "document evidence normalization"],
+      "required_when": "The task requires provider-backed parsing for complex PDFs or documents the current agent cannot read reliably.",
+      "without_api": "Use agent-native file/document reading for simple files, or ask the user for extracted text."
+    },
+    "market_data": {
+      "label": "Structured market data",
+      "env": ["TUSHARE_TOKEN", "FINNHUB_API_KEY"],
+      "unlocks": ["quotes", "daily bars", "historical series", "fundamentals", "screening data", "quant inputs"],
+      "required_when": "The task needs structured prices, time series, fundamentals, factor data, or repeatable market datasets.",
+      "without_api": "Do not fabricate structured data. Use user-provided files/cache, or fail closed for data-dependent analysis."
+    },
+    "market_intel": {
+      "label": "Market news and macro intelligence",
+      "env": ["JIN10_API_KEY", "TAVILY_API_KEYS", "QVERIS_API_KEY"],
+      "unlocks": ["market news", "macro events", "theme catalysts", "desk brief enrichment"],
+      "required_when": "The task needs provider-backed news feeds or broad market intelligence beyond agent-native search.",
+      "without_api": "Use agent-native search when available, cite sources, and fail closed if fresh evidence cannot be obtained."
+    },
+    "external_push": {
+      "label": "External confirmed push",
+      "env": ["FEISHU_APP_ID", "FEISHU_APP_SECRET", "FEISHU_RECEIVE_ID", "FEISHU_CHAT_ID"],
+      "unlocks": ["confirmed Feishu delivery", "scheduled report push"],
+      "required_when": "The user explicitly enables external-push=confirm-only and wants delivery outside the agent chat.",
+      "without_api": "External push is unavailable. Do not degrade to manual input or silent sending."
+    }
+  },
+  "api_groups_by_capability": {
+    "research_search": ["research_search"],
+    "web_extract": ["research_search", "document_parse"],
+    "document_parse": ["document_parse"],
+    "market_news": ["market_intel", "research_search"],
+    "structured_market_data": ["market_data"],
+    "external_push": ["external_push"]
+  },
+  "capabilities": {
+    "one_off_research": {
+      "label": "One-off investment research",
+      "public_skills": ["information-retrieval", "equity-research", "quality-gate"],
+      "agent_native_fit": "strong when the agent has web/search/file tools",
+      "api_groups": ["research_search", "document_parse"],
+      "api_required": false,
+      "without_api": "Usable with agent-native tools or user-provided sources."
+    },
+    "market_desk": {
+      "label": "Market desk, macro, themes, and news",
+      "public_skills": ["market-intel", "macro-regime", "theme-cycle", "execution-automation"],
+      "agent_native_fit": "useful for verification and fresh source inspection",
+      "api_groups": ["market_data", "market_intel", "research_search"],
+      "api_required": false,
+      "without_api": "Can run source-backed research, but structured desk data and repeatability are limited."
+    },
+    "structured_screening_and_quant": {
+      "label": "Structured screening and quant validation",
+      "public_skills": ["market-data", "equity-screening", "quant-validation"],
+      "agent_native_fit": "limited; public pages are not a reliable structured dataset",
+      "api_groups": ["market_data"],
+      "api_required": true,
+      "without_api": "Requires user-provided dataset/cache or fails closed."
+    },
+    "portfolio_review": {
+      "label": "Portfolio and position review",
+      "public_skills": ["portfolio-ops", "advice-lifecycle", "trade-planning"],
+      "agent_native_fit": "strong for analyzing provided ledgers, holdings, and reports",
+      "api_groups": ["market_data"],
+      "api_required": false,
+      "without_api": "Usable with manual ledger or imported files; market marks require cache, files, or market-data API."
+    },
+    "report_review": {
+      "label": "Report review and outcome alignment",
+      "public_skills": ["report-evolution", "quality-gate", "information-retrieval"],
+      "agent_native_fit": "strong for local reports and cited evidence",
+      "api_groups": ["document_parse", "research_search"],
+      "api_required": false,
+      "without_api": "Usable when reports and evidence are provided or readable by the agent."
+    },
+    "external_push": {
+      "label": "External report push",
+      "public_skills": ["execution-automation"],
+      "agent_native_fit": "not a substitute for service credentials",
+      "api_groups": ["external_push"],
+      "api_required": true,
+      "without_api": "Unavailable; keep output in the agent chat or workspace."
+    }
+  },
+  "preset_api_guidance": {
+    "quick-research": {
+      "recommended": ["research_search"],
+      "optional": ["document_parse"],
+      "message": "Start without APIs if the current agent has web/search/file tools. Add search or parsing APIs only when agent-native evidence is insufficient."
+    },
+    "daily-desk": {
+      "recommended": ["market_data", "market_intel"],
+      "optional": ["research_search"],
+      "message": "Market desk workflows get much better with structured market data and news APIs, but can still run source-backed research without them."
+    },
+    "portfolio-desk": {
+      "recommended": ["market_data"],
+      "optional": [],
+      "message": "Portfolio review needs holdings from manual-ledger, imported-file, or read-only-api. Market-data API is recommended for marks and time-series context."
+    },
+    "report-review": {
+      "recommended": ["document_parse", "research_search"],
+      "optional": [],
+      "message": "Report review can start with local reports and agent-native reading; parsing/search APIs improve coverage for complex documents and evidence checks."
+    },
+    "full-institutional": {
+      "recommended": ["market_data", "market_intel", "research_search", "document_parse"],
+      "optional": ["external_push"],
+      "message": "Full workflow can install and start without APIs, but institutional-grade repeatability requires structured market data, market intelligence, search, parsing, and prewarm artifacts."
+    }
+  }
+}

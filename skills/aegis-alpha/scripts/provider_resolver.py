@@ -18,7 +18,7 @@ CAPABILITIES = (
 )
 CACHE_PROVIDERS = {"workspace_cache", "cache_or_prewarm"}
 LEGACY_MANUAL_PROVIDER = "manual_payload"
-API_GROUPS_BY_CAPABILITY = {
+DEFAULT_API_GROUPS_BY_CAPABILITY = {
     "research_search": ("research_search",),
     "web_extract": ("research_search", "document_parse"),
     "document_parse": ("document_parse",),
@@ -54,7 +54,16 @@ def _profile(workspace: Path, explicit: str | None) -> dict[str, Any]:
     return _load_json(workspace / "config" / "runtime-profile.json", {})
 
 
-def _provider_available(provider: str, profile: dict[str, Any], capability: str) -> tuple[bool, str]:
+def _api_groups_by_capability(guide: dict[str, Any]) -> dict[str, tuple[str, ...]]:
+    configured = guide.get("api_groups_by_capability") if isinstance(guide.get("api_groups_by_capability"), dict) else {}
+    result = dict(DEFAULT_API_GROUPS_BY_CAPABILITY)
+    for capability, groups in configured.items():
+        if isinstance(groups, list):
+            result[str(capability)] = tuple(str(group) for group in groups)
+    return result
+
+
+def _provider_available(provider: str, profile: dict[str, Any], capability: str, guide: dict[str, Any]) -> tuple[bool, str]:
     data_source_mode = profile.get("data_source_mode") or "none"
     provider_priority = profile.get("data_provider_priority") or profile.get("data_source_modes") or []
     if not isinstance(provider_priority, list):
@@ -68,7 +77,7 @@ def _provider_available(provider: str, profile: dict[str, Any], capability: str)
             return True, "runtime profile allows agent-native acquisition"
         return False, "runtime profile did not enable agent-native acquisition"
     if provider == "skill_api":
-        required_groups = API_GROUPS_BY_CAPABILITY.get(capability, ())
+        required_groups = _api_groups_by_capability(guide).get(capability, ())
         configured_groups = [
             name
             for name in required_groups
@@ -124,7 +133,8 @@ def _dedupe(items: list[str]) -> list[str]:
     return result
 
 
-def resolve(capability: str, profile: dict[str, Any], capabilities: dict[str, Any]) -> dict[str, Any]:
+def resolve(capability: str, profile: dict[str, Any], capabilities: dict[str, Any], guide: dict[str, Any] | None = None) -> dict[str, Any]:
+    guide = guide if isinstance(guide, dict) else {}
     agent = profile.get("agent") or "unknown"
     configured = capabilities.get(agent) if isinstance(capabilities, dict) else None
     if not isinstance(configured, dict):
@@ -135,7 +145,7 @@ def resolve(capability: str, profile: dict[str, Any], capabilities: dict[str, An
     provider_order = _ordered_providers(capability, profile, provider_order)
     providers = []
     for provider in provider_order:
-        ok, reason = _provider_available(str(provider), profile, capability)
+        ok, reason = _provider_available(str(provider), profile, capability, guide)
         providers.append({"provider": provider, "available": ok, "reason": reason})
     selected = next((item["provider"] for item in providers if item["available"]), None)
     manual_input_policy = str(profile.get("manual_input_policy") or "ask-when-missing")
@@ -165,7 +175,8 @@ def main() -> int:
     workspace = _workspace(args.workspace)
     profile = _profile(workspace, args.profile)
     capabilities = _load_json(_skillpack_root() / "data" / "provider-capabilities.json", {})
-    print(json.dumps(resolve(args.capability, profile, capabilities), ensure_ascii=False, indent=2))
+    guide = _load_json(_skillpack_root() / "data" / "capability-guide.json", {})
+    print(json.dumps(resolve(args.capability, profile, capabilities, guide), ensure_ascii=False, indent=2))
     return 0
 
 

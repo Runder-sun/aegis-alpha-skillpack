@@ -14,9 +14,10 @@ The aggregate `aegis-alpha` skill acts as the conductor for first-run bootstrap,
 provider selection, and optional automation setup. Use
 `scripts/bootstrap_runtime.py` to create the runtime profile,
 `scripts/provider_resolver.py` to choose agent-native/API acquisition and
-workspace-cache evidence paths, and `references/automation-playbook.md` when
-configuring recurring work through the current agent's own automation
-capability.
+workspace-cache evidence paths, `data/capability-guide.json` to explain
+agent-native limits and API requirements to the user, and
+`references/automation-playbook.md` when configuring recurring work through the
+current agent's own automation capability.
 
 The runtime profile uses product presets plus independent capability axes. A
 user chooses a workflow preset such as `quick-research`, `daily-desk`,
@@ -25,6 +26,11 @@ provider priority, cache policy, manual input policy, portfolio source, and
 heartbeat mode separately. Provider choices are composable: agent-native
 acquisition and skill APIs can both be enabled in priority order. Workspace
 cache/prewarm and user-supplied evidence are separate policies, not providers.
+
+Before asking users for API keys, explain the skillpack's investment
+capabilities from `data/capability-guide.json` or the generated
+`profile.onboarding` block. API keys are capability-specific evidence feeds,
+not a global prerequisite for installing or starting the skillpack.
 
 Presets are default operating profiles, not feature gates. All public skills
 remain available after any preset. Requests outside the selected preset should

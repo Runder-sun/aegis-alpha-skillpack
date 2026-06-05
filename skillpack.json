@@ -70,6 +70,7 @@
   "conductor": {
     "bootstrap": "skills/aegis-alpha/scripts/bootstrap_runtime.py",
     "provider_resolver": "skills/aegis-alpha/scripts/provider_resolver.py",
+    "capability_guide": "skills/aegis-alpha/data/capability-guide.json",
     "automation_playbook": "skills/aegis-alpha/references/automation-playbook.md",
     "automation_jobs": "skills/aegis-alpha/data/automation-jobs.json",
     "provider_capabilities": "skills/aegis-alpha/data/provider-capabilities.json"

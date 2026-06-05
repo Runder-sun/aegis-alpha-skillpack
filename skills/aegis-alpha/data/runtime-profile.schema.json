@@ -57,6 +57,7 @@
     },
     "automation": {"type": "object"},
     "providers": {"type": "object"},
+    "onboarding": {"type": "object"},
     "safety": {
       "type": "object",
       "required": ["decision_allowed", "requires_human_confirmation", "live_trading_allowed"],

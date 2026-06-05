@@ -57,6 +57,14 @@ remain available. If the user asks for work outside the selected preset, route
 to the relevant public skill, resolve providers, ask for missing inputs when
 needed, and fail closed if critical evidence is unavailable.
 
+Before asking the user to configure API keys, read
+`../.aegis-alpha-core/data/capability-guide.json` or the generated
+`profile.onboarding` block. Explain what the package can do without APIs, what
+Claude Code can cover with agent-native tools, which API groups are recommended
+for the selected preset, and which specific tasks require APIs, cache, or
+user-provided evidence. Do not ask the user to choose raw API names before
+explaining the investment capabilities they unlock.
+
 ## Public Surface
 
 Prefer the individual native public skills when the request clearly matches one area:

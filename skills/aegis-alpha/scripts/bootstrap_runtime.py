@@ -193,6 +193,11 @@ def _api_capabilities() -> dict[str, Any]:
     return groups
 
 
+def _capability_guide() -> dict[str, Any]:
+    guide = _load_json(_skillpack_root() / "data" / "capability-guide.json", {})
+    return guide if isinstance(guide, dict) else {}
+
+
 def _latest_prewarm(workspace: Path) -> dict[str, Any]:
     prewarm_dir = workspace / "memory" / "prewarm"
     if not prewarm_dir.exists():
@@ -329,10 +334,18 @@ def _capability_level(workflow_scope: str, provider_priority: list[str], cache_p
     return "offline"
 
 
-def _next_actions(workflow_scope: str, provider_priority: list[str], cache_policy: str, manual_input_policy: str, heartbeat: str, portfolio_source: str, api: dict[str, Any], prewarm: dict[str, Any]) -> list[str]:
+def _next_actions(workflow_scope: str, provider_priority: list[str], cache_policy: str, manual_input_policy: str, heartbeat: str, portfolio_source: str, api: dict[str, Any], prewarm: dict[str, Any], readiness: dict[str, Any] | None = None) -> list[str]:
     actions: list[str] = []
     if "skill_api" in provider_priority and not any(group.get("configured") for group in api.values()):
-        actions.append("Configure at least one skill API key if API-backed data should be used, or put agent_native first for capabilities the current agent can satisfy.")
+        missing = []
+        if isinstance(readiness, dict):
+            plan = readiness.get("preset_api_plan")
+            if isinstance(plan, list):
+                missing = [str(item.get("group")) for item in plan if isinstance(item, dict) and not item.get("configured")]
+        if missing:
+            actions.append(f"Review onboarding.preset_api_plan before asking for API keys; missing recommended or optional API groups for this preset: {', '.join(missing)}.")
+        else:
+            actions.append("No skill API groups are configured. The package can still start with agent-native tools, cache, or user-supplied evidence when the requested capability allows it.")
     if cache_policy in {"cache-first", "refresh-if-stale", "prewarm-required"} and not prewarm.get("available"):
         actions.append("Run execution-automation morning-prewarm or nightly-prewarm before cache-dependent workflows.")
     if not provider_priority and manual_input_policy == "disabled":
@@ -346,6 +359,66 @@ def _next_actions(workflow_scope: str, provider_priority: list[str], cache_polic
     if not actions:
         actions.append("Runtime profile is ready for the selected preset and capability configuration.")
     return actions
+
+
+def _api_readiness(guide: dict[str, Any], preset: str, provider_priority: list[str], api: dict[str, Any], agent: str) -> dict[str, Any]:
+    api_groups = guide.get("api_groups") if isinstance(guide.get("api_groups"), dict) else {}
+    preset_guidance = guide.get("preset_api_guidance") if isinstance(guide.get("preset_api_guidance"), dict) else {}
+    selected = preset_guidance.get(preset) if isinstance(preset_guidance.get(preset), dict) else {}
+    configured_groups = sorted(
+        group for group, status in api.items() if isinstance(status, dict) and status.get("configured")
+    )
+    plan: list[dict[str, Any]] = []
+    for priority in ("recommended", "optional"):
+        for group in selected.get(priority, []) if isinstance(selected.get(priority), list) else []:
+            meta = api_groups.get(group) if isinstance(api_groups.get(group), dict) else {}
+            status = api.get(group) if isinstance(api.get(group), dict) else {}
+            env = meta.get("env") if isinstance(meta.get("env"), list) else []
+            plan.append({
+                "group": group,
+                "priority": priority,
+                "configured": bool(status.get("configured")),
+                "env": env,
+                "present_env": status.get("present_env", []),
+                "missing_env": status.get("missing_env", env),
+                "unlocks": meta.get("unlocks", []),
+                "required_when": meta.get("required_when", ""),
+                "without_api": meta.get("without_api", ""),
+            })
+    capabilities = guide.get("capabilities") if isinstance(guide.get("capabilities"), dict) else {}
+    api_required_for_specific_tasks = []
+    for key, item in capabilities.items():
+        if not isinstance(item, dict) or not item.get("api_required"):
+            continue
+        groups = item.get("api_groups") if isinstance(item.get("api_groups"), list) else []
+        missing = [group for group in groups if group not in configured_groups]
+        api_required_for_specific_tasks.append({
+            "capability": key,
+            "label": item.get("label", key),
+            "api_groups": groups,
+            "missing_api_groups": missing,
+            "without_api": item.get("without_api", ""),
+        })
+    provider_model = guide.get("provider_model") if isinstance(guide.get("provider_model"), dict) else {}
+    agent_native = provider_model.get("agent_native") if isinstance(provider_model.get("agent_native"), dict) else {}
+    return {
+        "guide_path": str(_skillpack_root() / "data" / "capability-guide.json"),
+        "agent": agent,
+        "can_start_without_api": True,
+        "data_provider_priority": provider_priority,
+        "skill_api_enabled": "skill_api" in provider_priority,
+        "configured_api_groups": configured_groups,
+        "preset_message": selected.get("message", ""),
+        "preset_api_plan": plan,
+        "api_required_for_specific_tasks": api_required_for_specific_tasks,
+        "agent_native_can_do": agent_native.get("can_do", []),
+        "agent_native_cannot_guarantee": agent_native.get("cannot_guarantee", []),
+        "user_explanation": [
+            "Aegis Alpha can install and start without API keys.",
+            "APIs are capability-specific accelerators and evidence feeds, not a prerequisite for every skill.",
+            "Use preset_api_plan to explain which API groups improve the selected preset and api_required_for_specific_tasks to explain what cannot run safely without matching APIs.",
+        ],
+    }
 
 
 def _ensure_workspace(workspace: Path) -> None:
@@ -365,6 +438,8 @@ def build_profile(args: argparse.Namespace) -> dict[str, Any]:
     resolved = _resolve_auto_fields(args)
     api = _api_capabilities()
     prewarm = _latest_prewarm(workspace)
+    guide = _capability_guide()
+    readiness = _api_readiness(guide, resolved["preset"], resolved["provider_priority"], api, agent)
     provider_capabilities = _load_json(_skillpack_root() / "data" / "provider-capabilities.json", {})
     automation_jobs = _load_json(_skillpack_root() / "data" / "automation-jobs.json", {})
     return {
@@ -411,6 +486,7 @@ def build_profile(args: argparse.Namespace) -> dict[str, Any]:
             "prewarm": prewarm,
             "agent_provider_order": provider_capabilities.get(agent, {}) if isinstance(provider_capabilities, dict) else {},
         },
+        "onboarding": readiness,
         "safety": {
             "decision_allowed": False,
             "requires_human_confirmation": True,
@@ -426,6 +502,7 @@ def build_profile(args: argparse.Namespace) -> dict[str, Any]:
             resolved["portfolio_source"],
             api,
             prewarm,
+            readiness,
         ),
     }
 
