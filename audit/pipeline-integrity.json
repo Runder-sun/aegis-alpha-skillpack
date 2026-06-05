@@ -1,8 +1,0 @@
-{
-  "ok": true,
-  "pipeline_count": 4,
-  "checked_steps": 57,
-  "push_steps": 4,
-  "push_default_policy": "pipeline-orchestrator skips *-push steps unless allow_push=true",
-  "failures": []
-}
