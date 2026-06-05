@@ -14,13 +14,27 @@ automation configuration, and cross-skill investment workflows.
 ## First Run
 
 If `AEGIS_ALPHA_WORKSPACE/config/runtime-profile.json` is missing or the user
-asks to initialize/configure Aegis Alpha, run:
+asks to initialize/configure Aegis Alpha, treat initialization as a
+skill-mediated workflow, not as a silent script default. The script is only the
+executor that writes the confirmed runtime profile.
+
+Do not run the bootstrap command until the user has explicitly selected a
+product experience or confirmed that the default `quick-research`
+initialization is acceptable. If the user only says "initialize" or
+"configure Aegis Alpha", ask for the intended product experience first. Do not
+choose `quick-research` on the user's behalf.
+
+After the user confirms the product experience and any capability axes, run:
 
 ```bash
 python3 scripts/bootstrap_runtime.py --agent codex --preset <preset> --data-providers <provider_priority> --cache-policy <cache_policy> --manual-input <manual_input_policy> --portfolio-source <portfolio_source> --heartbeat <heartbeat_mode>
 ```
 
-Ask the user for the intended product experience first:
+Use `--accept-defaults` only when the user explicitly confirms the default
+initialization without choosing every axis. Never use it as a convenience
+fallback.
+
+Ask the user for the intended product experience:
 
 - `quick-research`: one-off research and evidence collection.
 - `daily-desk`: morning/nightly market desk workflow.

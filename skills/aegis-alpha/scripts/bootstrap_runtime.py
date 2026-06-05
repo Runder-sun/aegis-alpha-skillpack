@@ -523,11 +523,29 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--external-push", choices=("disabled", "confirm-only"), default="disabled")
     parser.add_argument("--workspace")
     parser.add_argument("--dry-run", action="store_true")
+    parser.add_argument(
+        "--accept-defaults",
+        action="store_true",
+        help="Allow writing the implicit quick-research defaults after explicit user confirmation.",
+    )
     return parser.parse_args()
+
+
+def _enforce_initialization_confirmation(args: argparse.Namespace) -> None:
+    if args.dry_run or args.accept_defaults:
+        return
+    if args.preset != "auto" or args.mode:
+        return
+    raise SystemExit(
+        "Refusing to write a runtime profile with implicit quick-research defaults. "
+        "Ask the user to choose a product preset first, pass --preset explicitly, "
+        "or pass --accept-defaults after the user confirms the default initialization."
+    )
 
 
 def main() -> int:
     args = parse_args()
+    _enforce_initialization_confirmation(args)
     workspace = _workspace(args.workspace)
     profile = build_profile(args)
     profile_path = workspace / "config" / "runtime-profile.json"

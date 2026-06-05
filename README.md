@@ -167,6 +167,23 @@ For Codex and Claude Code, `--target <path>` points to a skills root directory.
 For Hermes and OpenClaw, `--target <path>` points to the package directory.
 Existing Aegis Alpha targets are not overwritten unless `--force` is provided.
 
+## Runtime Initialization
+
+Initialization is a skill-mediated workflow. The agent must ask the user to
+choose the intended product experience before writing a runtime profile, unless
+the user explicitly confirms the default `quick-research` initialization.
+
+The bootstrap script is the deterministic executor for the confirmed choices:
+
+```bash
+python3 skills/aegis-alpha/scripts/bootstrap_runtime.py --agent codex --preset quick-research
+```
+
+The script refuses to write implicit `quick-research` defaults when `--preset`
+is omitted. Use `--accept-defaults` only after the user explicitly confirms the
+default initialization. `--dry-run` remains available for inspection without
+writing runtime state.
+
 ## Validate
 
 Run the full local acceptance set:
