@@ -13,16 +13,18 @@ instructions and dispatch scripts.
 The aggregate `aegis-alpha` skill acts as the conductor for first-run bootstrap,
 provider selection, and optional automation setup. Use
 `scripts/bootstrap_runtime.py` to create the runtime profile,
-`scripts/provider_resolver.py` to choose agent-native/API/cache/manual data
-providers, and `references/automation-playbook.md` when configuring recurring
-work through the current agent's own automation capability.
+`scripts/provider_resolver.py` to choose agent-native/API acquisition and
+workspace-cache evidence paths, and `references/automation-playbook.md` when
+configuring recurring work through the current agent's own automation
+capability.
 
 The runtime profile uses product presets plus independent capability axes. A
 user chooses a workflow preset such as `quick-research`, `daily-desk`,
 `portfolio-desk`, `report-review`, or `full-institutional`, then chooses data
-provider priority, portfolio source, and heartbeat mode separately. Provider
-choices are composable: agent-native acquisition, skill APIs, prewarm/cache, and
-manual payloads can all be enabled in priority order.
+provider priority, cache policy, manual input policy, portfolio source, and
+heartbeat mode separately. Provider choices are composable: agent-native
+acquisition and skill APIs can both be enabled in priority order. Workspace
+cache/prewarm and user-supplied evidence are separate policies, not providers.
 
 Presets are default operating profiles, not feature gates. All public skills
 remain available after any preset. Requests outside the selected preset should

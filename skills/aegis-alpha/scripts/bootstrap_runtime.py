@@ -21,31 +21,41 @@ LEGACY_MODES = (
 PRESETS = {
     "quick-research": {
         "workflow_scope": "core-research",
-        "provider_priority": ["agent_native", "skill_api", "cache_or_prewarm", "manual_payload"],
+        "provider_priority": ["agent_native", "skill_api"],
+        "cache_policy": "read-if-fresh",
+        "manual_input_policy": "ask-when-missing",
         "portfolio_source": "none",
         "heartbeat": "none",
     },
     "daily-desk": {
         "workflow_scope": "market-desk",
-        "provider_priority": ["skill_api", "cache_or_prewarm", "agent_native", "manual_payload"],
+        "provider_priority": ["skill_api", "agent_native"],
+        "cache_policy": "refresh-if-stale",
+        "manual_input_policy": "ask-when-missing",
         "portfolio_source": "none",
         "heartbeat": "daily-prewarm",
     },
     "portfolio-desk": {
         "workflow_scope": "portfolio-review",
-        "provider_priority": ["skill_api", "cache_or_prewarm", "agent_native", "manual_payload"],
+        "provider_priority": ["skill_api", "agent_native"],
+        "cache_policy": "read-if-fresh",
+        "manual_input_policy": "ask-when-missing",
         "portfolio_source": "manual-ledger",
         "heartbeat": "manual",
     },
     "report-review": {
         "workflow_scope": "report-review",
-        "provider_priority": ["cache_or_prewarm", "agent_native", "skill_api", "manual_payload"],
+        "provider_priority": ["agent_native", "skill_api"],
+        "cache_policy": "cache-first",
+        "manual_input_policy": "ask-when-missing",
         "portfolio_source": "manual-ledger",
         "heartbeat": "none",
     },
     "full-institutional": {
         "workflow_scope": "full-institutional",
-        "provider_priority": ["skill_api", "cache_or_prewarm", "agent_native", "manual_payload"],
+        "provider_priority": ["skill_api", "agent_native"],
+        "cache_policy": "prewarm-required",
+        "manual_input_policy": "ask-when-missing",
         "portfolio_source": "manual-ledger",
         "heartbeat": "market-heartbeat",
     },
@@ -54,45 +64,61 @@ LEGACY_MODE_MAP = {
     "offline-research": {
         "preset": "quick-research",
         "workflow_scope": "core-research",
-        "provider_priority": ["manual_payload"],
+        "provider_priority": [],
+        "cache_policy": "none",
+        "manual_input_policy": "ask-when-missing",
         "portfolio_source": "none",
     },
     "agent-native": {
         "preset": "quick-research",
         "workflow_scope": "core-research",
-        "provider_priority": ["agent_native", "manual_payload"],
+        "provider_priority": ["agent_native"],
+        "cache_policy": "read-if-fresh",
+        "manual_input_policy": "ask-when-missing",
         "portfolio_source": "none",
     },
     "api-assisted": {
         "preset": "daily-desk",
         "workflow_scope": "market-desk",
-        "provider_priority": ["skill_api", "cache_or_prewarm", "agent_native", "manual_payload"],
+        "provider_priority": ["skill_api", "agent_native"],
+        "cache_policy": "refresh-if-stale",
+        "manual_input_policy": "ask-when-missing",
         "portfolio_source": "none",
     },
     "manual-portfolio": {
         "preset": "portfolio-desk",
         "workflow_scope": "portfolio-review",
-        "provider_priority": ["manual_payload", "cache_or_prewarm"],
+        "provider_priority": [],
+        "cache_policy": "read-if-fresh",
+        "manual_input_policy": "ask-when-missing",
         "portfolio_source": "manual-ledger",
     },
     "report-review": {
         "preset": "report-review",
         "workflow_scope": "report-review",
-        "provider_priority": ["cache_or_prewarm", "agent_native", "manual_payload"],
+        "provider_priority": ["agent_native"],
+        "cache_policy": "cache-first",
+        "manual_input_policy": "ask-when-missing",
         "portfolio_source": "manual-ledger",
     },
     "full-institutional": {
         "preset": "full-institutional",
         "workflow_scope": "full-institutional",
-        "provider_priority": ["skill_api", "cache_or_prewarm", "agent_native", "manual_payload"],
+        "provider_priority": ["skill_api", "agent_native"],
+        "cache_policy": "prewarm-required",
+        "manual_input_policy": "ask-when-missing",
         "portfolio_source": "manual-ledger",
     },
 }
 WORKFLOW_SCOPES = ("auto", "core-research", "market-desk", "portfolio-review", "report-review", "full-institutional")
 PORTFOLIO_SOURCES = ("auto", "none", "manual-ledger", "imported-file", "read-only-api")
 PORTFOLIO_MODES = PORTFOLIO_SOURCES
-DATA_PROVIDERS = ("manual_payload", "agent_native", "skill_api", "cache_or_prewarm")
-DATA_SOURCE_MODES = ("auto",) + DATA_PROVIDERS
+DATA_PROVIDERS = ("agent_native", "skill_api")
+LEGACY_MANUAL_PROVIDER = "manual_payload"
+LEGACY_CACHE_PROVIDER = "cache_or_prewarm"
+DATA_SOURCE_MODES = ("auto", "none") + DATA_PROVIDERS + (LEGACY_MANUAL_PROVIDER, LEGACY_CACHE_PROVIDER)
+CACHE_POLICIES = ("auto", "none", "read-if-fresh", "cache-first", "refresh-if-stale", "prewarm-required")
+MANUAL_INPUT_POLICIES = ("auto", "ask-when-missing", "disabled")
 HEARTBEAT_MODES = ("auto", "none", "manual", "daily-prewarm", "market-heartbeat", "full")
 AGENTS = ("auto", "codex", "claude-code", "hermes", "openclaw", "unknown")
 API_ENV_GROUPS = {
@@ -192,14 +218,17 @@ def _dedupe(items: list[str]) -> list[str]:
     return result
 
 
-def _parse_provider_priority(raw: str) -> list[str] | None:
+def _parse_provider_priority(raw: str) -> tuple[list[str] | None, bool, bool]:
     if raw == "auto":
-        return None
+        return None, False, False
     providers = [item.strip() for item in raw.split(",") if item.strip()]
+    cache_requested = LEGACY_CACHE_PROVIDER in providers
+    manual_requested = LEGACY_MANUAL_PROVIDER in providers
+    providers = [item for item in providers if item not in {LEGACY_CACHE_PROVIDER, LEGACY_MANUAL_PROVIDER, "none"}]
     invalid = [item for item in providers if item not in DATA_PROVIDERS]
     if invalid:
         raise SystemExit(f"Invalid --data-providers value(s): {', '.join(invalid)}")
-    return _dedupe(providers)
+    return _dedupe(providers), cache_requested, manual_requested
 
 
 def _legacy_config(mode: str | None) -> dict[str, Any] | None:
@@ -227,19 +256,44 @@ def _preset_defaults(args: argparse.Namespace) -> dict[str, Any]:
     return defaults
 
 
-def _provider_priority(args: argparse.Namespace, defaults: dict[str, Any]) -> list[str]:
-    explicit = _parse_provider_priority(args.data_providers)
+def _provider_priority(args: argparse.Namespace, defaults: dict[str, Any]) -> tuple[list[str], bool, bool]:
+    explicit, cache_requested, manual_requested = _parse_provider_priority(args.data_providers)
     if explicit is not None:
-        return explicit
+        return explicit, cache_requested, manual_requested
     if args.data_source != "auto":
-        fallback = [] if args.data_source == "manual_payload" else ["manual_payload"]
-        return _dedupe([args.data_source] + fallback)
-    return list(defaults["provider_priority"])
+        if args.data_source not in DATA_SOURCE_MODES:
+            raise SystemExit(f"Invalid --data-source value: {args.data_source}")
+        if args.data_source == "none":
+            return [], False, False
+        if args.data_source == LEGACY_CACHE_PROVIDER:
+            return [], True, False
+        if args.data_source == LEGACY_MANUAL_PROVIDER:
+            return [], False, True
+        return [args.data_source], False, False
+    return list(defaults["provider_priority"]), False, False
+
+
+def _cache_policy(args: argparse.Namespace, defaults: dict[str, Any], cache_requested: bool) -> str:
+    if args.cache_policy != "auto":
+        return args.cache_policy
+    if cache_requested:
+        return "cache-first"
+    return str(defaults.get("cache_policy") or "none")
+
+
+def _manual_input_policy(args: argparse.Namespace, defaults: dict[str, Any], manual_requested: bool) -> str:
+    if args.manual_input != "auto":
+        return args.manual_input
+    if manual_requested:
+        return "ask-when-missing"
+    return str(defaults.get("manual_input_policy") or "ask-when-missing")
 
 
 def _resolve_auto_fields(args: argparse.Namespace) -> dict[str, Any]:
     defaults = _preset_defaults(args)
-    provider_priority = _provider_priority(args, defaults)
+    provider_priority, cache_requested, manual_requested = _provider_priority(args, defaults)
+    cache_policy = _cache_policy(args, defaults, cache_requested)
+    manual_input_policy = _manual_input_policy(args, defaults, manual_requested)
     workflow_scope = args.workflow_scope if args.workflow_scope != "auto" else str(defaults["workflow_scope"])
     requested_portfolio_source = args.portfolio_source if args.portfolio_source != "auto" else args.portfolio_mode
     portfolio_source = requested_portfolio_source if requested_portfolio_source != "auto" else str(defaults["portfolio_source"])
@@ -248,17 +302,21 @@ def _resolve_auto_fields(args: argparse.Namespace) -> dict[str, Any]:
         "preset": str(defaults["preset"]),
         "workflow_scope": workflow_scope,
         "portfolio_source": portfolio_source,
+        "cache_policy": cache_policy,
+        "manual_input_policy": manual_input_policy,
         "heartbeat": heartbeat,
         "provider_priority": provider_priority,
-        "data_source_mode": provider_priority[0] if provider_priority else "manual_payload",
+        "data_source_mode": provider_priority[0] if provider_priority else "none",
     }
 
 
-def _capability_level(workflow_scope: str, provider_priority: list[str], heartbeat: str, api: dict[str, Any], prewarm: dict[str, Any]) -> str:
+def _capability_level(workflow_scope: str, provider_priority: list[str], cache_policy: str, heartbeat: str, api: dict[str, Any], prewarm: dict[str, Any]) -> str:
     any_api = any(group.get("configured") for group in api.values())
     has_prewarm = bool(prewarm.get("available"))
     has_agent_native = "agent_native" in provider_priority
-    if workflow_scope == "full-institutional" and (any_api or has_agent_native) and (has_prewarm or "cache_or_prewarm" not in provider_priority):
+    if workflow_scope == "full-institutional" and cache_policy == "prewarm-required" and not has_prewarm:
+        return "institutional-needs-prewarm"
+    if workflow_scope == "full-institutional" and (any_api or has_agent_native):
         return "institutional-ready" if heartbeat not in {"none", "manual"} else "institutional-manual"
     if "skill_api" in provider_priority and any_api and has_agent_native:
         return "hybrid-agent-api"
@@ -266,17 +324,19 @@ def _capability_level(workflow_scope: str, provider_priority: list[str], heartbe
         return "api-ready"
     if has_agent_native:
         return "agent-native-ready"
-    if has_prewarm:
+    if cache_policy != "none" and has_prewarm:
         return "cache-ready"
     return "offline"
 
 
-def _next_actions(workflow_scope: str, provider_priority: list[str], heartbeat: str, portfolio_source: str, api: dict[str, Any], prewarm: dict[str, Any]) -> list[str]:
+def _next_actions(workflow_scope: str, provider_priority: list[str], cache_policy: str, manual_input_policy: str, heartbeat: str, portfolio_source: str, api: dict[str, Any], prewarm: dict[str, Any]) -> list[str]:
     actions: list[str] = []
     if "skill_api" in provider_priority and not any(group.get("configured") for group in api.values()):
-        actions.append("Configure at least one skill API key if API-backed data should be used; otherwise keep agent_native/manual_payload ahead of skill_api.")
-    if "cache_or_prewarm" in provider_priority and not prewarm.get("available"):
-        actions.append("Run execution-automation morning-prewarm or nightly-prewarm before market-data workflows.")
+        actions.append("Configure at least one skill API key if API-backed data should be used, or put agent_native first for capabilities the current agent can satisfy.")
+    if cache_policy in {"cache-first", "refresh-if-stale", "prewarm-required"} and not prewarm.get("available"):
+        actions.append("Run execution-automation morning-prewarm or nightly-prewarm before cache-dependent workflows.")
+    if not provider_priority and manual_input_policy == "disabled":
+        actions.append("Enable agent_native or skill_api before research workflows, or allow manual input prompts.")
     if heartbeat != "none":
         actions.append("Read references/automation-playbook.md and let the current agent configure supported automations.")
     if workflow_scope == "full-institutional" and heartbeat in {"none", "manual"}:
@@ -325,9 +385,12 @@ def build_profile(args: argparse.Namespace) -> dict[str, Any]:
         "workflow_scope": resolved["workflow_scope"],
         "portfolio_source": resolved["portfolio_source"],
         "portfolio_mode": resolved["portfolio_source"],
+        "cache_policy": resolved["cache_policy"],
+        "manual_input_policy": resolved["manual_input_policy"],
         "capability_level": _capability_level(
             resolved["workflow_scope"],
             resolved["provider_priority"],
+            resolved["cache_policy"],
             resolved["heartbeat"],
             api,
             prewarm,
@@ -357,6 +420,8 @@ def build_profile(args: argparse.Namespace) -> dict[str, Any]:
         "next_actions": _next_actions(
             resolved["workflow_scope"],
             resolved["provider_priority"],
+            resolved["cache_policy"],
+            resolved["manual_input_policy"],
             resolved["heartbeat"],
             resolved["portfolio_source"],
             api,
@@ -373,8 +438,10 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--workflow-scope", choices=WORKFLOW_SCOPES, default="auto")
     parser.add_argument("--portfolio-source", choices=PORTFOLIO_SOURCES, default="auto")
     parser.add_argument("--portfolio-mode", choices=PORTFOLIO_MODES, default="auto", help="Deprecated alias for --portfolio-source.")
-    parser.add_argument("--data-source", choices=DATA_SOURCE_MODES, default="auto")
-    parser.add_argument("--data-providers", default="auto", help="Comma-separated provider priority, e.g. agent_native,skill_api,cache_or_prewarm,manual_payload.")
+    parser.add_argument("--data-source", default="auto", help="Deprecated alias for one acquisition provider; use --data-providers plus --cache-policy and --manual-input.")
+    parser.add_argument("--data-providers", default="auto", help="Comma-separated acquisition provider priority, e.g. agent_native,skill_api. Deprecated provider aliases are accepted only for migration.")
+    parser.add_argument("--cache-policy", choices=CACHE_POLICIES, default="auto")
+    parser.add_argument("--manual-input", choices=MANUAL_INPUT_POLICIES, default="auto")
     parser.add_argument("--heartbeat", choices=HEARTBEAT_MODES, default="auto")
     parser.add_argument("--external-push", choices=("disabled", "confirm-only"), default="disabled")
     parser.add_argument("--workspace")

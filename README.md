@@ -38,8 +38,8 @@ provider selection, and automation guidance:
 
 - `scripts/bootstrap_runtime.py` creates `runtime-profile.json` under
   `AEGIS_ALPHA_WORKSPACE`.
-- `scripts/provider_resolver.py` selects `agent_native`, `skill_api`,
-  `cache_or_prewarm`, or `manual_payload` providers by runtime profile.
+- `scripts/provider_resolver.py` selects between `agent_native`, `skill_api`,
+  and `workspace_cache` evidence paths by runtime profile and capability.
 - `references/automation-playbook.md` tells the current agent how to configure
   recurring work with its own automation capability when available.
 - `data/automation-jobs.json` defines standard morning, heartbeat, nightly, and
@@ -49,8 +49,11 @@ First-run configuration is split into orthogonal axes:
 
 - product preset: `quick-research`, `daily-desk`, `portfolio-desk`,
   `report-review`, or `full-institutional`.
-- data provider priority: any ordered combination of `agent_native`,
-  `skill_api`, `cache_or_prewarm`, and `manual_payload`.
+- data provider priority: any ordered combination of `agent_native` and
+  `skill_api`.
+- cache policy: `none`, `read-if-fresh`, `cache-first`, `refresh-if-stale`, or
+  `prewarm-required`.
+- manual input policy: `ask-when-missing` or `disabled`.
 - portfolio source: `none`, `manual-ledger`, `imported-file`, or
   `read-only-api`.
 - heartbeat mode: `none`, `manual`, `daily-prewarm`, `market-heartbeat`, or
@@ -63,8 +66,17 @@ and `read-only-api` means a read-only portfolio API. It never enables order
 execution.
 
 Agent-native acquisition and skill APIs are compatible. For example, a Codex
-installation can use `full-institutional` with
-`agent_native,skill_api,cache_or_prewarm,manual_payload` provider priority.
+installation can use `full-institutional` with `skill_api,agent_native`
+provider priority. The skill API can supply structured quotes, fundamentals,
+time series, parsing, or configured feeds while agent-native tools verify
+sources, search fresh news, inspect filings/pages, and fill gaps the API cannot
+cover.
+
+Workspace cache/prewarm is not a provider. It is an evidence artifact policy:
+use it to reuse or prepare auditable data before a workflow. Manual user input
+is also not a provider; it only controls whether the conductor may ask the user
+for explicit files, holdings, or facts when configured channels cannot prove a
+critical input.
 
 Presets are default operating profiles, not feature gates. All 15 public skills
 remain available after any preset is selected. If a user asks for work outside

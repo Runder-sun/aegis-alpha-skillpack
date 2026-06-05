@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "Aegis Alpha Runtime Profile",
   "type": "object",
-  "required": ["schema_version", "package", "agent", "preset", "workflow_scope", "portfolio_source", "workspace", "data_source_mode", "data_provider_priority", "automation", "providers", "safety"],
+  "required": ["schema_version", "package", "agent", "preset", "workflow_scope", "portfolio_source", "workspace", "data_source_mode", "data_provider_priority", "cache_policy", "manual_input_policy", "automation", "providers", "safety"],
   "properties": {
     "schema_version": {"type": "integer"},
     "package": {"const": "aegis-alpha"},
@@ -39,17 +39,21 @@
     "capability_level": {"type": "string"},
     "workspace": {"type": "string"},
     "data_source_mode": {
-      "enum": ["manual_payload", "agent_native", "skill_api", "cache_or_prewarm"]
+      "enum": ["none", "agent_native", "skill_api"]
     },
     "data_source_modes": {
       "type": "array",
-      "items": {"enum": ["manual_payload", "agent_native", "skill_api", "cache_or_prewarm"]},
-      "minItems": 1
+      "items": {"enum": ["agent_native", "skill_api"]}
     },
     "data_provider_priority": {
       "type": "array",
-      "items": {"enum": ["manual_payload", "agent_native", "skill_api", "cache_or_prewarm"]},
-      "minItems": 1
+      "items": {"enum": ["agent_native", "skill_api"]}
+    },
+    "cache_policy": {
+      "enum": ["none", "read-if-fresh", "cache-first", "refresh-if-stale", "prewarm-required"]
+    },
+    "manual_input_policy": {
+      "enum": ["ask-when-missing", "disabled"]
     },
     "automation": {"type": "object"},
     "providers": {"type": "object"},

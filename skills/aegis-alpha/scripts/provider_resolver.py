@@ -16,6 +16,16 @@ CAPABILITIES = (
     "structured_market_data",
     "external_push",
 )
+CACHE_PROVIDERS = {"workspace_cache", "cache_or_prewarm"}
+LEGACY_MANUAL_PROVIDER = "manual_payload"
+API_GROUPS_BY_CAPABILITY = {
+    "research_search": ("research_search",),
+    "web_extract": ("research_search", "document_parse"),
+    "document_parse": ("document_parse",),
+    "market_news": ("market_intel", "research_search"),
+    "structured_market_data": ("market_data",),
+    "external_push": ("external_push",),
+}
 
 
 def _skillpack_root() -> Path:
@@ -44,39 +54,74 @@ def _profile(workspace: Path, explicit: str | None) -> dict[str, Any]:
     return _load_json(workspace / "config" / "runtime-profile.json", {})
 
 
-def _provider_available(provider: str, profile: dict[str, Any]) -> tuple[bool, str]:
-    data_source_mode = profile.get("data_source_mode") or "manual_payload"
+def _provider_available(provider: str, profile: dict[str, Any], capability: str) -> tuple[bool, str]:
+    data_source_mode = profile.get("data_source_mode") or "none"
     provider_priority = profile.get("data_provider_priority") or profile.get("data_source_modes") or []
     if not isinstance(provider_priority, list):
         provider_priority = []
     api = (((profile.get("providers") or {}).get("api")) or {})
     prewarm = (((profile.get("providers") or {}).get("prewarm")) or {})
-    if provider == "manual_payload":
-        return True, "manual payload is always allowed"
+    if provider == LEGACY_MANUAL_PROVIDER:
+        return False, "user-supplied evidence is not a provider; use manual_input_policy"
     if provider == "agent_native":
         if "agent_native" in provider_priority or data_source_mode in {"agent_native", "auto"} or profile.get("legacy_mode") == "agent-native":
             return True, "runtime profile allows agent-native acquisition"
         return False, "runtime profile did not enable agent-native acquisition"
     if provider == "skill_api":
-        configured = any(isinstance(group, dict) and group.get("configured") for group in api.values())
-        return (configured, "at least one API group is configured" if configured else "no skill API key group is configured")
-    if provider == "cache_or_prewarm":
+        required_groups = API_GROUPS_BY_CAPABILITY.get(capability, ())
+        configured_groups = [
+            name
+            for name in required_groups
+            if isinstance(api.get(name), dict) and api[name].get("configured")
+        ]
+        configured = bool(configured_groups)
+        expected = ", ".join(required_groups) if required_groups else "capability-specific API group"
+        return (
+            configured,
+            f"configured API group(s): {', '.join(configured_groups)}"
+            if configured
+            else f"no configured API group for {capability}; expected one of: {expected}",
+        )
+    if provider in CACHE_PROVIDERS:
+        cache_policy = profile.get("cache_policy") or ("cache-first" if provider == "cache_or_prewarm" else "none")
+        if cache_policy == "none":
+            return False, "runtime profile did not enable workspace cache"
         available = bool(prewarm.get("available"))
-        return (available, "prewarm artifact is available" if available else "prewarm artifact is unavailable")
+        return (available, "workspace cache/prewarm artifact is available" if available else "workspace cache/prewarm artifact is unavailable")
     return False, "unknown provider"
 
 
 def _ordered_providers(capability: str, profile: dict[str, Any], capability_order: list[Any]) -> list[str]:
-    base_order = [str(item) for item in capability_order]
+    base_order = ["workspace_cache" if str(item) == "cache_or_prewarm" else str(item) for item in capability_order]
     if capability == "external_push":
         return base_order
     profile_priority = profile.get("data_provider_priority") or profile.get("data_source_modes")
-    if not isinstance(profile_priority, list) or not profile_priority:
-        return base_order
-    ordered = [str(item) for item in profile_priority if str(item) in base_order]
-    if "manual_payload" in base_order and "manual_payload" not in ordered:
-        ordered.append("manual_payload")
-    return ordered or base_order
+    acquisition_base = [item for item in base_order if item not in CACHE_PROVIDERS and item != LEGACY_MANUAL_PROVIDER]
+    if isinstance(profile_priority, list):
+        acquisition_order = [str(item) for item in profile_priority if str(item) in acquisition_base]
+    else:
+        acquisition_order = acquisition_base
+    cache_policy = str(profile.get("cache_policy") or "none")
+    cache_order = ["workspace_cache"] if "workspace_cache" in base_order and cache_policy != "none" else []
+    if cache_policy in {"cache-first", "refresh-if-stale", "prewarm-required"}:
+        return _dedupe(cache_order + acquisition_order)
+    if cache_policy == "read-if-fresh":
+        ordered: list[str] = []
+        for item in base_order:
+            if item == "workspace_cache" and cache_order:
+                ordered.extend(cache_order)
+            elif item in acquisition_order:
+                ordered.append(item)
+        return _dedupe(ordered)
+    return _dedupe(acquisition_order)
+
+
+def _dedupe(items: list[str]) -> list[str]:
+    result: list[str] = []
+    for item in items:
+        if item not in result:
+            result.append(item)
+    return result
 
 
 def resolve(capability: str, profile: dict[str, Any], capabilities: dict[str, Any]) -> dict[str, Any]:
@@ -86,21 +131,23 @@ def resolve(capability: str, profile: dict[str, Any], capabilities: dict[str, An
         configured = capabilities.get("unknown", {}) if isinstance(capabilities, dict) else {}
     provider_order = configured.get(capability) if isinstance(configured, dict) else None
     if not isinstance(provider_order, list):
-        provider_order = ["manual_payload"]
+        provider_order = []
     provider_order = _ordered_providers(capability, profile, provider_order)
     providers = []
     for provider in provider_order:
-        ok, reason = _provider_available(str(provider), profile)
+        ok, reason = _provider_available(str(provider), profile, capability)
         providers.append({"provider": provider, "available": ok, "reason": reason})
-    if capability != "external_push" and not any(item["available"] for item in providers):
-        providers.append({"provider": "manual_payload", "available": True, "reason": "request manual payload; no configured provider is available"})
     selected = next((item["provider"] for item in providers if item["available"]), None)
+    manual_input_policy = str(profile.get("manual_input_policy") or "ask-when-missing")
+    requires_user_input = selected is None and manual_input_policy == "ask-when-missing" and capability != "external_push"
     return {
         "agent": agent,
         "capability": capability,
         "selected": selected,
         "available": selected is not None,
         "providers": providers,
+        "manual_input_policy": manual_input_policy,
+        "requires_user_input": requires_user_input,
         "decision_allowed": False,
     }
 

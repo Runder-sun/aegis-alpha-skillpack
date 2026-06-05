@@ -19,7 +19,7 @@
       "name": "midday-review",
       "default_schedule": "weekday 12:35 local",
       "heartbeat_mode": "market-heartbeat",
-      "prompt": "Run Aegis Alpha midday market review using prewarm/cache or agent-native sources allowed by the runtime profile.",
+      "prompt": "Run Aegis Alpha midday market review using workspace cache evidence or acquisition channels allowed by the runtime profile.",
       "workflow": ["midday-prewarm", "market-review", "realtime-market-scan"]
     },
     {

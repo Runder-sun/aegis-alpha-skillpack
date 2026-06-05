@@ -58,11 +58,13 @@
   "runtime_configuration": {
     "presets": ["quick-research", "daily-desk", "portfolio-desk", "report-review", "full-institutional"],
     "workflow_scopes": ["core-research", "market-desk", "portfolio-review", "report-review", "full-institutional"],
-    "data_providers": ["agent_native", "skill_api", "cache_or_prewarm", "manual_payload"],
+    "data_providers": ["agent_native", "skill_api"],
+    "cache_policies": ["none", "read-if-fresh", "cache-first", "refresh-if-stale", "prewarm-required"],
+    "manual_input_policies": ["ask-when-missing", "disabled"],
     "portfolio_sources": ["none", "manual-ledger", "imported-file", "read-only-api"],
     "portfolio_modes": ["none", "manual-ledger", "imported-file", "read-only-api"],
     "heartbeat_modes": ["none", "manual", "daily-prewarm", "market-heartbeat", "full"],
-    "provider_policy": "Data providers are composable and ordered by runtime profile priority; agent-native and skill APIs are not mutually exclusive.",
+    "provider_policy": "Data providers are composable acquisition channels ordered by runtime profile priority. Agent-native and skill APIs are compatible and not mutually exclusive. Workspace cache/prewarm and manual user input are separate policies, not providers.",
     "preset_policy": "Presets are default operating profiles, not feature gates; all public skills remain available after any preset."
   },
   "conductor": {

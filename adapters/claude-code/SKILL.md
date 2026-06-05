@@ -17,7 +17,7 @@ If `AEGIS_ALPHA_WORKSPACE/config/runtime-profile.json` is missing or the user
 asks to initialize/configure Aegis Alpha, run:
 
 ```bash
-python3 scripts/bootstrap_runtime.py --agent claude-code --preset <preset> --data-providers <provider_priority> --portfolio-source <portfolio_source> --heartbeat <heartbeat_mode>
+python3 scripts/bootstrap_runtime.py --agent claude-code --preset <preset> --data-providers <provider_priority> --cache-policy <cache_policy> --manual-input <manual_input_policy> --portfolio-source <portfolio_source> --heartbeat <heartbeat_mode>
 ```
 
 Ask the user for the intended product experience first:
@@ -31,8 +31,11 @@ Ask the user for the intended product experience first:
 Then configure the orthogonal capability axes:
 
 - `data-providers`: comma-separated priority such as
-  `agent_native,skill_api,cache_or_prewarm,manual_payload`. Agent-native web
-  and skill APIs are compatible; they are not mutually exclusive.
+  `agent_native,skill_api`. Agent-native web and skill APIs are compatible;
+  they are not mutually exclusive.
+- `cache-policy`: `none`, `read-if-fresh`, `cache-first`,
+  `refresh-if-stale`, or `prewarm-required`.
+- `manual-input`: `ask-when-missing` or `disabled`.
 - `portfolio-source`: `none`, `manual-ledger`, `imported-file`, or
   `read-only-api`.
 - `heartbeat`: `none`, `manual`, `daily-prewarm`, `market-heartbeat`, or
@@ -43,6 +46,11 @@ Portfolio source describes where holdings and trade records come from:
 user-maintained ledger, `imported-file` means a CSV/JSON-style position file,
 and `read-only-api` means a read-only portfolio API. It never enables order
 execution.
+
+Workspace cache/prewarm is not a provider; it is an evidence artifact policy.
+Manual input is not a provider; it only controls whether Claude Code may ask the
+user for explicit files, holdings, or facts when configured acquisition
+channels cannot prove a critical input.
 
 Presets are defaults, not feature gates. After any preset, all public skills
 remain available. If the user asks for work outside the selected preset, route
@@ -81,9 +89,10 @@ python3 scripts/provider_resolver.py --capability <capability>
 ```
 
 Use the runtime profile's `data_provider_priority` together with the current
-Claude Code capability map. Agent-native web/search, skill APIs, prewarm/cache,
-and manual payloads can be combined in priority order. Missing critical
-evidence must fail closed.
+Claude Code capability map. `agent_native` and `skill_api` can be enabled
+together and ordered by capability. `workspace_cache` is controlled by
+`cache_policy`, and user-supplied evidence is controlled by
+`manual_input_policy`. Missing critical evidence must fail closed.
 
 ## Automation
 
