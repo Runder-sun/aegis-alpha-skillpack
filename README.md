@@ -33,7 +33,18 @@ Low-level providers and compatibility shims remain internal.
 
 ## Install
 
-Install Codex wrapper:
+Codex and Claude Code install a wrapper skillset, not a second full copy per
+skill:
+
+- `.aegis-alpha-core` contains the shared canonical source.
+- `aegis-alpha` is the aggregate cross-skill wrapper.
+- `aegis-alpha-<public-skill>` exposes each public skill individually.
+
+This keeps one maintained skillpack core while preserving direct invocation of
+individual public skills such as `aegis-alpha-market-data` or
+`aegis-alpha-equity-research`.
+
+Install Codex wrappers into `$CODEX_HOME/skills` or `~/.codex/skills`:
 
 ```bash
 python3 adapters/codex/install.py
@@ -51,14 +62,16 @@ Install OpenClaw package:
 python3 adapters/openclaw/install.py
 ```
 
-Install Claude Code wrapper into the current project:
+Install Claude Code `SKILL.md` wrappers into the current project's
+`.claude/skills` directory:
 
 ```bash
 python3 adapters/claude-code/install.py
 ```
 
-Use `--target <path>` to install into a specific directory. Existing targets are
-not overwritten unless `--force` is provided.
+For Codex and Claude Code, `--target <path>` points to a skills root directory.
+For Hermes and OpenClaw, `--target <path>` points to the package directory.
+Existing Aegis Alpha targets are not overwritten unless `--force` is provided.
 
 ## Validate
 

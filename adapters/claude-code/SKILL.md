@@ -31,16 +31,15 @@ Prefer the individual public wrappers when the request clearly matches one area:
 - `aegis-alpha-execution-automation`
 
 Use this aggregate wrapper for cross-skill investment workflows or when the
-right public wrapper is unclear. Internal skills are adapters only. Do not route
-user work directly to them unless performing maintenance.
+right public wrapper is unclear.
 
 ## Safety Rules
 
 - Treat every output as research-only unless it explicitly says otherwise.
-- `decision_allowed` must remain `false`.
+- Keep `decision_allowed=false`.
 - Missing critical evidence must fail closed.
-- Do not treat an empty result as no opportunity, no risk, or empty holdings.
-- Trade plans are paper plans and require human confirmation outside the skill.
+- Do not infer empty portfolios, empty opportunities, or no risk from missing data.
+- Paper trade plans require human confirmation outside the skill.
 
 ## How To Call
 

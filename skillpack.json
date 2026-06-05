@@ -26,8 +26,9 @@
   "supported_agents": {
     "codex": {
       "adapter": "adapters/codex",
-      "layout": "wrapper",
-      "default_target": "$CODEX_HOME/skills/aegis-alpha or ~/.codex/skills/aegis-alpha"
+      "layout": "wrapper-skillset",
+      "default_target": "$CODEX_HOME/skills or ~/.codex/skills",
+      "installs": [".aegis-alpha-core", "aegis-alpha", "aegis-alpha-<public-skill>"]
     },
     "hermes": {
       "adapter": "adapters/hermes",
@@ -41,8 +42,9 @@
     },
     "claude-code": {
       "adapter": "adapters/claude-code",
-      "layout": "wrapper",
-      "default_target": "$CLAUDE_CODE_SKILLS_HOME/aegis-alpha or ./.claude/skills/aegis-alpha"
+      "layout": "wrapper-skillset",
+      "default_target": "$CLAUDE_CODE_SKILLS_HOME or ./.claude/skills",
+      "installs": [".aegis-alpha-core", "aegis-alpha", "aegis-alpha-<public-skill>"]
     }
   },
   "environment": {
