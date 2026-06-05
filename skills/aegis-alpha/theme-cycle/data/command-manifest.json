@@ -1,0 +1,403 @@
+{
+  "package": "theme-cycle",
+  "description": "Theme discovery, lifecycle tracking, event impact analysis, Themesurfer risk gating, and paper-only rotation checks.",
+  "commands": [
+    {
+      "name": "discover-themes",
+      "description": "Discover active and weak themes from the latest prewarm sector snapshot.",
+      "status": "implemented",
+      "legacy_functions": [
+        "discover_themes"
+      ],
+      "payload_schema": {
+        "$ref": "#/$defs/theme_payload"
+      },
+      "result_schema": {
+        "$ref": "#/$defs/theme_result"
+      },
+      "upstream_dependencies": [
+        "memory/prewarm/nightly-prewarm-*.json",
+        "memory/themes.json",
+        "macro-regime public outputs"
+      ],
+      "freshness_policy": "Theme freshness is inherited from theme store updated_at, latest prewarm artifact, and macro-regime outputs.",
+      "error_behavior": [
+        "theme_store_missing",
+        "market_risk_inputs_missing",
+        "event_inputs_missing",
+        "theme_inputs_missing"
+      ],
+      "example": {}
+    },
+    {
+      "name": "event-analysis",
+      "description": "Map supplied or prewarm events/news to active themes and risk flags.",
+      "status": "implemented",
+      "legacy_functions": [
+        "event_analysis"
+      ],
+      "payload_schema": {
+        "$ref": "#/$defs/theme_payload"
+      },
+      "result_schema": {
+        "$ref": "#/$defs/theme_result"
+      },
+      "upstream_dependencies": [
+        "memory/prewarm/nightly-prewarm-*.json",
+        "memory/themes.json",
+        "macro-regime public outputs"
+      ],
+      "freshness_policy": "Theme freshness is inherited from theme store updated_at, latest prewarm artifact, and macro-regime outputs.",
+      "error_behavior": [
+        "theme_store_missing",
+        "market_risk_inputs_missing",
+        "event_inputs_missing",
+        "theme_inputs_missing"
+      ],
+      "example": {}
+    },
+    {
+      "name": "global-medium-long-strategy",
+      "description": "Summarize global medium/long mainlines and allocation references from macro regime plus theme store.",
+      "status": "implemented",
+      "legacy_functions": [
+        "global_medium_long_strategy"
+      ],
+      "payload_schema": {
+        "$ref": "#/$defs/theme_payload"
+      },
+      "result_schema": {
+        "$ref": "#/$defs/theme_result"
+      },
+      "upstream_dependencies": [
+        "memory/prewarm/nightly-prewarm-*.json",
+        "memory/themes.json",
+        "macro-regime public outputs"
+      ],
+      "freshness_policy": "Theme freshness is inherited from theme store updated_at, latest prewarm artifact, and macro-regime outputs.",
+      "error_behavior": [
+        "theme_store_missing",
+        "market_risk_inputs_missing",
+        "event_inputs_missing",
+        "theme_inputs_missing"
+      ],
+      "example": {}
+    },
+    {
+      "name": "macro-analysis",
+      "description": "Return combined global and domestic macro snapshots through macro-regime command contracts.",
+      "status": "implemented",
+      "legacy_functions": [
+        "macro_analysis"
+      ],
+      "payload_schema": {
+        "$ref": "#/$defs/theme_payload"
+      },
+      "result_schema": {
+        "$ref": "#/$defs/theme_result"
+      },
+      "upstream_dependencies": [
+        "memory/prewarm/nightly-prewarm-*.json",
+        "memory/themes.json",
+        "macro-regime public outputs"
+      ],
+      "freshness_policy": "Theme freshness is inherited from theme store updated_at, latest prewarm artifact, and macro-regime outputs.",
+      "error_behavior": [
+        "theme_store_missing",
+        "market_risk_inputs_missing",
+        "event_inputs_missing",
+        "theme_inputs_missing"
+      ],
+      "example": {}
+    },
+    {
+      "name": "rebalance-check",
+      "description": "Create paper-only theme rotation review actions from lifecycle and market-risk state.",
+      "status": "implemented",
+      "legacy_functions": [
+        "rebalance_check"
+      ],
+      "payload_schema": {
+        "$ref": "#/$defs/theme_payload"
+      },
+      "result_schema": {
+        "$ref": "#/$defs/theme_result"
+      },
+      "upstream_dependencies": [
+        "memory/prewarm/nightly-prewarm-*.json",
+        "memory/themes.json",
+        "macro-regime public outputs"
+      ],
+      "freshness_policy": "Theme freshness is inherited from theme store updated_at, latest prewarm artifact, and macro-regime outputs.",
+      "error_behavior": [
+        "theme_store_missing",
+        "market_risk_inputs_missing",
+        "event_inputs_missing",
+        "theme_inputs_missing"
+      ],
+      "example": {}
+    },
+    {
+      "name": "sector-cycle-panorama",
+      "description": "Return strong/weak sector cycle panorama from the latest prewarm snapshot.",
+      "status": "implemented",
+      "legacy_functions": [
+        "sector_cycle_panorama"
+      ],
+      "payload_schema": {
+        "$ref": "#/$defs/theme_payload"
+      },
+      "result_schema": {
+        "$ref": "#/$defs/theme_result"
+      },
+      "upstream_dependencies": [
+        "memory/prewarm/nightly-prewarm-*.json",
+        "memory/themes.json",
+        "macro-regime public outputs"
+      ],
+      "freshness_policy": "Theme freshness is inherited from theme store updated_at, latest prewarm artifact, and macro-regime outputs.",
+      "error_behavior": [
+        "theme_store_missing",
+        "market_risk_inputs_missing",
+        "event_inputs_missing",
+        "theme_inputs_missing"
+      ],
+      "example": {}
+    },
+    {
+      "name": "theme-tracker",
+      "description": "Read the local theme store with optional status or horizon filters.",
+      "status": "implemented",
+      "legacy_functions": [
+        "theme_tracker"
+      ],
+      "payload_schema": {
+        "$ref": "#/$defs/theme_payload"
+      },
+      "result_schema": {
+        "$ref": "#/$defs/theme_result"
+      },
+      "upstream_dependencies": [
+        "memory/prewarm/nightly-prewarm-*.json",
+        "memory/themes.json",
+        "macro-regime public outputs"
+      ],
+      "freshness_policy": "Theme freshness is inherited from theme store updated_at, latest prewarm artifact, and macro-regime outputs.",
+      "error_behavior": [
+        "theme_store_missing",
+        "market_risk_inputs_missing",
+        "event_inputs_missing",
+        "theme_inputs_missing"
+      ],
+      "example": {}
+    },
+    {
+      "name": "mainline-update",
+      "description": "Update and persist global and A-share mainlines with lifecycle history and invalidation triggers.",
+      "status": "implemented",
+      "legacy_functions": [
+        "mainline_update"
+      ],
+      "payload_schema": {
+        "$ref": "#/$defs/theme_payload"
+      },
+      "result_schema": {
+        "$ref": "#/$defs/theme_result"
+      },
+      "upstream_dependencies": [
+        "memory/prewarm/nightly-prewarm-*.json",
+        "memory/themes.json",
+        "macro-regime public outputs"
+      ],
+      "freshness_policy": "Theme freshness is inherited from theme store updated_at, latest prewarm artifact, and macro-regime outputs.",
+      "error_behavior": [
+        "theme_store_missing",
+        "market_risk_inputs_missing",
+        "event_inputs_missing",
+        "theme_inputs_missing"
+      ],
+      "example": {}
+    },
+    {
+      "name": "themesurfer-check",
+      "description": "Return FULL or LOCKOUT risk gate from market sentiment, limit-down, and fried-board inputs.",
+      "status": "implemented",
+      "legacy_functions": [
+        "themesurfer_check"
+      ],
+      "payload_schema": {
+        "$ref": "#/$defs/theme_payload"
+      },
+      "result_schema": {
+        "$ref": "#/$defs/theme_result"
+      },
+      "upstream_dependencies": [
+        "memory/prewarm/nightly-prewarm-*.json",
+        "memory/themes.json",
+        "macro-regime public outputs"
+      ],
+      "freshness_policy": "Theme freshness is inherited from theme store updated_at, latest prewarm artifact, and macro-regime outputs.",
+      "error_behavior": [
+        "theme_store_missing",
+        "market_risk_inputs_missing",
+        "event_inputs_missing",
+        "theme_inputs_missing"
+      ],
+      "example": {}
+    },
+    {
+      "name": "themesurfer-signal",
+      "description": "Versioned Themesurfer signal with allow_new_positions flag and risk reasons.",
+      "status": "implemented",
+      "legacy_functions": [
+        "themesurfer_signal"
+      ],
+      "payload_schema": {
+        "$ref": "#/$defs/theme_payload"
+      },
+      "result_schema": {
+        "$ref": "#/$defs/theme_result"
+      },
+      "upstream_dependencies": [
+        "memory/prewarm/nightly-prewarm-*.json",
+        "memory/themes.json",
+        "macro-regime public outputs"
+      ],
+      "freshness_policy": "Theme freshness is inherited from theme store updated_at, latest prewarm artifact, and macro-regime outputs.",
+      "error_behavior": [
+        "theme_store_missing",
+        "market_risk_inputs_missing",
+        "event_inputs_missing",
+        "theme_inputs_missing"
+      ],
+      "example": {}
+    },
+    {
+      "name": "themesurfer-weekly-stats",
+      "description": "Summarize theme-store lifecycle, status, and history-event counts.",
+      "status": "implemented",
+      "legacy_functions": [
+        "themesurfer_weekly_stats"
+      ],
+      "payload_schema": {
+        "$ref": "#/$defs/theme_payload"
+      },
+      "result_schema": {
+        "$ref": "#/$defs/theme_result"
+      },
+      "upstream_dependencies": [
+        "memory/prewarm/nightly-prewarm-*.json",
+        "memory/themes.json",
+        "macro-regime public outputs"
+      ],
+      "freshness_policy": "Theme freshness is inherited from theme store updated_at, latest prewarm artifact, and macro-regime outputs.",
+      "error_behavior": [
+        "theme_store_missing",
+        "market_risk_inputs_missing",
+        "event_inputs_missing",
+        "theme_inputs_missing"
+      ],
+      "example": {}
+    }
+  ],
+  "$defs": {
+    "theme_payload": {
+      "type": "object",
+      "properties": {
+        "themes": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "events": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "status": {
+          "type": "string"
+        },
+        "horizon": {
+          "type": "string"
+        },
+        "as_of": {
+          "type": "string"
+        }
+      }
+    },
+    "theme_result": {
+      "type": "object",
+      "required": [
+        "decision_allowed",
+        "errors",
+        "ok",
+        "result",
+        "warnings"
+      ],
+      "properties": {
+        "ok": {
+          "type": "boolean"
+        },
+        "decision_allowed": {
+          "type": "boolean",
+          "const": false
+        },
+        "max_action_level": {
+          "type": "string",
+          "const": "research_only"
+        },
+        "sources": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "artifacts": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "warnings": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "errors": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "result": {
+          "type": "object"
+        },
+        "requires_human_confirmation": {
+          "type": "boolean",
+          "const": true
+        },
+        "as_of": {
+          "type": "string"
+        },
+        "freshness": {
+          "type": "object"
+        },
+        "source": {
+          "type": [
+            "array",
+            "string"
+          ],
+          "items": {
+            "type": "string"
+          }
+        },
+        "missing_critical_inputs": {
+          "type": "array"
+        }
+      }
+    }
+  }
+}

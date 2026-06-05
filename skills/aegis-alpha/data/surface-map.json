@@ -1,0 +1,53 @@
+{
+  "package": "aegis-alpha",
+  "public_skill_limit": 15,
+  "public_skills": [
+    "information-retrieval",
+    "market-data",
+    "market-intel",
+    "macro-regime",
+    "theme-cycle",
+    "equity-screening",
+    "equity-research",
+    "trade-planning",
+    "portfolio-ops",
+    "advice-lifecycle",
+    "pipeline",
+    "quality-gate",
+    "quant-validation",
+    "report-evolution",
+    "execution-automation"
+  ],
+  "internal_skills": {
+    "akshare": {"facade": "market-data", "role": "data_provider"},
+    "baostock": {"facade": "market-data", "role": "data_provider"},
+    "tushare": {"facade": "market-data", "role": "data_provider"},
+    "hhxg-market": {"facade": "market-data", "role": "data_provider"},
+    "jin10-feed": {"facade": "market-intel", "role": "event_feed"},
+    "content-extract": {"facade": "information-retrieval", "role": "content_parser"},
+    "mineru-extract": {"facade": "information-retrieval", "role": "document_parser"},
+    "search-layer": {"facade": "information-retrieval", "role": "search_adapter"},
+    "research-tools": {"facade": "information-retrieval", "role": "research_utilities"},
+    "pipeline-runner": {"facade": "pipeline", "role": "pipeline_templates"},
+    "pipeline-orchestrator": {"facade": "pipeline", "role": "pipeline_executor"},
+    "portfolio-management": {"facade": "portfolio-ops", "role": "portfolio_state"},
+    "position-ops": {"facade": "portfolio-ops", "role": "position_risk"},
+    "weekly-stock-pool": {"facade": "equity-screening", "role": "weekly_pool_builder"},
+    "themesurfer-signal": {"facade": "theme-cycle", "role": "market_gate_signal"},
+    "qveris-official": {"facade": "information-retrieval", "role": "external_connector"}
+  },
+  "merge_groups": {
+    "information-retrieval": ["search-layer", "research-tools", "content-extract", "mineru-extract", "qveris-official"],
+    "portfolio-ops": ["portfolio-management", "position-ops"],
+    "pipeline": ["pipeline-runner", "pipeline-orchestrator"],
+    "theme-cycle": ["theme-cycle", "themesurfer-signal"],
+    "market-data": ["market-data", "akshare", "baostock", "tushare", "hhxg-market"]
+  },
+  "safety_policy": {
+    "decision_allowed": false,
+    "requires_human_confirmation": true,
+    "fail_closed": true,
+    "no_silent_fallback": true,
+    "no_empty_success_for_missing_evidence": true
+  }
+}

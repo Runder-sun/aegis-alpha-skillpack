@@ -1,0 +1,376 @@
+{
+  "package": "market-intel",
+  "description": "Cross-source market intelligence, news, events, policy, reports, sentiment, and black-swan monitoring.",
+  "commands": [
+    {
+      "name": "black-swan-monitor",
+      "description": "Detect extreme A-share market risk signals and headline context from the latest snapshot.",
+      "status": "implemented",
+      "legacy_functions": [
+        "black_swan_monitor"
+      ],
+      "payload_schema": {
+        "$ref": "#/$defs/market_intel_payload"
+      },
+      "result_schema": {
+        "$ref": "#/$defs/market_intel_result"
+      },
+      "upstream_dependencies": [
+        "memory/prewarm/nightly-prewarm-*.json",
+        "optional explicit provider payload"
+      ],
+      "freshness_policy": "Intelligence freshness is inherited from prewarm artifacts and provider timestamps; provider absence is not neutral evidence.",
+      "error_behavior": [
+        "intelligence_source_missing",
+        "market_sentiment_inputs_missing",
+        "policy_items_missing",
+        "research_reports_missing"
+      ],
+      "example": {}
+    },
+    {
+      "name": "daily-news-scan",
+      "description": "Collect A-share, China macro, and global market news from prewarm and optional search providers.",
+      "status": "implemented",
+      "legacy_functions": [
+        "daily_news_scan"
+      ],
+      "payload_schema": {
+        "$ref": "#/$defs/market_intel_payload"
+      },
+      "result_schema": {
+        "$ref": "#/$defs/market_intel_result"
+      },
+      "upstream_dependencies": [
+        "memory/prewarm/nightly-prewarm-*.json",
+        "optional explicit provider payload"
+      ],
+      "freshness_policy": "Intelligence freshness is inherited from prewarm artifacts and provider timestamps; provider absence is not neutral evidence.",
+      "error_behavior": [
+        "intelligence_source_missing",
+        "market_sentiment_inputs_missing",
+        "policy_items_missing",
+        "research_reports_missing"
+      ],
+      "example": {}
+    },
+    {
+      "name": "event-calendar-scan",
+      "description": "Return A-share calendar and global macro event calendar from prewarm data.",
+      "status": "implemented",
+      "legacy_functions": [
+        "event_calendar_scan"
+      ],
+      "payload_schema": {
+        "$ref": "#/$defs/market_intel_payload"
+      },
+      "result_schema": {
+        "$ref": "#/$defs/market_intel_result"
+      },
+      "upstream_dependencies": [
+        "memory/prewarm/nightly-prewarm-*.json",
+        "optional explicit provider payload"
+      ],
+      "freshness_policy": "Intelligence freshness is inherited from prewarm artifacts and provider timestamps; provider absence is not neutral evidence.",
+      "error_behavior": [
+        "intelligence_source_missing",
+        "market_sentiment_inputs_missing",
+        "policy_items_missing",
+        "research_reports_missing"
+      ],
+      "example": {}
+    },
+    {
+      "name": "forum-sentiment",
+      "description": "Summarize sector-level market chatter proxy from strong and weak sector snapshot data.",
+      "status": "implemented",
+      "legacy_functions": [
+        "forum_sentiment"
+      ],
+      "payload_schema": {
+        "$ref": "#/$defs/market_intel_payload"
+      },
+      "result_schema": {
+        "$ref": "#/$defs/market_intel_result"
+      },
+      "upstream_dependencies": [
+        "memory/prewarm/nightly-prewarm-*.json",
+        "optional explicit provider payload"
+      ],
+      "freshness_policy": "Intelligence freshness is inherited from prewarm artifacts and provider timestamps; provider absence is not neutral evidence.",
+      "error_behavior": [
+        "intelligence_source_missing",
+        "market_sentiment_inputs_missing",
+        "policy_items_missing",
+        "research_reports_missing"
+      ],
+      "example": {}
+    },
+    {
+      "name": "kol-tracker",
+      "description": "Track hot-money seat and top net-buy context from the snapshot hotmoney surface.",
+      "status": "implemented",
+      "legacy_functions": [
+        "kol_tracker"
+      ],
+      "payload_schema": {
+        "$ref": "#/$defs/market_intel_payload"
+      },
+      "result_schema": {
+        "$ref": "#/$defs/market_intel_result"
+      },
+      "upstream_dependencies": [
+        "memory/prewarm/nightly-prewarm-*.json",
+        "optional explicit provider payload"
+      ],
+      "freshness_policy": "Intelligence freshness is inherited from prewarm artifacts and provider timestamps; provider absence is not neutral evidence.",
+      "error_behavior": [
+        "intelligence_source_missing",
+        "market_sentiment_inputs_missing",
+        "policy_items_missing",
+        "research_reports_missing"
+      ],
+      "example": {}
+    },
+    {
+      "name": "market-sentiment-index",
+      "description": "Return sentiment, limit-up/down, fried-board, and promotion-rate indicators.",
+      "status": "implemented",
+      "legacy_functions": [
+        "market_sentiment_index"
+      ],
+      "payload_schema": {
+        "$ref": "#/$defs/market_intel_payload"
+      },
+      "result_schema": {
+        "$ref": "#/$defs/market_intel_result"
+      },
+      "upstream_dependencies": [
+        "memory/prewarm/nightly-prewarm-*.json",
+        "optional explicit provider payload"
+      ],
+      "freshness_policy": "Intelligence freshness is inherited from prewarm artifacts and provider timestamps; provider absence is not neutral evidence.",
+      "error_behavior": [
+        "intelligence_source_missing",
+        "market_sentiment_inputs_missing",
+        "policy_items_missing",
+        "research_reports_missing"
+      ],
+      "example": {}
+    },
+    {
+      "name": "global-sentiment-scan",
+      "description": "Scan optional xreach/QVeris global macro sentiment items and keyword counts.",
+      "status": "implemented",
+      "legacy_functions": [
+        "global_sentiment_scan"
+      ],
+      "payload_schema": {
+        "$ref": "#/$defs/market_intel_payload"
+      },
+      "result_schema": {
+        "$ref": "#/$defs/market_intel_result"
+      },
+      "upstream_dependencies": [
+        "memory/prewarm/nightly-prewarm-*.json",
+        "optional explicit provider payload"
+      ],
+      "freshness_policy": "Intelligence freshness is inherited from prewarm artifacts and provider timestamps; provider absence is not neutral evidence.",
+      "error_behavior": [
+        "intelligence_source_missing",
+        "market_sentiment_inputs_missing",
+        "policy_items_missing",
+        "research_reports_missing"
+      ],
+      "example": {}
+    },
+    {
+      "name": "global-event-scan",
+      "description": "Collect global macro event items from optional providers and prewarm calendars/news.",
+      "status": "implemented",
+      "legacy_functions": [
+        "global_event_scan"
+      ],
+      "payload_schema": {
+        "$ref": "#/$defs/market_intel_payload"
+      },
+      "result_schema": {
+        "$ref": "#/$defs/market_intel_result"
+      },
+      "upstream_dependencies": [
+        "memory/prewarm/nightly-prewarm-*.json",
+        "optional explicit provider payload"
+      ],
+      "freshness_policy": "Intelligence freshness is inherited from prewarm artifacts and provider timestamps; provider absence is not neutral evidence.",
+      "error_behavior": [
+        "intelligence_source_missing",
+        "market_sentiment_inputs_missing",
+        "policy_items_missing",
+        "research_reports_missing"
+      ],
+      "example": {}
+    },
+    {
+      "name": "policy-analysis",
+      "description": "Summarize policy items from prewarm policy feeds.",
+      "status": "implemented",
+      "legacy_functions": [
+        "policy_analysis"
+      ],
+      "payload_schema": {
+        "$ref": "#/$defs/market_intel_payload"
+      },
+      "result_schema": {
+        "$ref": "#/$defs/market_intel_result"
+      },
+      "upstream_dependencies": [
+        "memory/prewarm/nightly-prewarm-*.json",
+        "optional explicit provider payload"
+      ],
+      "freshness_policy": "Intelligence freshness is inherited from prewarm artifacts and provider timestamps; provider absence is not neutral evidence.",
+      "error_behavior": [
+        "intelligence_source_missing",
+        "market_sentiment_inputs_missing",
+        "policy_items_missing",
+        "research_reports_missing"
+      ],
+      "example": {}
+    },
+    {
+      "name": "research-reports",
+      "description": "Summarize focus news, macro news, and research reports from prewarm feeds.",
+      "status": "implemented",
+      "legacy_functions": [
+        "research_reports"
+      ],
+      "payload_schema": {
+        "$ref": "#/$defs/market_intel_payload"
+      },
+      "result_schema": {
+        "$ref": "#/$defs/market_intel_result"
+      },
+      "upstream_dependencies": [
+        "memory/prewarm/nightly-prewarm-*.json",
+        "optional explicit provider payload"
+      ],
+      "freshness_policy": "Intelligence freshness is inherited from prewarm artifacts and provider timestamps; provider absence is not neutral evidence.",
+      "error_behavior": [
+        "intelligence_source_missing",
+        "market_sentiment_inputs_missing",
+        "policy_items_missing",
+        "research_reports_missing"
+      ],
+      "example": {}
+    }
+  ],
+  "removed_from_public_surface": [
+    {
+      "name": "event-driven-trading",
+      "reason": "Name implies executable trading; replace with event-analysis in theme-cycle plus paper-only trade-planning."
+    },
+    {
+      "name": "xueqiu-kol-query",
+      "reason": "No verified Xueqiu connector in this package."
+    },
+    {
+      "name": "xueqiu-kol-sentiment",
+      "reason": "No verified Xueqiu connector in this package."
+    },
+    {
+      "name": "xueqiu-quotes",
+      "reason": "No verified Xueqiu connector in this package."
+    },
+    {
+      "name": "xueqiu-watchlist-sync",
+      "reason": "No verified Xueqiu connector in this package."
+    }
+  ],
+  "$defs": {
+    "market_intel_payload": {
+      "type": "object",
+      "properties": {
+        "query": {
+          "type": "string"
+        },
+        "scope": {
+          "type": "string"
+        },
+        "as_of": {
+          "type": "string"
+        }
+      }
+    },
+    "market_intel_result": {
+      "type": "object",
+      "required": [
+        "decision_allowed",
+        "errors",
+        "ok",
+        "result",
+        "warnings"
+      ],
+      "properties": {
+        "ok": {
+          "type": "boolean"
+        },
+        "decision_allowed": {
+          "type": "boolean",
+          "const": false
+        },
+        "max_action_level": {
+          "type": "string",
+          "const": "research_only"
+        },
+        "sources": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "warnings": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "errors": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "result": {
+          "type": "object"
+        },
+        "requires_human_confirmation": {
+          "type": "boolean",
+          "const": true
+        },
+        "as_of": {
+          "type": "string"
+        },
+        "freshness": {
+          "type": "object"
+        },
+        "source": {
+          "type": [
+            "array",
+            "string"
+          ],
+          "items": {
+            "type": "string"
+          }
+        },
+        "artifacts": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "missing_critical_inputs": {
+          "type": "array"
+        }
+      }
+    }
+  }
+}

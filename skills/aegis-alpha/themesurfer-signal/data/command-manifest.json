@@ -1,0 +1,7 @@
+{
+  "package": "themesurfer-signal",
+  "description": "Market filter signal (MA20) for A-share short-term trading gate.",
+  "commands": [
+    {"name": "signal", "legacy_functions": ["themesurfer_signal"]}
+  ]
+}

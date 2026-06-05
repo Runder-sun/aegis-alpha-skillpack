@@ -1,0 +1,264 @@
+{
+  "package": "market-data",
+  "description": "Consolidated structured market data from nightly prewarm.",
+  "safety_policy": {
+    "decision_allowed": false,
+    "requires_human_confirmation": true,
+    "max_action_level": "data_only",
+    "fail_closed": true,
+    "requires_prewarm_artifact": true
+  },
+  "commands": [
+    {
+      "name": "snapshot-full",
+      "description": "Return the full HHXG market snapshot from the latest prewarm artifact.",
+      "status": "implemented",
+      "payload_schema": {
+        "type": "object"
+      },
+      "result_schema": {
+        "$ref": "#/$defs/market_data_result"
+      },
+      "example": {},
+      "upstream_dependencies": [
+        "memory/prewarm/nightly-prewarm-*.json"
+      ],
+      "freshness_policy": "Data is read only from the latest prewarm artifact; missing artifact or missing command field fails closed.",
+      "error_behavior": [
+        "prewarm_directory_missing",
+        "prewarm_artifact_missing",
+        "prewarm_artifact_invalid_json",
+        "required_market_data_missing"
+      ]
+    },
+    {
+      "name": "margin-full",
+      "description": "Return HHXG margin data from the latest prewarm artifact.",
+      "status": "implemented",
+      "payload_schema": {
+        "type": "object"
+      },
+      "result_schema": {
+        "$ref": "#/$defs/market_data_result"
+      },
+      "example": {},
+      "upstream_dependencies": [
+        "memory/prewarm/nightly-prewarm-*.json"
+      ],
+      "freshness_policy": "Data is read only from the latest prewarm artifact; missing artifact or missing command field fails closed.",
+      "error_behavior": [
+        "prewarm_directory_missing",
+        "prewarm_artifact_missing",
+        "prewarm_artifact_invalid_json",
+        "required_market_data_missing"
+      ]
+    },
+    {
+      "name": "calendar-week",
+      "description": "Return weekly market calendar data from the latest prewarm artifact.",
+      "status": "implemented",
+      "payload_schema": {
+        "type": "object"
+      },
+      "result_schema": {
+        "$ref": "#/$defs/market_data_result"
+      },
+      "example": {},
+      "upstream_dependencies": [
+        "memory/prewarm/nightly-prewarm-*.json"
+      ],
+      "freshness_policy": "Data is read only from the latest prewarm artifact; missing artifact or missing command field fails closed.",
+      "error_behavior": [
+        "prewarm_directory_missing",
+        "prewarm_artifact_missing",
+        "prewarm_artifact_invalid_json",
+        "required_market_data_missing"
+      ]
+    },
+    {
+      "name": "macro-pmi",
+      "description": "Return macro PMI series from the latest prewarm artifact.",
+      "status": "implemented",
+      "payload_schema": {
+        "type": "object"
+      },
+      "result_schema": {
+        "$ref": "#/$defs/market_data_result"
+      },
+      "example": {},
+      "upstream_dependencies": [
+        "memory/prewarm/nightly-prewarm-*.json"
+      ],
+      "freshness_policy": "Data is read only from the latest prewarm artifact; missing artifact or missing command field fails closed.",
+      "error_behavior": [
+        "prewarm_directory_missing",
+        "prewarm_artifact_missing",
+        "prewarm_artifact_invalid_json",
+        "required_market_data_missing"
+      ]
+    },
+    {
+      "name": "macro-cpi",
+      "description": "Return macro CPI series from the latest prewarm artifact.",
+      "status": "implemented",
+      "payload_schema": {
+        "type": "object"
+      },
+      "result_schema": {
+        "$ref": "#/$defs/market_data_result"
+      },
+      "example": {},
+      "upstream_dependencies": [
+        "memory/prewarm/nightly-prewarm-*.json"
+      ],
+      "freshness_policy": "Data is read only from the latest prewarm artifact; missing artifact or missing command field fails closed.",
+      "error_behavior": [
+        "prewarm_directory_missing",
+        "prewarm_artifact_missing",
+        "prewarm_artifact_invalid_json",
+        "required_market_data_missing"
+      ]
+    },
+    {
+      "name": "macro-ppi",
+      "description": "Return macro PPI series from the latest prewarm artifact.",
+      "status": "implemented",
+      "payload_schema": {
+        "type": "object"
+      },
+      "result_schema": {
+        "$ref": "#/$defs/market_data_result"
+      },
+      "example": {},
+      "upstream_dependencies": [
+        "memory/prewarm/nightly-prewarm-*.json"
+      ],
+      "freshness_policy": "Data is read only from the latest prewarm artifact; missing artifact or missing command field fails closed.",
+      "error_behavior": [
+        "prewarm_directory_missing",
+        "prewarm_artifact_missing",
+        "prewarm_artifact_invalid_json",
+        "required_market_data_missing"
+      ]
+    },
+    {
+      "name": "index-daily",
+      "description": "Return index daily data from the latest prewarm artifact.",
+      "status": "implemented",
+      "payload_schema": {
+        "type": "object",
+        "properties": {
+          "symbol": {
+            "type": "string"
+          }
+        }
+      },
+      "result_schema": {
+        "$ref": "#/$defs/market_data_result"
+      },
+      "example": {
+        "symbol": "sh.000001"
+      },
+      "upstream_dependencies": [
+        "memory/prewarm/nightly-prewarm-*.json"
+      ],
+      "freshness_policy": "Data is read only from the latest prewarm artifact; missing artifact or missing command field fails closed.",
+      "error_behavior": [
+        "prewarm_directory_missing",
+        "prewarm_artifact_missing",
+        "prewarm_artifact_invalid_json",
+        "required_market_data_missing"
+      ]
+    }
+  ],
+  "$defs": {
+    "market_data_result": {
+      "type": "object",
+      "required": [
+        "command",
+        "decision_allowed",
+        "errors",
+        "ok",
+        "package",
+        "payload",
+        "result",
+        "warnings"
+      ],
+      "properties": {
+        "package": {
+          "type": "string",
+          "const": "market-data"
+        },
+        "command": {
+          "type": "string"
+        },
+        "payload": {
+          "type": "object"
+        },
+        "result": {
+          "type": [
+            "object",
+            "array"
+          ]
+        },
+        "ok": {
+          "type": "boolean"
+        },
+        "decision_allowed": {
+          "type": "boolean",
+          "const": false
+        },
+        "requires_human_confirmation": {
+          "type": "boolean",
+          "const": true
+        },
+        "as_of": {
+          "type": "string"
+        },
+        "freshness": {
+          "type": "object"
+        },
+        "source": {
+          "type": [
+            "array",
+            "string"
+          ],
+          "items": {
+            "type": "string"
+          }
+        },
+        "sources": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "artifacts": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "warnings": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "errors": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "missing_critical_inputs": {
+          "type": "array"
+        },
+        "max_action_level": {
+          "type": "string",
+          "const": "data_only"
+        }
+      }
+    }
+  }
+}

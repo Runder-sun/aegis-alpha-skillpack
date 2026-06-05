@@ -1,0 +1,3 @@
+display_name: Market Intel
+short_description: Cross-source market intelligence and event monitoring.
+default_prompt: Use `market-intel` commands to complete this task.

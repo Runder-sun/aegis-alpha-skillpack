@@ -1,0 +1,27 @@
+{
+  "package": "tushare",
+  "commands": [
+    {"name": "news"},
+    {"name": "major-news"},
+    {"name": "policy"},
+    {"name": "research-report"},
+    {"name": "eco-cal"},
+    {"name": "macro-cn-m2"},
+    {"name": "macro-cn-sf"},
+    {"name": "macro-cn-gdp"},
+    {"name": "macro-cn-shibor"},
+    {"name": "macro-cn-lpr"},
+    {"name": "daily-basic"},
+    {"name": "stock-list"},
+    {"name": "stk-limit"},
+    {"name": "top-list"},
+    {"name": "top-inst"},
+    {"name": "margin"},
+    {"name": "share-float"},
+    {"name": "income"},
+    {"name": "balancesheet"},
+    {"name": "cashflow"},
+    {"name": "fina-indicator"},
+    {"name": "sw-daily"}
+  ]
+}

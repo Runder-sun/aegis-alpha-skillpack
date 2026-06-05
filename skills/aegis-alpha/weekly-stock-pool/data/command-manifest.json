@@ -1,0 +1,109 @@
+{
+  "package": "weekly-stock-pool",
+  "description": "Research-only weekly stock pool consolidation from verified weekly pipeline, context, and prewarm artifacts.",
+  "safety_policy": {
+    "decision_allowed": false,
+    "requires_human_confirmation": true,
+    "max_action_level": "research_only",
+    "fail_closed": true,
+    "no_empty_success": true,
+    "no_silent_fallback": true
+  },
+  "commands": [
+    {
+      "name": "weekly-stock-pool",
+      "description": "Build a weekly candidate pool only when weekly pipeline runs, weekly context, prewarm snapshot, and extracted candidates are all available.",
+      "status": "implemented",
+      "legacy_functions": [
+        "weekly_stock_pool"
+      ],
+      "payload_schema": {
+        "$ref": "#/$defs/weekly_stock_pool_payload"
+      },
+      "result_schema": {
+        "$ref": "#/$defs/weekly_stock_pool_result"
+      },
+      "example": {
+        "min_candidates": 1,
+        "write_artifact": true
+      },
+      "freshness_policy": "Uses latest local weekly artifacts. Missing artifacts or zero extracted candidates fail closed and must not be interpreted as no opportunity."
+    }
+  ],
+  "$defs": {
+    "weekly_stock_pool_payload": {
+      "type": "object",
+      "properties": {
+        "min_candidates": {
+          "type": "integer",
+          "minimum": 1,
+          "default": 1,
+          "description": "Minimum extracted candidates required for a successful weekly pool."
+        },
+        "max_age_minutes": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Optional freshness expectation recorded in the output envelope."
+        },
+        "write_artifact": {
+          "type": "boolean",
+          "default": true,
+          "description": "Whether to write the command envelope to memory/stock_pool."
+        }
+      }
+    },
+    "candidate": {
+      "type": "object",
+      "properties": {
+        "name": {"type": "string"},
+        "symbol": {"type": "string"},
+        "code": {"type": "string"},
+        "theme": {"type": "string"},
+        "score": {"type": "number"},
+        "source": {"type": "string"}
+      },
+      "additionalProperties": true
+    },
+    "weekly_stock_pool_result": {
+      "type": "object",
+      "required": [
+        "ok",
+        "decision_allowed",
+        "requires_human_confirmation",
+        "max_action_level",
+        "as_of",
+        "freshness",
+        "sources",
+        "artifacts",
+        "warnings",
+        "errors",
+        "missing_critical_inputs",
+        "result"
+      ],
+      "properties": {
+        "ok": {"type": "boolean"},
+        "decision_allowed": {"type": "boolean", "const": false},
+        "requires_human_confirmation": {"type": "boolean", "const": true},
+        "max_action_level": {"type": "string", "const": "research_only"},
+        "as_of": {"type": "string"},
+        "freshness": {"type": "object"},
+        "source": {"type": "string"},
+        "sources": {"type": "array", "items": {"type": "string"}},
+        "artifacts": {"type": "array", "items": {"type": "string"}},
+        "warnings": {"type": "array", "items": {"type": "string"}},
+        "errors": {"type": "array", "items": {"type": "string"}},
+        "missing_critical_inputs": {"type": "array", "items": {"type": "string"}},
+        "result": {
+          "type": "object",
+          "properties": {
+            "candidate_count": {"type": "integer"},
+            "candidates": {"type": ["array", "null"], "items": {"$ref": "#/$defs/candidate"}},
+            "filters": {"type": "array", "items": {"type": "string"}},
+            "pool_state": {"type": "string", "enum": ["available", "unavailable"]},
+            "failure_policy": {"type": "string", "const": "fail_closed"}
+          }
+        }
+      }
+    }
+  }
+}

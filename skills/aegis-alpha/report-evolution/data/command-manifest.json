@@ -1,0 +1,177 @@
+{
+  "package": "report-evolution",
+  "description": "Capture evidence and align outcomes for report evolution (Phase 1).",
+  "safety_policy": {
+    "decision_allowed": false,
+    "requires_human_confirmation": true,
+    "max_action_level": "report_review_only",
+    "fail_closed": true
+  },
+  "commands": [
+    {
+      "name": "capture-report-evidence",
+      "description": "Capture pipeline evidence for a target report window.",
+      "status": "implemented",
+      "legacy_functions": [],
+      "payload_schema": {
+        "type": "object",
+        "properties": {
+          "report_id": {
+            "type": "string"
+          },
+          "pipeline_id": {
+            "type": "string"
+          },
+          "window": {
+            "type": "string"
+          }
+        }
+      },
+      "result_schema": {
+        "$ref": "#/$defs/report_evolution_result"
+      },
+      "example": {
+        "pipeline_id": "nightly"
+      },
+      "upstream_dependencies": [
+        "memory/pipeline_runs",
+        "memory/reports",
+        "memory/pipeline_context",
+        "memory/report_evidence"
+      ],
+      "freshness_policy": "Report evolution artifacts are derived from current workspace report, pipeline, context, and evidence artifacts.",
+      "error_behavior": [
+        "report_evidence_not_found",
+        "missing_explicit_artifact",
+        "invalid_evidence_metadata",
+        "invalid_payload_json"
+      ]
+    },
+    {
+      "name": "align-report-outcome",
+      "description": "Align report outputs with observed outcomes using evidence snapshots or explicit report IDs.",
+      "status": "implemented",
+      "legacy_functions": [],
+      "payload_schema": {
+        "type": "object",
+        "properties": {
+          "report_id": {
+            "type": "string"
+          },
+          "outcomes": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          }
+        }
+      },
+      "result_schema": {
+        "$ref": "#/$defs/report_evolution_result"
+      },
+      "example": {
+        "report_id": "nightly-2026-06-04"
+      },
+      "upstream_dependencies": [
+        "memory/pipeline_runs",
+        "memory/reports",
+        "memory/pipeline_context",
+        "memory/report_evidence"
+      ],
+      "freshness_policy": "Report evolution artifacts are derived from current workspace report, pipeline, context, and evidence artifacts.",
+      "error_behavior": [
+        "report_evidence_not_found",
+        "missing_explicit_artifact",
+        "invalid_evidence_metadata",
+        "invalid_payload_json"
+      ]
+    }
+  ],
+  "$defs": {
+    "report_evolution_result": {
+      "type": "object",
+      "required": [
+        "command",
+        "decision_allowed",
+        "errors",
+        "ok",
+        "package",
+        "payload",
+        "result",
+        "warnings"
+      ],
+      "properties": {
+        "package": {
+          "type": "string",
+          "const": "report-evolution"
+        },
+        "command": {
+          "type": "string"
+        },
+        "payload": {
+          "type": "object"
+        },
+        "result": {
+          "type": "object"
+        },
+        "ok": {
+          "type": "boolean"
+        },
+        "decision_allowed": {
+          "type": "boolean",
+          "const": false
+        },
+        "requires_human_confirmation": {
+          "type": "boolean",
+          "const": true
+        },
+        "as_of": {
+          "type": "string"
+        },
+        "freshness": {
+          "type": "object"
+        },
+        "source": {
+          "type": [
+            "array",
+            "string"
+          ],
+          "items": {
+            "type": "string"
+          }
+        },
+        "sources": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "artifacts": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "warnings": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "errors": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "missing_critical_inputs": {
+          "type": "array"
+        },
+        "max_action_level": {
+          "type": "string",
+          "const": "report_review_only"
+        }
+      }
+    }
+  }
+}

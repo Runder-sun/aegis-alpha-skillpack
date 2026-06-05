@@ -1,0 +1,172 @@
+{
+  "package": "quality-gate",
+  "description": "Nightly quality checks and backtest loops.",
+  "safety_policy": {
+    "decision_allowed": false,
+    "requires_human_confirmation": true,
+    "max_action_level": "quality_validation_only",
+    "fail_closed": true
+  },
+  "commands": [
+    {
+      "name": "nightly-quality-gate",
+      "description": "Validate latest nightly prewarm, pipeline run, and report artifacts.",
+      "status": "implemented",
+      "legacy_functions": [
+        "nightly_quality_gate"
+      ],
+      "payload_schema": {
+        "type": "object"
+      },
+      "result_schema": {
+        "$ref": "#/$defs/quality_result"
+      },
+      "example": {},
+      "upstream_dependencies": [
+        "memory/prewarm",
+        "memory/pipeline_runs",
+        "memory/reports",
+        "quant-validation when delegated"
+      ],
+      "freshness_policy": "Quality status is derived from current workspace artifacts at command runtime.",
+      "error_behavior": [
+        "prewarm_present_failed",
+        "pipeline_present_failed",
+        "report_present_failed",
+        "missing_runtime_artifacts"
+      ]
+    },
+    {
+      "name": "backtest-loop",
+      "description": "Validate runtime artifacts and optionally delegate to quant-validation.",
+      "status": "implemented",
+      "legacy_functions": [
+        "backtest_loop"
+      ],
+      "payload_schema": {
+        "type": "object",
+        "properties": {
+          "command": {
+            "type": "string",
+            "enum": [
+              "nightly-eval-12m",
+              "batch-backtest"
+            ]
+          },
+          "price_series": {
+            "type": "array"
+          },
+          "strategy": {
+            "type": "object"
+          }
+        }
+      },
+      "result_schema": {
+        "$ref": "#/$defs/quality_result"
+      },
+      "example": {
+        "command": "nightly-eval-12m"
+      },
+      "upstream_dependencies": [
+        "memory/prewarm",
+        "memory/pipeline_runs",
+        "memory/reports",
+        "quant-validation when delegated"
+      ],
+      "freshness_policy": "Quality status is derived from current workspace artifacts at command runtime.",
+      "error_behavior": [
+        "prewarm_present_failed",
+        "pipeline_present_failed",
+        "report_present_failed",
+        "missing_runtime_artifacts"
+      ]
+    }
+  ],
+  "$defs": {
+    "quality_result": {
+      "type": "object",
+      "required": [
+        "command",
+        "decision_allowed",
+        "errors",
+        "ok",
+        "package",
+        "payload",
+        "result",
+        "warnings"
+      ],
+      "properties": {
+        "package": {
+          "type": "string",
+          "const": "quality-gate"
+        },
+        "command": {
+          "type": "string"
+        },
+        "payload": {
+          "type": "object"
+        },
+        "result": {
+          "type": "object"
+        },
+        "ok": {
+          "type": "boolean"
+        },
+        "decision_allowed": {
+          "type": "boolean",
+          "const": false
+        },
+        "requires_human_confirmation": {
+          "type": "boolean",
+          "const": true
+        },
+        "as_of": {
+          "type": "string"
+        },
+        "freshness": {
+          "type": "object"
+        },
+        "source": {
+          "type": [
+            "array",
+            "string"
+          ],
+          "items": {
+            "type": "string"
+          }
+        },
+        "sources": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "artifacts": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "warnings": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "errors": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "missing_critical_inputs": {
+          "type": "array"
+        },
+        "max_action_level": {
+          "type": "string",
+          "const": "quality_validation_only"
+        }
+      }
+    }
+  }
+}

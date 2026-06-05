@@ -1,0 +1,289 @@
+{
+  "package": "pipeline",
+  "description": "Public investment workflow pipeline facade for listing templates, dry-runs, and auditable execution.",
+  "safety_policy": {
+    "decision_allowed": false,
+    "requires_human_confirmation": true,
+    "max_action_level": "workflow_orchestration_only",
+    "fail_closed": true,
+    "push_disabled_by_default": true
+  },
+  "commands": [
+    {
+      "name": "pipeline-list",
+      "description": "List available investment workflow templates.",
+      "status": "implemented",
+      "routes_to": "pipeline-runner::pipeline-list",
+      "payload_schema": {
+        "type": "object"
+      },
+      "result_schema": {
+        "$ref": "#/$defs/facade_result"
+      },
+      "example": {},
+      "upstream_dependencies": [
+        "pipeline-runner facade route",
+        "pipeline-orchestrator facade route",
+        "workspace skills"
+      ],
+      "freshness_policy": "Pipeline freshness is delegated to the routed pipeline artifact and step outputs.",
+      "error_behavior": [
+        "pipeline_not_found",
+        "delegate_failed",
+        "dispatch_not_found",
+        "pipeline_step_failed"
+      ]
+    },
+    {
+      "name": "pipeline-dry-run",
+      "description": "Validate a pipeline path without running steps.",
+      "status": "implemented",
+      "routes_to": "pipeline-orchestrator::pipeline-dry-run",
+      "payload_schema": {
+        "$ref": "#/$defs/pipeline_payload"
+      },
+      "result_schema": {
+        "$ref": "#/$defs/facade_result"
+      },
+      "example": {
+        "pipeline_id": "nightly",
+        "dry_run": true
+      },
+      "upstream_dependencies": [
+        "pipeline-runner facade route",
+        "pipeline-orchestrator facade route",
+        "workspace skills"
+      ],
+      "freshness_policy": "Pipeline freshness is delegated to the routed pipeline artifact and step outputs.",
+      "error_behavior": [
+        "pipeline_not_found",
+        "delegate_failed",
+        "dispatch_not_found",
+        "pipeline_step_failed"
+      ]
+    },
+    {
+      "name": "pipeline-run",
+      "description": "Run a named pipeline and persist an auditable result artifact.",
+      "status": "implemented",
+      "routes_to": "pipeline-orchestrator::pipeline-run",
+      "payload_schema": {
+        "$ref": "#/$defs/pipeline_payload"
+      },
+      "result_schema": {
+        "$ref": "#/$defs/facade_result"
+      },
+      "example": {
+        "pipeline_id": "weekly",
+        "allow_push": false
+      },
+      "upstream_dependencies": [
+        "pipeline-runner facade route",
+        "pipeline-orchestrator facade route",
+        "workspace skills"
+      ],
+      "freshness_policy": "Pipeline freshness is delegated to the routed pipeline artifact and step outputs.",
+      "error_behavior": [
+        "pipeline_not_found",
+        "delegate_failed",
+        "dispatch_not_found",
+        "pipeline_step_failed"
+      ]
+    },
+    {
+      "name": "pipeline-run-nightly",
+      "description": "Run or dry-run the nightly workflow.",
+      "status": "implemented",
+      "routes_to": "pipeline-orchestrator::pipeline-run",
+      "payload_schema": {
+        "$ref": "#/$defs/pipeline_payload"
+      },
+      "result_schema": {
+        "$ref": "#/$defs/facade_result"
+      },
+      "example": {
+        "dry_run": true
+      },
+      "upstream_dependencies": [
+        "pipeline-runner facade route",
+        "pipeline-orchestrator facade route",
+        "workspace skills"
+      ],
+      "freshness_policy": "Pipeline freshness is delegated to the routed pipeline artifact and step outputs.",
+      "error_behavior": [
+        "pipeline_not_found",
+        "delegate_failed",
+        "dispatch_not_found",
+        "pipeline_step_failed"
+      ]
+    },
+    {
+      "name": "pipeline-run-morning",
+      "description": "Run or dry-run the morning workflow.",
+      "status": "implemented",
+      "routes_to": "pipeline-orchestrator::pipeline-run",
+      "payload_schema": {
+        "$ref": "#/$defs/pipeline_payload"
+      },
+      "result_schema": {
+        "$ref": "#/$defs/facade_result"
+      },
+      "example": {
+        "dry_run": true
+      },
+      "upstream_dependencies": [
+        "pipeline-runner facade route",
+        "pipeline-orchestrator facade route",
+        "workspace skills"
+      ],
+      "freshness_policy": "Pipeline freshness is delegated to the routed pipeline artifact and step outputs.",
+      "error_behavior": [
+        "pipeline_not_found",
+        "delegate_failed",
+        "dispatch_not_found",
+        "pipeline_step_failed"
+      ]
+    },
+    {
+      "name": "pipeline-run-weekly",
+      "description": "Run or dry-run the weekly workflow.",
+      "status": "implemented",
+      "routes_to": "pipeline-orchestrator::pipeline-run",
+      "payload_schema": {
+        "$ref": "#/$defs/pipeline_payload"
+      },
+      "result_schema": {
+        "$ref": "#/$defs/facade_result"
+      },
+      "example": {
+        "dry_run": true
+      },
+      "upstream_dependencies": [
+        "pipeline-runner facade route",
+        "pipeline-orchestrator facade route",
+        "workspace skills"
+      ],
+      "freshness_policy": "Pipeline freshness is delegated to the routed pipeline artifact and step outputs.",
+      "error_behavior": [
+        "pipeline_not_found",
+        "delegate_failed",
+        "dispatch_not_found",
+        "pipeline_step_failed"
+      ]
+    }
+  ],
+  "$defs": {
+    "pipeline_payload": {
+      "type": "object",
+      "properties": {
+        "pipeline_id": {
+          "type": "string",
+          "enum": [
+            "nightly",
+            "morning",
+            "market-review",
+            "weekly"
+          ]
+        },
+        "dry_run": {
+          "type": "boolean",
+          "default": false
+        },
+        "allow_push": {
+          "type": "boolean",
+          "default": false
+        },
+        "max_fail": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "skip_packages": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "skip_commands": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "facade_result": {
+      "type": "object",
+      "required": [
+        "as_of",
+        "decision_allowed",
+        "errors",
+        "max_action_level",
+        "missing_critical_inputs",
+        "ok",
+        "requires_human_confirmation",
+        "result",
+        "sources",
+        "warnings"
+      ],
+      "properties": {
+        "ok": {
+          "type": "boolean"
+        },
+        "decision_allowed": {
+          "type": "boolean",
+          "const": false
+        },
+        "requires_human_confirmation": {
+          "type": "boolean",
+          "const": true
+        },
+        "max_action_level": {
+          "type": "string",
+          "const": "workflow_orchestration_only"
+        },
+        "as_of": {
+          "type": "string"
+        },
+        "freshness": {
+          "type": "object"
+        },
+        "source": {
+          "type": "string"
+        },
+        "sources": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "artifacts": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "warnings": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "errors": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "missing_critical_inputs": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "result": {
+          "type": "object"
+        }
+      }
+    }
+  }
+}

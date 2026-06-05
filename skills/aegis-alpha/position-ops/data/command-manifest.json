@@ -1,0 +1,60 @@
+{
+  "package": "position-ops",
+  "description": "Position sizing and risk operations.",
+  "commands": [
+    {
+      "name": "portfolio-risk-check",
+      "description": "Check concentration and missing-value risks from known positions.",
+      "status": "implemented",
+      "legacy_functions": ["portfolio_risk_check"],
+      "payload_schema": {
+        "type": "object",
+        "properties": {
+          "max_single_position_pct": {"type": "number", "minimum": 0, "maximum": 1, "default": 0.2}
+        }
+      },
+      "result_schema": {"$ref": "#/$defs/position_ops_result"}
+    },
+    {
+      "name": "position-management-v2",
+      "description": "Load known positions from workspace state without inferring empty holdings from missing state.",
+      "status": "implemented",
+      "legacy_functions": ["position_management_v2"],
+      "payload_schema": {"type": "object", "properties": {}},
+      "result_schema": {"$ref": "#/$defs/position_ops_result"}
+    },
+    {
+      "name": "position-sizing-advisor",
+      "description": "Calculate paper-plan position size from risk budget and stop-loss distance.",
+      "status": "implemented",
+      "legacy_functions": ["position_sizing_advisor"],
+      "payload_schema": {
+        "type": "object",
+        "required": ["portfolio_value", "risk_budget_pct", "stop_loss_pct"],
+        "properties": {
+          "portfolio_value": {"type": "number", "exclusiveMinimum": 0},
+          "risk_budget_pct": {"type": "number", "exclusiveMinimum": 0, "maximum": 1},
+          "stop_loss_pct": {"type": "number", "exclusiveMinimum": 0, "maximum": 1},
+          "max_single_position_pct": {"type": "number", "exclusiveMinimum": 0, "maximum": 1, "default": 0.2},
+          "current_exposure": {"type": "number", "minimum": 0}
+        }
+      },
+      "result_schema": {"$ref": "#/$defs/position_ops_result"}
+    }
+  ],
+  "$defs": {
+    "position_ops_result": {
+      "type": "object",
+      "required": ["ok", "decision_allowed", "warnings", "errors", "result"],
+      "properties": {
+        "ok": {"type": "boolean"},
+        "decision_allowed": {"type": "boolean", "const": false},
+        "max_action_level": {"type": "string"},
+        "sources": {"type": "array", "items": {"type": "string"}},
+        "warnings": {"type": "array", "items": {"type": "string"}},
+        "errors": {"type": "array", "items": {"type": "string"}},
+        "result": {"type": "object"}
+      }
+    }
+  }
+}

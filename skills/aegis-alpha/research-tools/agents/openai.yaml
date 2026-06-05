@@ -1,0 +1,3 @@
+display_name: Research Tools
+short_description: Shared research and utility tooling.
+default_prompt: Use `research-tools` commands to complete this task.

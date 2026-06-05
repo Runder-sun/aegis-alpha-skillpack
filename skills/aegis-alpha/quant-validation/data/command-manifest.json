@@ -1,0 +1,621 @@
+{
+  "package": "quant-validation",
+  "description": "Research-only offline backtesting, strategy comparison, parameter grid search, and nightly validation.",
+  "safety_policy": {
+    "decision_allowed": false,
+    "requires_human_confirmation": true,
+    "max_action_level": "research_validation_only",
+    "fail_closed": true,
+    "no_silent_fallback": true
+  },
+  "commands": [
+    {
+      "name": "agent-validation-backtest",
+      "description": "Backtest one strategy and apply configurable validation gates.",
+      "status": "implemented",
+      "legacy_functions": [
+        "agent_validation_backtest"
+      ],
+      "payload_schema": {
+        "$ref": "#/$defs/backtest_payload"
+      },
+      "result_schema": {
+        "$ref": "#/$defs/quant_result"
+      },
+      "example": {
+        "price_series": [
+          {
+            "date": "2026-01-01",
+            "close": 10
+          },
+          {
+            "date": "2026-01-02",
+            "close": 10.5
+          },
+          {
+            "date": "2026-01-03",
+            "close": 10.2
+          }
+        ],
+        "strategy": {
+          "type": "buy_and_hold"
+        }
+      },
+      "freshness_policy": "Uses supplied series only; missing or invalid history fails closed.",
+      "upstream_dependencies": [
+        "explicit price_series/prices/returns/equity_curve or explicit series_path"
+      ],
+      "error_behavior": [
+        "historical_series_required",
+        "insufficient_history",
+        "invalid_strategy",
+        "grid_required"
+      ]
+    },
+    {
+      "name": "strategy-backtest",
+      "description": "Backtest a single explicit strategy and compare it to buy-and-hold benchmark.",
+      "status": "implemented",
+      "legacy_functions": [
+        "strategy_backtest"
+      ],
+      "payload_schema": {
+        "$ref": "#/$defs/backtest_payload"
+      },
+      "result_schema": {
+        "$ref": "#/$defs/quant_result"
+      },
+      "example": {
+        "price_series": [
+          {
+            "close": 10
+          },
+          {
+            "close": 11
+          },
+          {
+            "close": 12
+          }
+        ],
+        "strategy_type": "buy_and_hold"
+      },
+      "freshness_policy": "Metrics are only as valid as the supplied series.",
+      "upstream_dependencies": [
+        "explicit price_series/prices/returns/equity_curve or explicit series_path"
+      ],
+      "error_behavior": [
+        "historical_series_required",
+        "insufficient_history",
+        "invalid_strategy",
+        "grid_required"
+      ]
+    },
+    {
+      "name": "batch-backtest",
+      "description": "Backtest multiple strategies against the same historical series.",
+      "status": "implemented",
+      "legacy_functions": [
+        "batch_backtest"
+      ],
+      "payload_schema": {
+        "$ref": "#/$defs/batch_payload"
+      },
+      "result_schema": {
+        "$ref": "#/$defs/quant_result"
+      },
+      "example": {
+        "price_series": [
+          {
+            "close": 10
+          },
+          {
+            "close": 11
+          },
+          {
+            "close": 12
+          }
+        ],
+        "strategies": [
+          {
+            "id": "hold",
+            "type": "buy_and_hold"
+          },
+          {
+            "id": "cash",
+            "type": "cash"
+          }
+        ]
+      },
+      "freshness_policy": "No strategy is ranked unless its backtest completes with valid metrics.",
+      "upstream_dependencies": [
+        "explicit price_series/prices/returns/equity_curve or explicit series_path"
+      ],
+      "error_behavior": [
+        "historical_series_required",
+        "insufficient_history",
+        "invalid_strategy",
+        "grid_required"
+      ]
+    },
+    {
+      "name": "strategy-compare",
+      "description": "Rank supplied backtest results or run batch-backtest from supplied strategies.",
+      "status": "implemented",
+      "legacy_functions": [
+        "strategy_compare"
+      ],
+      "payload_schema": {
+        "$ref": "#/$defs/compare_payload"
+      },
+      "result_schema": {
+        "$ref": "#/$defs/quant_result"
+      },
+      "example": {
+        "results": [
+          {
+            "strategy_id": "hold",
+            "metrics": {
+              "total_return_pct": 10,
+              "max_drawdown_pct": -5,
+              "sharpe": 1.2
+            }
+          }
+        ]
+      },
+      "freshness_policy": "Comparison requires comparable result metrics or explicit strategies plus series.",
+      "upstream_dependencies": [
+        "explicit price_series/prices/returns/equity_curve or explicit series_path"
+      ],
+      "error_behavior": [
+        "historical_series_required",
+        "insufficient_history",
+        "invalid_strategy",
+        "grid_required"
+      ]
+    },
+    {
+      "name": "grid-search-advisor",
+      "description": "Evaluate a bounded parameter grid and return the best paper-only research candidate.",
+      "status": "implemented",
+      "legacy_functions": [
+        "grid_search_advisor"
+      ],
+      "payload_schema": {
+        "$ref": "#/$defs/grid_payload"
+      },
+      "result_schema": {
+        "$ref": "#/$defs/quant_result"
+      },
+      "example": {
+        "price_series": [
+          {
+            "close": 10
+          },
+          {
+            "close": 11
+          },
+          {
+            "close": 12
+          },
+          {
+            "close": 13
+          }
+        ],
+        "grid": {
+          "short_window": [
+            1,
+            2
+          ],
+          "long_window": [
+            3
+          ]
+        }
+      },
+      "freshness_policy": "Grid search is bounded by max_combinations and requires explicit history.",
+      "upstream_dependencies": [
+        "explicit price_series/prices/returns/equity_curve or explicit series_path"
+      ],
+      "error_behavior": [
+        "historical_series_required",
+        "insufficient_history",
+        "invalid_strategy",
+        "grid_required"
+      ]
+    },
+    {
+      "name": "parameter-optimization-biweekly",
+      "description": "Run the same bounded grid search and package the result as a biweekly research review.",
+      "status": "implemented",
+      "legacy_functions": [
+        "parameter_optimization_biweekly"
+      ],
+      "payload_schema": {
+        "$ref": "#/$defs/grid_payload"
+      },
+      "result_schema": {
+        "$ref": "#/$defs/quant_result"
+      },
+      "example": {
+        "price_series": [
+          {
+            "close": 10
+          },
+          {
+            "close": 11
+          },
+          {
+            "close": 12
+          },
+          {
+            "close": 13
+          }
+        ],
+        "grid": {
+          "short_window": [
+            1,
+            2
+          ],
+          "long_window": [
+            3
+          ]
+        }
+      },
+      "freshness_policy": "Optimized parameters remain paper-only until independently validated.",
+      "upstream_dependencies": [
+        "explicit price_series/prices/returns/equity_curve or explicit series_path"
+      ],
+      "error_behavior": [
+        "historical_series_required",
+        "insufficient_history",
+        "invalid_strategy",
+        "grid_required"
+      ]
+    },
+    {
+      "name": "nightly-eval-12m",
+      "description": "Run nightly validation from explicit series, or use the legacy monthly backtest script when available.",
+      "status": "implemented",
+      "legacy_functions": [
+        "nightly_eval_12m"
+      ],
+      "payload_schema": {
+        "$ref": "#/$defs/nightly_payload"
+      },
+      "result_schema": {
+        "$ref": "#/$defs/quant_result"
+      },
+      "example": {
+        "price_series": [
+          {
+            "close": 10
+          },
+          {
+            "close": 11
+          },
+          {
+            "close": 12
+          }
+        ],
+        "strategy": {
+          "type": "buy_and_hold"
+        }
+      },
+      "freshness_policy": "Fails closed unless explicit history or the legacy backtest script is available.",
+      "upstream_dependencies": [
+        "explicit price_series/prices/returns/equity_curve or explicit series_path"
+      ],
+      "error_behavior": [
+        "historical_series_required",
+        "insufficient_history",
+        "invalid_strategy",
+        "grid_required"
+      ]
+    }
+  ],
+  "$defs": {
+    "series_record": {
+      "type": "object",
+      "properties": {
+        "date": {
+          "type": "string"
+        },
+        "datetime": {
+          "type": "string"
+        },
+        "close": {
+          "type": "number"
+        },
+        "price": {
+          "type": "number"
+        },
+        "value": {
+          "type": "number"
+        },
+        "equity": {
+          "type": "number"
+        },
+        "nav": {
+          "type": "number"
+        },
+        "return": {
+          "type": "number"
+        }
+      }
+    },
+    "strategy": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string",
+          "enum": [
+            "buy_and_hold",
+            "cash",
+            "ma_cross",
+            "threshold"
+          ]
+        },
+        "short_window": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "long_window": {
+          "type": "integer",
+          "minimum": 2
+        },
+        "lookback": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "threshold": {
+          "type": "number"
+        },
+        "signals": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          }
+        },
+        "cost_bps": {
+          "type": "number",
+          "minimum": 0
+        }
+      }
+    },
+    "backtest_payload": {
+      "type": "object",
+      "properties": {
+        "price_series": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/series_record"
+          }
+        },
+        "prices": {
+          "type": "array"
+        },
+        "equity_curve": {
+          "type": "array"
+        },
+        "returns": {
+          "type": "array"
+        },
+        "series_path": {
+          "type": "string"
+        },
+        "series_type": {
+          "type": "string",
+          "enum": [
+            "prices",
+            "returns"
+          ]
+        },
+        "strategy": {
+          "$ref": "#/$defs/strategy"
+        },
+        "strategy_type": {
+          "type": "string"
+        },
+        "signals": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          }
+        },
+        "periods_per_year": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "cost_bps": {
+          "type": "number",
+          "minimum": 0
+        },
+        "min_total_return_pct": {
+          "type": "number"
+        },
+        "max_drawdown_pct": {
+          "type": "number"
+        },
+        "min_periods": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "write_artifact": {
+          "type": "boolean",
+          "default": false
+        }
+      }
+    },
+    "batch_payload": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/backtest_payload"
+        },
+        {
+          "type": "object",
+          "required": [
+            "strategies"
+          ],
+          "properties": {
+            "strategies": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/strategy"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "compare_payload": {
+      "type": "object",
+      "properties": {
+        "results": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "strategies": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/strategy"
+          }
+        },
+        "price_series": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/series_record"
+          }
+        }
+      }
+    },
+    "grid_payload": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/backtest_payload"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "grid": {
+              "type": "object"
+            },
+            "params": {
+              "type": "object"
+            },
+            "max_combinations": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100
+            },
+            "strategy_type": {
+              "type": "string",
+              "default": "ma_cross"
+            }
+          }
+        }
+      ]
+    },
+    "nightly_payload": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/backtest_payload"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "months": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "iterations": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "auto_optimize": {
+              "type": "boolean"
+            }
+          }
+        }
+      ]
+    },
+    "quant_result": {
+      "type": "object",
+      "required": [
+        "as_of",
+        "decision_allowed",
+        "errors",
+        "freshness",
+        "max_action_level",
+        "missing_critical_inputs",
+        "ok",
+        "requires_human_confirmation",
+        "result",
+        "source",
+        "warnings"
+      ],
+      "properties": {
+        "ok": {
+          "type": "boolean"
+        },
+        "decision_allowed": {
+          "type": "boolean",
+          "const": false
+        },
+        "requires_human_confirmation": {
+          "type": "boolean",
+          "const": true
+        },
+        "max_action_level": {
+          "type": "string",
+          "const": "research_validation_only"
+        },
+        "as_of": {
+          "type": "string"
+        },
+        "freshness": {
+          "type": "object"
+        },
+        "source": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "sources": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "artifacts": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "warnings": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "errors": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "missing_critical_inputs": {
+          "type": "array"
+        },
+        "result": {
+          "type": "object"
+        }
+      }
+    }
+  }
+}

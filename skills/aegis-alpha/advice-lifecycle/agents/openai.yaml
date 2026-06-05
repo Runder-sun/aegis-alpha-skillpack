@@ -1,0 +1,3 @@
+display_name: Advice Lifecycle
+short_description: Advice generation, tracking, and lifecycle updates.
+default_prompt: Use `advice-lifecycle` commands to complete this task.

@@ -1,0 +1,822 @@
+{
+  "ok": true,
+  "workspace": "/tmp/aegis-alpha-closed-loop-smoke",
+  "artifacts": {
+    "advice_ledger": "/tmp/aegis-alpha-closed-loop-smoke/memory/advice/advice-ledger.json",
+    "report": "/tmp/aegis-alpha-closed-loop-smoke/memory/reports/nightly-report-20260604-210000.md",
+    "capture": "/tmp/aegis-alpha-closed-loop-smoke/memory/report_evidence/nightly/nightly-20260604-210000-td2026-06-05-cn-a-share-sv1",
+    "alignment": "/tmp/aegis-alpha-closed-loop-smoke/memory/evolution/logs/align-20260604-210000.json"
+  },
+  "checks": [
+    {
+      "name": "market snapshot produces regime judgment",
+      "ok": true,
+      "detail": {
+        "package": "macro-regime",
+        "command": "macro-regime-query",
+        "payload": {},
+        "as_of": "2026-06-05T07:27:52.161755+00:00",
+        "freshness": {
+          "status": "current",
+          "as_of": "2026-06-05T07:27:52.161755+00:00",
+          "policy": "macro-regime freshness is inherited from latest prewarm artifact, macro cache, and explicit provider timestamps"
+        },
+        "ok": true,
+        "decision_allowed": false,
+        "requires_human_confirmation": true,
+        "max_action_level": "research_only",
+        "source": [],
+        "sources": [
+          "hhxg_snapshot"
+        ],
+        "artifacts": [],
+        "warnings": [],
+        "errors": [],
+        "missing_critical_inputs": [],
+        "result": {
+          "risk": {
+            "risk_score": 0,
+            "risk_level": "green",
+            "risk_mode": "neutral",
+            "reasons": [],
+            "inputs": {
+              "sentiment_index": 55.0,
+              "limit_down": 4.0,
+              "fried": 12.0,
+              "promotion_rate": 0.42
+            }
+          },
+          "risk_budget_reference": {
+            "max_equity": 0.7,
+            "cash_min": 0.1,
+            "new_position_allowed": true
+          },
+          "capital_flow": {
+            "hotmoney_total_net_yi": 16.5,
+            "top_net_buy": [
+              {
+                "name": "中科曙光",
+                "code": "603019",
+                "net_yi": 4.8
+              }
+            ],
+            "sector_strong_net": [
+              {
+                "label": "行业",
+                "name": "半导体",
+                "leader": "中芯国际",
+                "net_yi": 6
+              }
+            ],
+            "source": "hhxg_snapshot"
+          },
+          "sector_rotation": {
+            "sectors": [
+              {
+                "label": "行业",
+                "strong": [
+                  {
+                    "name": "半导体",
+                    "leader": "中芯国际",
+                    "net_yi": 6
+                  }
+                ],
+                "weak": [
+                  {
+                    "name": "地产"
+                  }
+                ]
+              }
+            ],
+            "source": "hhxg_snapshot.sectors"
+          },
+          "concept_heat": {
+            "heat": [
+              {
+                "name": "AI算力",
+                "score": 100.0,
+                "net_yi": 9.0,
+                "limitup_count": 4.0,
+                "stock_count": 22.0,
+                "top_stocks": [
+                  {
+                    "name": "中科曙光",
+                    "code": "603019"
+                  }
+                ],
+                "source": "hhxg_snapshot.hot_themes"
+              }
+            ],
+            "source": "hhxg_snapshot.hot_themes/sectors"
+          },
+          "source": "hhxg_snapshot"
+        },
+        "_returncode": 0
+      }
+    },
+    {
+      "name": "regime feeds theme gate",
+      "ok": true,
+      "detail": {
+        "package": "theme-cycle",
+        "command": "themesurfer-check",
+        "payload": {},
+        "as_of": "2026-06-05T07:27:52.249256+00:00",
+        "freshness": {
+          "status": "current",
+          "as_of": "2026-06-05T07:27:52.249256+00:00",
+          "policy": "theme-cycle freshness is inherited from latest prewarm artifact, theme store, and macro-regime outputs"
+        },
+        "ok": true,
+        "decision_allowed": false,
+        "requires_human_confirmation": true,
+        "max_action_level": "research_only",
+        "source": [],
+        "sources": [
+          "hhxg_snapshot.market"
+        ],
+        "artifacts": [],
+        "warnings": [],
+        "errors": [],
+        "missing_critical_inputs": [],
+        "result": {
+          "status": "FULL",
+          "allow_new_positions": true,
+          "risk_level": "green",
+          "risk_score": 0,
+          "reasons": [],
+          "inputs": {
+            "sentiment_index": 55.0,
+            "limit_down": 4.0,
+            "fried": 12.0
+          },
+          "source": "hhxg_snapshot.market"
+        },
+        "_returncode": 0
+      }
+    },
+    {
+      "name": "theme evidence produces candidate pool",
+      "ok": true,
+      "detail": {
+        "package": "equity-screening",
+        "command": "stock-screening",
+        "payload": {
+          "candidates": [
+            {
+              "name": "中科曙光",
+              "code": "603019",
+              "theme": "AI算力",
+              "net_yi": 8.5,
+              "news_hits": 4,
+              "research_hits": 2
+            },
+            {
+              "name": "中芯国际",
+              "code": "688981",
+              "theme": "半导体",
+              "net_yi": 6.2,
+              "news_hits": 3,
+              "research_hits": 2
+            }
+          ],
+          "min_score": 50
+        },
+        "as_of": "2026-06-05T07:27:52.312302+00:00",
+        "freshness": {
+          "status": "current",
+          "as_of": "2026-06-05T07:27:52.312302+00:00",
+          "policy": "screening freshness is inherited from supplied candidates or the latest prewarm artifact"
+        },
+        "ok": true,
+        "decision_allowed": false,
+        "requires_human_confirmation": true,
+        "max_action_level": "research_only",
+        "source": [],
+        "sources": [
+          "/tmp/aegis-alpha-closed-loop-smoke/memory/prewarm/nightly-prewarm-2026-06-04.json",
+          "payload.candidates"
+        ],
+        "artifacts": [],
+        "warnings": [],
+        "errors": [],
+        "missing_critical_inputs": [],
+        "result": {
+          "candidates": [
+            {
+              "name": "中科曙光",
+              "code": "603019",
+              "theme": "AI算力",
+              "net_yi": 8.5,
+              "news_hits": 4,
+              "research_hits": 2,
+              "score": 87.25,
+              "score_breakdown": {
+                "capital": 85.0,
+                "theme_match": 100,
+                "info": 100.0,
+                "sentiment": 62.5,
+                "risk_penalty": 0
+              }
+            },
+            {
+              "name": "中芯国际",
+              "code": "688981",
+              "theme": "半导体",
+              "net_yi": 6.2,
+              "news_hits": 3,
+              "research_hits": 2,
+              "score": 75.03,
+              "score_breakdown": {
+                "capital": 62.0,
+                "theme_match": 100,
+                "info": 83.33,
+                "sentiment": 62.5,
+                "risk_penalty": 0
+              }
+            }
+          ],
+          "count": 2,
+          "total_input": 2,
+          "score_schema": {
+            "capital": 0.35,
+            "theme_match": 0.2,
+            "info": 0.25,
+            "sentiment": 0.2
+          }
+        },
+        "_returncode": 0
+      }
+    },
+    {
+      "name": "candidate has fundamental narrative valuation research",
+      "ok": true,
+      "detail": {
+        "package": "equity-research",
+        "command": "stock-analysis",
+        "payload": {
+          "code": "603019",
+          "name": "中科曙光",
+          "metrics": {
+            "roe": 0.16,
+            "net_margin": 0.12,
+            "revenue_growth": 0.18,
+            "net_profit_growth": 0.22,
+            "debt_to_asset": 0.34,
+            "operating_cashflow": 80,
+            "net_profit": 70,
+            "price": 45,
+            "eps": 1.8,
+            "industry_pe": 35,
+            "dividend_yield": 0.01
+          },
+          "context": {
+            "summary": "AI算力服务器龙头之一，受益于算力基础设施投入。",
+            "thesis": "订单景气与国产替代形成中期支撑。",
+            "risks": [
+              "估值波动",
+              "行业竞争",
+              "订单兑现不及预期"
+            ]
+          },
+          "news": [
+            {
+              "title": "AI算力政策催化",
+              "content": "算力基础设施政策继续落地"
+            }
+          ],
+          "narrative_score": 72
+        },
+        "as_of": "2026-06-05T07:27:52.373637+00:00",
+        "freshness": {
+          "status": "current",
+          "as_of": "2026-06-05T07:27:52.373637+00:00",
+          "policy": "research freshness is inherited from supplied metrics, evidence, and latest prewarm artifact when used"
+        },
+        "ok": true,
+        "decision_allowed": false,
+        "requires_human_confirmation": true,
+        "max_action_level": "research_only",
+        "source": [],
+        "sources": [
+          "/tmp/aegis-alpha-closed-loop-smoke/memory/prewarm/nightly-prewarm-2026-06-04.json",
+          "payload.context",
+          "payload.news"
+        ],
+        "artifacts": [],
+        "warnings": [],
+        "errors": [],
+        "missing_critical_inputs": [],
+        "result": {
+          "sections": {
+            "news": {
+              "code": "603019",
+              "name": "中科曙光",
+              "query": "603019",
+              "items": [],
+              "count": 0,
+              "total_found": 0
+            },
+            "narrative": {
+              "summary": {
+                "text": "市场情绪修复，AI算力和半导体方向活跃"
+              },
+              "themes": [],
+              "thesis": "订单景气与国产替代形成中期支撑。",
+              "risks": [
+                "估值波动",
+                "行业竞争",
+                "订单兑现不及预期"
+              ],
+              "source": "payload.context + prewarm.hhxg_snapshot"
+            },
+            "fundamental": {
+              "quality": {
+                "metrics_used": [
+                  "debt_to_asset",
+                  "net_margin",
+                  "net_profit",
+                  "net_profit_growth",
+                  "operating_cashflow",
+                  "revenue_growth",
+                  "roe"
+                ],
+                "cashflow_quality": 1.1428571428571428,
+                "strengths": [
+                  "cashflow_supports_profit",
+                  "healthy_net_margin",
+                  "revenue_growth_positive",
+                  "roe_strong"
+                ],
+                "risks": [],
+                "flags": [],
+                "financial_quality_score": 82,
+                "grade": "strong"
+              },
+              "business_model": null,
+              "competitive_position": null,
+              "key_questions": [
+                "Can growth persist without margin erosion?",
+                "Is cash flow quality consistent across cycles?",
+                "Does balance-sheet risk constrain strategy?"
+              ]
+            },
+            "valuation": {
+              "pe": 25.0,
+              "pb": null,
+              "peg": 1.1363636363636365,
+              "industry_pe": 35.0,
+              "dividend_yield": 0.01,
+              "fcf_yield": null,
+              "positives": [
+                "pe_discount_to_industry"
+              ],
+              "valuation_flags": [],
+              "valuation_score": 68,
+              "grade": "fair"
+            },
+            "score": {
+              "score": 75.1,
+              "components": {
+                "financial_quality": 82,
+                "valuation": 68,
+                "narrative": 72.0
+              },
+              "weights": {
+                "financial_quality": 0.45,
+                "valuation": 0.35,
+                "narrative": 0.2
+              },
+              "risk_penalty": 0,
+              "grade": "watchlist"
+            }
+          },
+          "missing_sections": [],
+          "research_complete": true,
+          "decision_allowed": false
+        },
+        "_returncode": 0
+      }
+    },
+    {
+      "name": "research composes paper trade plan with invalidation boundaries",
+      "ok": true,
+      "detail": {
+        "package": "trade-planning",
+        "command": "full-investment-plan",
+        "payload": {
+          "themesurfer_status": "FULL",
+          "risk_level": "green",
+          "themes": [
+            {
+              "name": "AI算力",
+              "strength": 0.82
+            }
+          ],
+          "candidates": [
+            {
+              "name": "中科曙光",
+              "code": "603019",
+              "theme": "AI算力",
+              "net_yi": 8.5,
+              "news_hits": 4,
+              "research_hits": 2,
+              "score": 87.25,
+              "score_breakdown": {
+                "capital": 85.0,
+                "theme_match": 100,
+                "info": 100.0,
+                "sentiment": 62.5,
+                "risk_penalty": 0
+              }
+            }
+          ],
+          "technical": {
+            "price": 45,
+            "ma20": 42,
+            "ma60": 39,
+            "support": 40,
+            "resistance": 52,
+            "rsi": 58
+          }
+        },
+        "as_of": "2026-06-05T07:27:52.436708+00:00",
+        "freshness": {
+          "status": "current",
+          "as_of": "2026-06-05T07:27:52.436708+00:00",
+          "policy": "trade-planning freshness is inherited from supplied candidates, technical inputs, and latest prewarm artifact"
+        },
+        "ok": true,
+        "decision_allowed": false,
+        "max_action_level": "paper_plan_only",
+        "requires_human_confirmation": true,
+        "source": [],
+        "sources": [
+          "/tmp/aegis-alpha-closed-loop-smoke/memory/prewarm/nightly-prewarm-2026-06-04.json",
+          "payload.candidates",
+          "payload.themes"
+        ],
+        "artifacts": [],
+        "warnings": [],
+        "errors": [],
+        "missing_critical_inputs": [],
+        "result": {
+          "plan_complete": true,
+          "missing_sections": [],
+          "sections": {
+            "short_term": {
+              "themesurfer_status": "FULL",
+              "allow_new_positions": true,
+              "risk_level": "green",
+              "risk_reason": "payload risk level",
+              "position_cap": 0.6,
+              "single_position_cap": 0.1,
+              "candidates": [
+                {
+                  "name": "中科曙光",
+                  "code": "603019",
+                  "theme": "AI算力",
+                  "net_yi": 8.5,
+                  "news_hits": 4,
+                  "research_hits": 2,
+                  "score": 47.0,
+                  "score_breakdown": {
+                    "event": 66.67,
+                    "trend": 0.0,
+                    "heat": 85.0,
+                    "sentiment": 50.0,
+                    "risk_penalty": 0
+                  }
+                }
+              ],
+              "score_schema": {
+                "event": 0.3,
+                "trend": 0.3,
+                "heat": 0.2,
+                "sentiment": 0.2,
+                "risk_penalty": "depends on risk_level"
+              },
+              "note": "paper plan only; human confirmation required"
+            },
+            "themes": {
+              "themes": [
+                {
+                  "name": "AI算力",
+                  "strength": 0.82
+                }
+              ],
+              "count": 1
+            },
+            "targets": {
+              "theme_targets": [
+                {
+                  "theme": "AI算力",
+                  "targets": [
+                    {
+                      "name": "中科曙光",
+                      "code": "603019",
+                      "theme": "AI算力",
+                      "net_yi": 8.5,
+                      "news_hits": 4,
+                      "research_hits": 2,
+                      "score": 87.25,
+                      "score_breakdown": {
+                        "capital": 85.0,
+                        "theme_match": 100,
+                        "info": 100.0,
+                        "sentiment": 62.5,
+                        "risk_penalty": 0
+                      }
+                    }
+                  ]
+                }
+              ],
+              "theme_count": 1
+            },
+            "strategy": {
+              "strategy": "pilot_then_scale",
+              "rules": [
+                "Start with pilot size only after human confirmation.",
+                "Scale only after thesis confirmation and market filter remains FULL.",
+                "Cut exposure when invalidation trigger is hit."
+              ],
+              "risk_level": "green",
+              "themesurfer_status": "FULL",
+              "position_cap": 0.6,
+              "single_position_cap": 0.1,
+              "top_candidates": [
+                {
+                  "name": "中科曙光",
+                  "code": "603019",
+                  "theme": "AI算力",
+                  "net_yi": 8.5,
+                  "news_hits": 4,
+                  "research_hits": 2,
+                  "score": 47.0,
+                  "score_breakdown": {
+                    "event": 66.67,
+                    "trend": 0.0,
+                    "heat": 85.0,
+                    "sentiment": 50.0,
+                    "risk_penalty": 0
+                  }
+                }
+              ]
+            },
+            "technical": {
+              "trend": "uptrend",
+              "flags": [],
+              "entry_zone": [
+                44.1,
+                45.45
+              ],
+              "stop_loss_reference": 40.0,
+              "take_profit_reference": 52.0,
+              "invalid_if": [
+                "price closes below stop_loss_reference",
+                "market filter enters LOCKOUT"
+              ]
+            }
+          },
+          "execution_policy": {
+            "decision_allowed": false,
+            "requires_human_confirmation": true,
+            "max_action_level": "paper_plan_only"
+          }
+        },
+        "_returncode": 0
+      }
+    },
+    {
+      "name": "portfolio risk check enters loop",
+      "ok": true,
+      "detail": {
+        "ok": true,
+        "package": "portfolio-ops",
+        "command": "portfolio-risk-check",
+        "payload": {
+          "max_single_position_pct": 0.4
+        },
+        "as_of": "2026-06-05T07:27:52.572321+00:00",
+        "freshness": {
+          "status": "delegated"
+        },
+        "decision_allowed": false,
+        "requires_human_confirmation": true,
+        "max_action_level": "analysis_only",
+        "source": "position-ops::portfolio-risk-check",
+        "sources": [
+          "position-ops::portfolio-risk-check"
+        ],
+        "artifacts": [],
+        "warnings": [
+          "risk_check_uses_cost_value_when_current_price_missing"
+        ],
+        "errors": [],
+        "missing_critical_inputs": [],
+        "result": {
+          "delegated": {
+            "package": "position-ops",
+            "command": "portfolio-risk-check",
+            "payload": {
+              "max_single_position_pct": 0.4
+            },
+            "ok": true,
+            "decision_allowed": false,
+            "max_action_level": "analysis_only",
+            "sources": [
+              "/tmp/aegis-alpha-closed-loop-smoke/memory/positions.json"
+            ],
+            "warnings": [
+              "risk_check_uses_cost_value_when_current_price_missing"
+            ],
+            "errors": [],
+            "result": {
+              "portfolio_state_known": true,
+              "position_count": 1,
+              "total_value_estimate": 4500.0,
+              "max_single_position_pct": 0.4,
+              "positions": [
+                {
+                  "code": "603019",
+                  "name": "中科曙光",
+                  "value": 4500.0,
+                  "value_mode": "cost_value",
+                  "weight": 1.0
+                }
+              ],
+              "risk_flags": [
+                {
+                  "code": "603019",
+                  "risk": "single_position_concentration",
+                  "weight": 1.0,
+                  "limit": 0.4
+                }
+              ],
+              "risk_flag_count": 1
+            }
+          }
+        },
+        "_returncode": 0
+      }
+    },
+    {
+      "name": "paper advice is recorded with lifecycle controls",
+      "ok": true,
+      "detail": {
+        "package": "advice-lifecycle",
+        "command": "investment-advice",
+        "payload": {
+          "recommendations": [
+            {
+              "id": "closed-loop-603019",
+              "code": "603019",
+              "name": "中科曙光",
+              "theme": "AI算力",
+              "thesis": "仅作研究跟踪，等待人工确认和风险预算复核。",
+              "entry_price": 45,
+              "valid_until": "2026-07-04",
+              "invalidation": "AI算力景气或订单验证不及预期"
+            }
+          ]
+        },
+        "as_of": "2026-06-05T07:27:52Z",
+        "freshness": {
+          "status": "current",
+          "as_of": "2026-06-05T07:27:52Z",
+          "policy": "workspace ledger and supplied payload are current only at command runtime; market freshness is inherited from source artifacts."
+        },
+        "ok": true,
+        "decision_allowed": false,
+        "requires_human_confirmation": true,
+        "max_action_level": "research_only",
+        "source": [
+          "payload.recommendations"
+        ],
+        "sources": [
+          "payload.recommendations"
+        ],
+        "artifacts": [
+          "/tmp/aegis-alpha-closed-loop-smoke/memory/advice/advice-ledger.json"
+        ],
+        "warnings": [],
+        "errors": [],
+        "missing_critical_inputs": [],
+        "result": {
+          "created": [
+            {
+              "id": "closed-loop-603019",
+              "created_at": "2026-06-05T07:27:52Z",
+              "updated_at": "2026-06-05T07:27:52Z",
+              "status": "active",
+              "code": "603019",
+              "name": "中科曙光",
+              "theme": "AI算力",
+              "thesis": "仅作研究跟踪，等待人工确认和风险预算复核。",
+              "action_label": "research_watch",
+              "entry_price": 45.0,
+              "current_price": 45.0,
+              "valid_until": "2026-07-04",
+              "invalidation": "AI算力景气或订单验证不及预期",
+              "evidence": [],
+              "paper_only": true,
+              "decision_allowed": false,
+              "requires_human_confirmation": true,
+              "history": [
+                {
+                  "at": "2026-06-05T07:27:52Z",
+                  "event": "created",
+                  "note": "recorded from explicit payload"
+                }
+              ]
+            }
+          ],
+          "created_count": 1,
+          "ledger_count": 1,
+          "ledger_path": "/tmp/aegis-alpha-closed-loop-smoke/memory/advice/advice-ledger.json"
+        },
+        "_returncode": 0
+      }
+    },
+    {
+      "name": "report evidence capture and outcome alignment create review artifacts",
+      "ok": true,
+      "detail": {
+        "capture": {
+          "package": "report-evolution",
+          "command": "capture-report-evidence",
+          "payload": {
+            "pipeline_id": "nightly",
+            "snapshot_version": 1
+          },
+          "as_of": "2026-06-05T07:27:52.825335+00:00",
+          "freshness": {
+            "status": "current",
+            "as_of": "2026-06-05T07:27:52.825335+00:00",
+            "policy": "report evolution artifacts are derived from current workspace report, pipeline, and evidence artifacts"
+          },
+          "ok": true,
+          "decision_allowed": false,
+          "requires_human_confirmation": true,
+          "max_action_level": "report_review_only",
+          "source": [
+            "/tmp/aegis-alpha-closed-loop-smoke/memory/report_evidence/nightly/nightly-20260604-210000-td2026-06-05-cn-a-share-sv1"
+          ],
+          "sources": [
+            "/tmp/aegis-alpha-closed-loop-smoke/memory/report_evidence/nightly/nightly-20260604-210000-td2026-06-05-cn-a-share-sv1"
+          ],
+          "artifacts": [
+            "/tmp/aegis-alpha-closed-loop-smoke/memory/report_evidence/nightly/nightly-20260604-210000-td2026-06-05-cn-a-share-sv1"
+          ],
+          "warnings": [],
+          "errors": [],
+          "missing_critical_inputs": [],
+          "result": {
+            "ok": true,
+            "saved_to": "/tmp/aegis-alpha-closed-loop-smoke/memory/report_evidence/nightly/nightly-20260604-210000-td2026-06-05-cn-a-share-sv1",
+            "report_id": "nightly-20260604-210000-td2026-06-05-cn-a-share-sv1",
+            "idempotent": false
+          },
+          "_returncode": 0
+        },
+        "align": {
+          "package": "report-evolution",
+          "command": "align-report-outcome",
+          "payload": {
+            "pipeline_id": "nightly"
+          },
+          "as_of": "2026-06-05T07:27:52.914714+00:00",
+          "freshness": {
+            "status": "current",
+            "as_of": "2026-06-05T07:27:52.914714+00:00",
+            "policy": "report evolution artifacts are derived from current workspace report, pipeline, and evidence artifacts"
+          },
+          "ok": true,
+          "decision_allowed": false,
+          "requires_human_confirmation": true,
+          "max_action_level": "report_review_only",
+          "source": [
+            "/tmp/aegis-alpha-closed-loop-smoke/memory/evolution/logs/align-20260604-210000.json"
+          ],
+          "sources": [
+            "/tmp/aegis-alpha-closed-loop-smoke/memory/evolution/logs/align-20260604-210000.json"
+          ],
+          "artifacts": [
+            "/tmp/aegis-alpha-closed-loop-smoke/memory/evolution/logs/align-20260604-210000.json"
+          ],
+          "warnings": [],
+          "errors": [],
+          "missing_critical_inputs": [],
+          "result": {
+            "ok": true,
+            "saved_to": "/tmp/aegis-alpha-closed-loop-smoke/memory/evolution/logs/align-20260604-210000.json",
+            "report_id": "nightly-20260604-210000-td2026-06-05-cn-a-share-sv1",
+            "version_id": "evo-20260604-210000-nightly-sv1"
+          },
+          "_returncode": 0
+        }
+      }
+    }
+  ],
+  "failed": []
+}

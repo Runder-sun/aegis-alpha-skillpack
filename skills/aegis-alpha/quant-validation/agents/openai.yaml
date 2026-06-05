@@ -1,0 +1,3 @@
+display_name: Quant Validation
+short_description: Backtesting, parameter optimization, and strategy validation.
+default_prompt: Use `quant-validation` commands to complete this task.

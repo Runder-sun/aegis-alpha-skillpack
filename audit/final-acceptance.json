@@ -1,0 +1,275 @@
+{
+  "ok": true,
+  "source": "/root/hermes-agent/aegis-alpha-skillpack/skills/aegis-alpha",
+  "audit_dir": "/root/hermes-agent/aegis-alpha-skillpack/audit",
+  "checked_at": null,
+  "summary": {
+    "checks": 15,
+    "failures": 0,
+    "public_skill_count": 15,
+    "internal_skill_count": 16,
+    "public_command_count": 116,
+    "pipeline_steps": 57,
+    "smoke_checks": 57,
+    "closed_loop_checks": 8
+  },
+  "checks": [
+    {
+      "category": "surface",
+      "name": "public surface is no more than declared limit",
+      "passed": true,
+      "evidence": {
+        "public_count": 15,
+        "limit": 15,
+        "surface_report": 15
+      }
+    },
+    {
+      "category": "surface",
+      "name": "internal adapters are hidden from default discovery",
+      "passed": true,
+      "evidence": {
+        "ok": true,
+        "public_limit": 15,
+        "public_count_listed": 15,
+        "listed_public": [
+          "advice-lifecycle",
+          "equity-research",
+          "equity-screening",
+          "execution-automation",
+          "information-retrieval",
+          "macro-regime",
+          "market-data",
+          "market-intel",
+          "pipeline",
+          "portfolio-ops",
+          "quality-gate",
+          "quant-validation",
+          "report-evolution",
+          "theme-cycle",
+          "trade-planning"
+        ],
+        "missing_public": [],
+        "missing_internal": [],
+        "undeclared_visible": [],
+        "public_marked_internal": [],
+        "internal_not_marked": []
+      }
+    },
+    {
+      "category": "surface",
+      "name": "surface map declares public and internal layers",
+      "passed": true,
+      "evidence": {
+        "public_skills": [
+          "information-retrieval",
+          "market-data",
+          "market-intel",
+          "macro-regime",
+          "theme-cycle",
+          "equity-screening",
+          "equity-research",
+          "trade-planning",
+          "portfolio-ops",
+          "advice-lifecycle",
+          "pipeline",
+          "quality-gate",
+          "quant-validation",
+          "report-evolution",
+          "execution-automation"
+        ],
+        "internal_count": 16
+      }
+    },
+    {
+      "category": "implementation",
+      "name": "all public commands are implemented",
+      "passed": true,
+      "evidence": []
+    },
+    {
+      "category": "implementation",
+      "name": "no stub or partial commands remain in manifests",
+      "passed": true,
+      "evidence": {
+        "implemented": 217
+      }
+    },
+    {
+      "category": "contract",
+      "name": "public manifest contract gate passes",
+      "passed": true,
+      "evidence": {
+        "ok": true,
+        "public_skill_count": 15,
+        "checked_commands": 116,
+        "failure_count": 0,
+        "failures": []
+      }
+    },
+    {
+      "category": "contract",
+      "name": "public contract docs include required provenance and safety fields",
+      "passed": true,
+      "evidence": {}
+    },
+    {
+      "category": "contract",
+      "name": "public contract docs do not describe missing data as empty success",
+      "passed": true,
+      "evidence": {}
+    },
+    {
+      "category": "data_quality",
+      "name": "package-level data quality policy documents freshness, units, frequency, adjustment basis, and provenance",
+      "passed": true,
+      "evidence": {
+        "missing_terms": []
+      }
+    },
+    {
+      "category": "safety",
+      "name": "surface safety policy is fail-closed and research-only",
+      "passed": true,
+      "evidence": {
+        "decision_allowed": false,
+        "requires_human_confirmation": true,
+        "fail_closed": true,
+        "no_silent_fallback": true,
+        "no_empty_success_for_missing_evidence": true
+      }
+    },
+    {
+      "category": "pipeline",
+      "name": "pipeline references resolve to implemented commands",
+      "passed": true,
+      "evidence": {
+        "ok": true,
+        "pipeline_count": 4,
+        "checked_steps": 57,
+        "push_steps": 4,
+        "push_default_policy": "pipeline-orchestrator skips *-push steps unless allow_push=true",
+        "failures": []
+      }
+    },
+    {
+      "category": "smoke",
+      "name": "critical smoke suite passes",
+      "passed": true,
+      "evidence": {
+        "ok": true,
+        "failed": []
+      }
+    },
+    {
+      "category": "smoke",
+      "name": "smoke suite covers multiple fail-closed scenarios",
+      "passed": true,
+      "evidence": {
+        "count": 17,
+        "failed": [],
+        "checks": [
+          {
+            "name": "portfolio-view fails closed when state is missing",
+            "ok": true
+          },
+          {
+            "name": "record-trade oversell fails closed",
+            "ok": true
+          },
+          {
+            "name": "position-sizing-advisor fails closed on missing inputs",
+            "ok": true
+          },
+          {
+            "name": "equity valuation-check fails closed without valuation metrics",
+            "ok": true
+          },
+          {
+            "name": "equity-screening stock-screening fails closed without candidates or prewarm",
+            "ok": true
+          },
+          {
+            "name": "equity-screening evidence collection fails closed without evidence source",
+            "ok": true
+          },
+          {
+            "name": "equity-screening stock-pool maintenance fails closed on corrupt pool",
+            "ok": true
+          },
+          {
+            "name": "trade short-term-analysis fails closed without candidates or prewarm",
+            "ok": true
+          },
+          {
+            "name": "theme-cycle themesurfer-check fails closed without market risk inputs",
+            "ok": true
+          },
+          {
+            "name": "market-intel sentiment index fails closed without snapshot inputs",
+            "ok": true
+          },
+          {
+            "name": "macro-regime query fails closed without snapshot inputs",
+            "ok": true
+          },
+          {
+            "name": "advice-lifecycle history fails closed without ledger",
+            "ok": true
+          },
+          {
+            "name": "execution-automation prewarm-status fails closed without artifact",
+            "ok": true
+          },
+          {
+            "name": "execution-automation push fails closed without explicit confirmation",
+            "ok": true
+          },
+          {
+            "name": "quant-validation strategy-backtest fails closed without history",
+            "ok": true
+          },
+          {
+            "name": "information-retrieval research-search fails closed without query",
+            "ok": true
+          },
+          {
+            "name": "weekly-stock-pool fails closed without weekly artifacts",
+            "ok": true
+          }
+        ]
+      }
+    },
+    {
+      "category": "closed_loop",
+      "name": "investment closed-loop smoke passes",
+      "passed": true,
+      "evidence": {
+        "ok": true,
+        "failed": [],
+        "artifacts": {
+          "advice_ledger": "/tmp/aegis-alpha-closed-loop-smoke/memory/advice/advice-ledger.json",
+          "report": "/tmp/aegis-alpha-closed-loop-smoke/memory/reports/nightly-report-20260604-210000.md",
+          "capture": "/tmp/aegis-alpha-closed-loop-smoke/memory/report_evidence/nightly/nightly-20260604-210000-td2026-06-05-cn-a-share-sv1",
+          "alignment": "/tmp/aegis-alpha-closed-loop-smoke/memory/evolution/logs/align-20260604-210000.json"
+        }
+      }
+    },
+    {
+      "category": "closed_loop",
+      "name": "closed-loop smoke covers regime, theme, screening, research, trade plan, risk, advice, and report review",
+      "passed": true,
+      "evidence": {
+        "regime": true,
+        "theme": true,
+        "screening": true,
+        "research": true,
+        "trade_plan": true,
+        "portfolio_risk": true,
+        "advice_lifecycle": true,
+        "report_review": true
+      }
+    }
+  ],
+  "failures": []
+}

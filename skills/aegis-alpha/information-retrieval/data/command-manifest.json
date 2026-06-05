@@ -1,0 +1,311 @@
+{
+  "package": "information-retrieval",
+  "description": "Public research intake facade for search, URL extraction, document parsing, and local research history.",
+  "safety_policy": {
+    "decision_allowed": false,
+    "requires_human_confirmation": true,
+    "max_action_level": "research_only",
+    "fail_closed": true
+  },
+  "commands": [
+    {
+      "name": "research-search",
+      "description": "Search for one or more queries and optionally extract references.",
+      "status": "implemented",
+      "routes_to": "search-layer::search",
+      "payload_schema": {
+        "$ref": "#/$defs/search_payload"
+      },
+      "result_schema": {
+        "$ref": "#/$defs/facade_result"
+      },
+      "example": {
+        "query": "A股 半导体 政策 研报",
+        "mode": "deep",
+        "extract_refs": true
+      },
+      "upstream_dependencies": [
+        "public facade route",
+        "explicit query/url/path payload"
+      ],
+      "freshness_policy": "Freshness is delegated to the routed retrieval adapter and preserved in delegated result fields when available.",
+      "error_behavior": [
+        "delegate_failed",
+        "dispatch_not_found",
+        "query_or_queries_required",
+        "url_required",
+        "document_source_required"
+      ]
+    },
+    {
+      "name": "fetch-content",
+      "description": "Fetch and normalize an explicit URL.",
+      "status": "implemented",
+      "routes_to": "research-tools::web-content-fetch",
+      "payload_schema": {
+        "$ref": "#/$defs/url_payload"
+      },
+      "result_schema": {
+        "$ref": "#/$defs/facade_result"
+      },
+      "example": {
+        "url": "https://example.com/report"
+      },
+      "upstream_dependencies": [
+        "public facade route",
+        "explicit query/url/path payload"
+      ],
+      "freshness_policy": "Freshness is delegated to the routed retrieval adapter and preserved in delegated result fields when available.",
+      "error_behavior": [
+        "delegate_failed",
+        "dispatch_not_found",
+        "query_or_queries_required",
+        "url_required",
+        "document_source_required"
+      ]
+    },
+    {
+      "name": "parse-document",
+      "description": "Parse explicit documents or URLs through the high-fidelity parser.",
+      "status": "implemented",
+      "routes_to": "mineru-extract::parse-documents",
+      "payload_schema": {
+        "$ref": "#/$defs/document_payload"
+      },
+      "result_schema": {
+        "$ref": "#/$defs/facade_result"
+      },
+      "example": {
+        "paths": [
+          "/tmp/report.pdf"
+        ]
+      },
+      "upstream_dependencies": [
+        "public facade route",
+        "explicit query/url/path payload"
+      ],
+      "freshness_policy": "Freshness is delegated to the routed retrieval adapter and preserved in delegated result fields when available.",
+      "error_behavior": [
+        "delegate_failed",
+        "dispatch_not_found",
+        "query_or_queries_required",
+        "url_required",
+        "document_source_required"
+      ]
+    },
+    {
+      "name": "research-history",
+      "description": "List local research artifacts and prior pipeline/report context.",
+      "status": "implemented",
+      "routes_to": "research-tools::analysis-history",
+      "payload_schema": {
+        "$ref": "#/$defs/history_payload"
+      },
+      "result_schema": {
+        "$ref": "#/$defs/facade_result"
+      },
+      "example": {
+        "limit": 10
+      },
+      "upstream_dependencies": [
+        "public facade route",
+        "explicit query/url/path payload"
+      ],
+      "freshness_policy": "Freshness is delegated to the routed retrieval adapter and preserved in delegated result fields when available.",
+      "error_behavior": [
+        "delegate_failed",
+        "dispatch_not_found",
+        "query_or_queries_required",
+        "url_required",
+        "document_source_required"
+      ]
+    },
+    {
+      "name": "set-research-preference",
+      "description": "Persist a local research preference.",
+      "status": "implemented",
+      "routes_to": "research-tools::set-preference",
+      "payload_schema": {
+        "$ref": "#/$defs/preference_payload"
+      },
+      "result_schema": {
+        "$ref": "#/$defs/facade_result"
+      },
+      "example": {
+        "key": "preferred_sources",
+        "value": [
+          "official",
+          "exchange",
+          "company"
+        ]
+      },
+      "upstream_dependencies": [
+        "public facade route",
+        "explicit query/url/path payload"
+      ],
+      "freshness_policy": "Freshness is delegated to the routed retrieval adapter and preserved in delegated result fields when available.",
+      "error_behavior": [
+        "delegate_failed",
+        "dispatch_not_found",
+        "query_or_queries_required",
+        "url_required",
+        "document_source_required"
+      ]
+    }
+  ],
+  "$defs": {
+    "search_payload": {
+      "type": "object",
+      "properties": {
+        "query": {
+          "type": "string"
+        },
+        "queries": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "mode": {
+          "type": "string"
+        },
+        "intent": {
+          "type": "string"
+        },
+        "freshness": {
+          "type": "string"
+        },
+        "extract_refs": {
+          "type": "boolean"
+        }
+      }
+    },
+    "url_payload": {
+      "type": "object",
+      "required": [
+        "url"
+      ],
+      "properties": {
+        "url": {
+          "type": "string"
+        }
+      }
+    },
+    "document_payload": {
+      "type": "object",
+      "properties": {
+        "paths": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "urls": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "url": {
+          "type": "string"
+        }
+      }
+    },
+    "history_payload": {
+      "type": "object",
+      "properties": {
+        "limit": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100
+        }
+      }
+    },
+    "preference_payload": {
+      "type": "object",
+      "required": [
+        "key"
+      ],
+      "properties": {
+        "key": {
+          "type": "string"
+        },
+        "value": {}
+      }
+    },
+    "facade_result": {
+      "type": "object",
+      "required": [
+        "as_of",
+        "decision_allowed",
+        "errors",
+        "max_action_level",
+        "missing_critical_inputs",
+        "ok",
+        "requires_human_confirmation",
+        "result",
+        "sources",
+        "warnings"
+      ],
+      "properties": {
+        "ok": {
+          "type": "boolean"
+        },
+        "decision_allowed": {
+          "type": "boolean",
+          "const": false
+        },
+        "requires_human_confirmation": {
+          "type": "boolean",
+          "const": true
+        },
+        "max_action_level": {
+          "type": "string",
+          "const": "research_only"
+        },
+        "as_of": {
+          "type": "string"
+        },
+        "freshness": {
+          "type": "object"
+        },
+        "source": {
+          "type": "string"
+        },
+        "sources": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "artifacts": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "warnings": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "errors": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "missing_critical_inputs": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "result": {
+          "type": "object"
+        }
+      }
+    }
+  }
+}

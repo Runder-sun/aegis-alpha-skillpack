@@ -1,0 +1,3 @@
+display_name: Portfolio Management
+short_description: Portfolio state management and trade record operations.
+default_prompt: Use `portfolio-management` commands to complete this task.

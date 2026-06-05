@@ -1,0 +1,97 @@
+{
+  "package": "search-layer",
+  "description": "Research-only information retrieval layer for multi-source search, reference extraction, and thread fetching.",
+  "safety_policy": {
+    "decision_allowed": false,
+    "requires_human_confirmation": true,
+    "max_action_level": "research_only",
+    "fail_closed": true,
+    "no_empty_success": true
+  },
+  "commands": [
+    {
+      "name": "search",
+      "description": "Run configured multi-source search for one or more queries; missing query or provider output fails closed.",
+      "status": "implemented",
+      "legacy_functions": [],
+      "payload_schema": {"$ref": "#/$defs/search_payload"},
+      "result_schema": {"$ref": "#/$defs/search_result"},
+      "example": {"query": "OpenClaw latest config bug", "mode": "deep", "intent": "status", "freshness": "pw"},
+      "freshness_policy": "Freshness is controlled by payload freshness and provider metadata; no result means unavailable evidence."
+    },
+    {
+      "name": "extract-refs",
+      "description": "Extract structured references from explicit URLs.",
+      "status": "implemented",
+      "legacy_functions": [],
+      "payload_schema": {"$ref": "#/$defs/extract_refs_payload"},
+      "result_schema": {"$ref": "#/$defs/search_result"},
+      "example": {"urls": ["https://example.com/article"]},
+      "freshness_policy": "Only explicit URLs are processed; missing URLs fail closed."
+    },
+    {
+      "name": "fetch-thread",
+      "description": "Fetch a GitHub/Reddit/HN/V2EX/web thread and return content, comments, and references.",
+      "status": "implemented",
+      "legacy_functions": [],
+      "payload_schema": {"$ref": "#/$defs/fetch_thread_payload"},
+      "result_schema": {"$ref": "#/$defs/search_result"},
+      "example": {"url": "https://github.com/openai/openai-python/issues/1", "format": "json", "max_comments": 20},
+      "freshness_policy": "Thread freshness follows fetched metadata; network/API failure is explicit."
+    }
+  ],
+  "$defs": {
+    "search_payload": {
+      "type": "object",
+      "properties": {
+        "query": {"type": "string"},
+        "queries": {"type": "array", "items": {"type": "string"}},
+        "mode": {"type": "string", "enum": ["fast", "deep", "answer"], "default": "deep"},
+        "intent": {"type": "string", "enum": ["factual", "status", "comparison", "tutorial", "exploratory", "news", "resource"]},
+        "freshness": {"type": "string", "enum": ["pd", "pw", "pm", "py"]},
+        "num": {"type": "integer", "minimum": 1, "maximum": 20},
+        "domain_boost": {"type": "array", "items": {"type": "string"}},
+        "source": {"type": "array", "items": {"type": "string"}},
+        "extract_refs": {"type": "boolean", "default": false},
+        "extract_refs_urls": {"type": "array", "items": {"type": "string"}}
+      }
+    },
+    "extract_refs_payload": {
+      "type": "object",
+      "required": ["urls"],
+      "properties": {
+        "urls": {"type": "array", "items": {"type": "string"}},
+        "intent": {"type": "string"}
+      }
+    },
+    "fetch_thread_payload": {
+      "type": "object",
+      "required": ["url"],
+      "properties": {
+        "url": {"type": "string"},
+        "max_comments": {"type": "integer", "minimum": 0, "maximum": 500},
+        "extract_refs_only": {"type": "boolean", "default": false},
+        "format": {"type": "string", "enum": ["json", "markdown"], "default": "json"}
+      }
+    },
+    "search_result": {
+      "type": "object",
+      "required": ["ok", "decision_allowed", "requires_human_confirmation", "max_action_level", "as_of", "freshness", "source", "warnings", "errors", "missing_critical_inputs", "result"],
+      "properties": {
+        "ok": {"type": "boolean"},
+        "decision_allowed": {"type": "boolean", "const": false},
+        "requires_human_confirmation": {"type": "boolean", "const": true},
+        "max_action_level": {"type": "string", "const": "research_only"},
+        "as_of": {"type": "string"},
+        "freshness": {"type": "object"},
+        "source": {"type": "array", "items": {"type": "string"}},
+        "sources": {"type": "array", "items": {"type": "string"}},
+        "artifacts": {"type": "array", "items": {"type": "string"}},
+        "warnings": {"type": "array", "items": {"type": "string"}},
+        "errors": {"type": "array", "items": {"type": "string"}},
+        "missing_critical_inputs": {"type": "array"},
+        "result": {"type": "object"}
+      }
+    }
+  }
+}

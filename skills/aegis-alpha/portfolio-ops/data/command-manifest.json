@@ -1,0 +1,383 @@
+{
+  "package": "portfolio-ops",
+  "description": "Public portfolio operations facade for holdings, trade records, risk checks, and position sizing.",
+  "safety_policy": {
+    "decision_allowed": false,
+    "requires_human_confirmation": true,
+    "max_action_level": "analysis_only",
+    "fail_closed": true,
+    "no_empty_success": true
+  },
+  "commands": [
+    {
+      "name": "portfolio-add",
+      "description": "Record a position in local portfolio state.",
+      "status": "implemented",
+      "routes_to": "portfolio-management::portfolio-add",
+      "payload_schema": {
+        "$ref": "#/$defs/position_payload"
+      },
+      "result_schema": {
+        "$ref": "#/$defs/facade_result"
+      },
+      "example": {
+        "code": "600519",
+        "name": "贵州茅台",
+        "quantity": 10,
+        "price": 1500
+      },
+      "upstream_dependencies": [
+        "portfolio-management facade route",
+        "position-ops facade route",
+        "memory/positions.json"
+      ],
+      "freshness_policy": "Portfolio freshness is delegated to state files and explicit trade/risk payloads; missing state fails closed.",
+      "error_behavior": [
+        "portfolio_state_missing",
+        "sell_quantity_exceeds_position",
+        "missing_required_input",
+        "dispatch_not_found"
+      ]
+    },
+    {
+      "name": "portfolio-remove",
+      "description": "Remove or reduce a position.",
+      "status": "implemented",
+      "routes_to": "portfolio-management::portfolio-remove",
+      "payload_schema": {
+        "$ref": "#/$defs/position_payload"
+      },
+      "result_schema": {
+        "$ref": "#/$defs/facade_result"
+      },
+      "example": {
+        "code": "600519",
+        "quantity": 5
+      },
+      "upstream_dependencies": [
+        "portfolio-management facade route",
+        "position-ops facade route",
+        "memory/positions.json"
+      ],
+      "freshness_policy": "Portfolio freshness is delegated to state files and explicit trade/risk payloads; missing state fails closed.",
+      "error_behavior": [
+        "portfolio_state_missing",
+        "sell_quantity_exceeds_position",
+        "missing_required_input",
+        "dispatch_not_found"
+      ]
+    },
+    {
+      "name": "portfolio-view",
+      "description": "Read known portfolio state.",
+      "status": "implemented",
+      "routes_to": "portfolio-management::portfolio-view",
+      "payload_schema": {
+        "type": "object"
+      },
+      "result_schema": {
+        "$ref": "#/$defs/facade_result"
+      },
+      "example": {},
+      "upstream_dependencies": [
+        "portfolio-management facade route",
+        "position-ops facade route",
+        "memory/positions.json"
+      ],
+      "freshness_policy": "Portfolio freshness is delegated to state files and explicit trade/risk payloads; missing state fails closed.",
+      "error_behavior": [
+        "portfolio_state_missing",
+        "sell_quantity_exceeds_position",
+        "missing_required_input",
+        "dispatch_not_found"
+      ]
+    },
+    {
+      "name": "portfolio-report",
+      "description": "Summarize holdings.",
+      "status": "implemented",
+      "routes_to": "portfolio-management::portfolio-report",
+      "payload_schema": {
+        "type": "object"
+      },
+      "result_schema": {
+        "$ref": "#/$defs/facade_result"
+      },
+      "example": {},
+      "upstream_dependencies": [
+        "portfolio-management facade route",
+        "position-ops facade route",
+        "memory/positions.json"
+      ],
+      "freshness_policy": "Portfolio freshness is delegated to state files and explicit trade/risk payloads; missing state fails closed.",
+      "error_behavior": [
+        "portfolio_state_missing",
+        "sell_quantity_exceeds_position",
+        "missing_required_input",
+        "dispatch_not_found"
+      ]
+    },
+    {
+      "name": "record-trade",
+      "description": "Append an explicit trade record and update known state.",
+      "status": "implemented",
+      "routes_to": "portfolio-management::record-trade",
+      "payload_schema": {
+        "$ref": "#/$defs/trade_payload"
+      },
+      "result_schema": {
+        "$ref": "#/$defs/facade_result"
+      },
+      "example": {
+        "code": "600519",
+        "side": "sell",
+        "quantity": 1,
+        "price": 1600
+      },
+      "upstream_dependencies": [
+        "portfolio-management facade route",
+        "position-ops facade route",
+        "memory/positions.json"
+      ],
+      "freshness_policy": "Portfolio freshness is delegated to state files and explicit trade/risk payloads; missing state fails closed.",
+      "error_behavior": [
+        "portfolio_state_missing",
+        "sell_quantity_exceeds_position",
+        "missing_required_input",
+        "dispatch_not_found"
+      ]
+    },
+    {
+      "name": "portfolio-risk-check",
+      "description": "Run research-only portfolio risk checks.",
+      "status": "implemented",
+      "routes_to": "position-ops::portfolio-risk-check",
+      "payload_schema": {
+        "$ref": "#/$defs/risk_payload"
+      },
+      "result_schema": {
+        "$ref": "#/$defs/facade_result"
+      },
+      "example": {
+        "max_single_position_pct": 0.3
+      },
+      "upstream_dependencies": [
+        "portfolio-management facade route",
+        "position-ops facade route",
+        "memory/positions.json"
+      ],
+      "freshness_policy": "Portfolio freshness is delegated to state files and explicit trade/risk payloads; missing state fails closed.",
+      "error_behavior": [
+        "portfolio_state_missing",
+        "sell_quantity_exceeds_position",
+        "missing_required_input",
+        "dispatch_not_found"
+      ]
+    },
+    {
+      "name": "position-sizing-advisor",
+      "description": "Produce paper-only sizing guidance from explicit risk inputs.",
+      "status": "implemented",
+      "routes_to": "position-ops::position-sizing-advisor",
+      "payload_schema": {
+        "$ref": "#/$defs/sizing_payload"
+      },
+      "result_schema": {
+        "$ref": "#/$defs/facade_result"
+      },
+      "example": {
+        "portfolio_value": 100000,
+        "risk_per_trade_pct": 0.01,
+        "entry_price": 10,
+        "stop_price": 9
+      },
+      "upstream_dependencies": [
+        "portfolio-management facade route",
+        "position-ops facade route",
+        "memory/positions.json"
+      ],
+      "freshness_policy": "Portfolio freshness is delegated to state files and explicit trade/risk payloads; missing state fails closed.",
+      "error_behavior": [
+        "portfolio_state_missing",
+        "sell_quantity_exceeds_position",
+        "missing_required_input",
+        "dispatch_not_found"
+      ]
+    },
+    {
+      "name": "position-management",
+      "description": "Read position state through the hardened position-management view.",
+      "status": "implemented",
+      "routes_to": "position-ops::position-management-v2",
+      "payload_schema": {
+        "type": "object"
+      },
+      "result_schema": {
+        "$ref": "#/$defs/facade_result"
+      },
+      "example": {},
+      "upstream_dependencies": [
+        "portfolio-management facade route",
+        "position-ops facade route",
+        "memory/positions.json"
+      ],
+      "freshness_policy": "Portfolio freshness is delegated to state files and explicit trade/risk payloads; missing state fails closed.",
+      "error_behavior": [
+        "portfolio_state_missing",
+        "sell_quantity_exceeds_position",
+        "missing_required_input",
+        "dispatch_not_found"
+      ]
+    }
+  ],
+  "$defs": {
+    "position_payload": {
+      "type": "object",
+      "required": [
+        "code"
+      ],
+      "properties": {
+        "code": {
+          "type": "string"
+        },
+        "symbol": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "quantity": {
+          "type": "number"
+        },
+        "price": {
+          "type": "number"
+        }
+      }
+    },
+    "trade_payload": {
+      "type": "object",
+      "required": [
+        "code",
+        "side",
+        "quantity",
+        "price"
+      ],
+      "properties": {
+        "code": {
+          "type": "string"
+        },
+        "side": {
+          "type": "string",
+          "enum": [
+            "buy",
+            "sell"
+          ]
+        },
+        "quantity": {
+          "type": "number"
+        },
+        "price": {
+          "type": "number"
+        }
+      }
+    },
+    "risk_payload": {
+      "type": "object",
+      "properties": {
+        "max_single_position_pct": {
+          "type": "number"
+        }
+      }
+    },
+    "sizing_payload": {
+      "type": "object",
+      "properties": {
+        "portfolio_value": {
+          "type": "number"
+        },
+        "risk_per_trade_pct": {
+          "type": "number"
+        },
+        "entry_price": {
+          "type": "number"
+        },
+        "stop_price": {
+          "type": "number"
+        }
+      }
+    },
+    "facade_result": {
+      "type": "object",
+      "required": [
+        "as_of",
+        "decision_allowed",
+        "errors",
+        "max_action_level",
+        "missing_critical_inputs",
+        "ok",
+        "requires_human_confirmation",
+        "result",
+        "sources",
+        "warnings"
+      ],
+      "properties": {
+        "ok": {
+          "type": "boolean"
+        },
+        "decision_allowed": {
+          "type": "boolean",
+          "const": false
+        },
+        "requires_human_confirmation": {
+          "type": "boolean",
+          "const": true
+        },
+        "max_action_level": {
+          "type": "string"
+        },
+        "as_of": {
+          "type": "string"
+        },
+        "freshness": {
+          "type": "object"
+        },
+        "source": {
+          "type": "string"
+        },
+        "sources": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "artifacts": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "warnings": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "errors": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "missing_critical_inputs": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "result": {
+          "type": "object"
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,3 @@
+display_name: Position Ops
+short_description: Position sizing and risk operations.
+default_prompt: Use `position-ops` commands to complete this task.

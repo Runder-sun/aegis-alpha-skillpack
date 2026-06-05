@@ -1,0 +1,3 @@
+display_name: Execution Automation
+short_description: Scheduled and real-time automation workflows.
+default_prompt: Use `execution-automation` commands to complete this task.

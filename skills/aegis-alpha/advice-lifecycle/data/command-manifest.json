@@ -1,0 +1,820 @@
+{
+  "package": "advice-lifecycle",
+  "description": "Paper-only advice recording, tracking, expiry review, and report prompt generation.",
+  "safety_model": {
+    "decision_allowed": false,
+    "requires_human_confirmation": true,
+    "max_action_level": "research_only",
+    "failure_policy": "fail_closed",
+    "fallback_policy": "No silent fallback for missing ledger, missing prices, stale source artifacts, or incomplete recommendation identity."
+  },
+  "commands": [
+    {
+      "name": "investment-advice",
+      "description": "Record explicit paper-only recommendation objects into the workspace advice ledger; this command does not infer or generate trade advice by itself.",
+      "status": "implemented",
+      "legacy_functions": [
+        "investment_advice"
+      ],
+      "upstream_dependencies": [
+        "explicit payload.recommendations"
+      ],
+      "freshness_policy": "Payload is current only at command runtime; source evidence freshness must be supplied inside each recommendation evidence item when material.",
+      "error_behavior": [
+        "recommendations_required",
+        "recommendation_identity_or_thesis_required",
+        "advice_ledger_invalid_json",
+        "advice_ledger_invalid_schema"
+      ],
+      "payload_schema": {
+        "$ref": "#/$defs/investment_advice_payload"
+      },
+      "result_schema": {
+        "$ref": "#/$defs/advice_command_result"
+      },
+      "examples": [
+        {
+          "payload": {
+            "recommendations": [
+              {
+                "id": "adv-600519",
+                "code": "600519",
+                "name": "贵州茅台",
+                "theme": "消费",
+                "thesis": "品牌壁垒强，仅作研究跟踪。",
+                "entry_price": 1500,
+                "valid_until": "2026-07-01",
+                "invalidation": "基本面恶化或估值假设失效"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "advice-history",
+      "description": "Read the workspace advice ledger, optionally filtering by status and limit.",
+      "status": "implemented",
+      "legacy_functions": [
+        "advice_history"
+      ],
+      "upstream_dependencies": [
+        "memory/advice/advice-ledger.json"
+      ],
+      "freshness_policy": "Ledger freshness is reported from command runtime and ledger updated_at.",
+      "error_behavior": [
+        "advice_ledger_missing",
+        "advice_ledger_invalid_json",
+        "advice_ledger_invalid_schema"
+      ],
+      "payload_schema": {
+        "$ref": "#/$defs/advice_history_payload"
+      },
+      "result_schema": {
+        "$ref": "#/$defs/advice_command_result"
+      },
+      "examples": [
+        {
+          "payload": {
+            "status": "active",
+            "limit": 20
+          }
+        }
+      ]
+    },
+    {
+      "name": "advice-update-prices",
+      "description": "Update current prices for existing advice rows using explicit prices supplied by id, code, or name.",
+      "status": "implemented",
+      "legacy_functions": [
+        "advice_update_prices"
+      ],
+      "upstream_dependencies": [
+        "memory/advice/advice-ledger.json",
+        "explicit payload.prices"
+      ],
+      "freshness_policy": "Price freshness is inherited from the explicit payload; no provider fallback is attempted.",
+      "error_behavior": [
+        "advice_ledger_missing",
+        "prices_required",
+        "no_matching_advice_for_prices"
+      ],
+      "payload_schema": {
+        "$ref": "#/$defs/advice_price_update_payload"
+      },
+      "result_schema": {
+        "$ref": "#/$defs/advice_command_result"
+      },
+      "examples": [
+        {
+          "payload": {
+            "prices": {
+              "adv-600519": 1650
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "update-daily-advice",
+      "description": "Apply explicit status and note updates to existing advice rows.",
+      "status": "implemented",
+      "legacy_functions": [
+        "update_daily_advice"
+      ],
+      "upstream_dependencies": [
+        "memory/advice/advice-ledger.json",
+        "explicit payload.updates"
+      ],
+      "freshness_policy": "Daily updates are current only at command runtime.",
+      "error_behavior": [
+        "advice_ledger_missing",
+        "updates_required",
+        "no_matching_advice_for_updates"
+      ],
+      "payload_schema": {
+        "$ref": "#/$defs/advice_daily_update_payload"
+      },
+      "result_schema": {
+        "$ref": "#/$defs/advice_command_result"
+      },
+      "examples": [
+        {
+          "payload": {
+            "updates": [
+              {
+                "id": "adv-600519",
+                "status": "watch",
+                "note": "估值假设待复核"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "advice-expire-check",
+      "description": "Detect active advice rows whose valid_until has expired; status changes require explicit apply=true.",
+      "status": "implemented",
+      "legacy_functions": [
+        "advice_expire_check"
+      ],
+      "upstream_dependencies": [
+        "memory/advice/advice-ledger.json"
+      ],
+      "freshness_policy": "Expiry is evaluated against command runtime UTC.",
+      "error_behavior": [
+        "advice_ledger_missing",
+        "advice_ledger_invalid_json",
+        "advice_ledger_invalid_schema"
+      ],
+      "payload_schema": {
+        "$ref": "#/$defs/advice_expire_payload"
+      },
+      "result_schema": {
+        "$ref": "#/$defs/advice_command_result"
+      },
+      "examples": [
+        {
+          "payload": {
+            "apply": false
+          }
+        }
+      ]
+    },
+    {
+      "name": "advice-track-report",
+      "description": "Build per-advice tracking rows with status, entry price, current price, return percentage, and expiry.",
+      "status": "implemented",
+      "legacy_functions": [
+        "advice_track_report"
+      ],
+      "upstream_dependencies": [
+        "memory/advice/advice-ledger.json"
+      ],
+      "freshness_policy": "Return freshness depends on the most recent explicit price update in the ledger.",
+      "error_behavior": [
+        "advice_ledger_missing",
+        "advice_ledger_invalid_json",
+        "advice_ledger_invalid_schema"
+      ],
+      "payload_schema": {
+        "type": "object",
+        "properties": {}
+      },
+      "result_schema": {
+        "$ref": "#/$defs/advice_command_result"
+      },
+      "examples": [
+        {
+          "payload": {}
+        }
+      ]
+    },
+    {
+      "name": "advice-track-stats",
+      "description": "Summarize advice tracking counts and priced return statistics from the ledger.",
+      "status": "implemented",
+      "legacy_functions": [
+        "advice_track_stats"
+      ],
+      "upstream_dependencies": [
+        "memory/advice/advice-ledger.json"
+      ],
+      "freshness_policy": "Return stats freshness depends on the most recent explicit price update in the ledger.",
+      "error_behavior": [
+        "advice_ledger_missing",
+        "advice_ledger_invalid_json",
+        "advice_ledger_invalid_schema"
+      ],
+      "payload_schema": {
+        "type": "object",
+        "properties": {}
+      },
+      "result_schema": {
+        "$ref": "#/$defs/advice_command_result"
+      },
+      "examples": [
+        {
+          "payload": {}
+        }
+      ]
+    },
+    {
+      "name": "nightly-strategy",
+      "description": "Build the nightly 7-section strategy prompt bundle from pipeline/prewarm/theme artifacts; optional LLM generation must remain evidence-bound.",
+      "status": "implemented",
+      "legacy_functions": [
+        "nightly_strategy"
+      ],
+      "upstream_dependencies": [
+        "memory/pipeline_runs",
+        "memory/prewarm",
+        "memory/themes.json"
+      ],
+      "freshness_policy": "Prompt data_zone reports data gaps; missing critical fields are surfaced as warnings and missing_critical_inputs.",
+      "error_behavior": [
+        "context_path_outside_workspace",
+        "payload_must_be_object"
+      ],
+      "payload_schema": {
+        "$ref": "#/$defs/report_payload"
+      },
+      "result_schema": {
+        "$ref": "#/$defs/report_prompt_result"
+      },
+      "examples": [
+        {
+          "payload": {
+            "enable_llm": false
+          }
+        }
+      ]
+    },
+    {
+      "name": "nightly-section",
+      "description": "Build one evidence-bound nightly report section prompt for section_id 1 through 7.",
+      "status": "implemented",
+      "legacy_functions": [
+        "nightly_section"
+      ],
+      "upstream_dependencies": [
+        "memory/pipeline_runs",
+        "memory/prewarm",
+        "memory/themes.json"
+      ],
+      "freshness_policy": "Prompt data_zone reports data gaps; missing critical fields are surfaced as warnings and missing_critical_inputs.",
+      "error_behavior": [
+        "section_id_required",
+        "context_path_outside_workspace",
+        "payload_must_be_object"
+      ],
+      "payload_schema": {
+        "$ref": "#/$defs/nightly_section_payload"
+      },
+      "result_schema": {
+        "$ref": "#/$defs/report_prompt_result"
+      },
+      "examples": [
+        {
+          "payload": {
+            "section_id": 3,
+            "enable_llm": false
+          }
+        }
+      ]
+    },
+    {
+      "name": "morning-briefing",
+      "description": "Build the morning briefing prompt bundle from current pipeline/prewarm/theme artifacts.",
+      "status": "implemented",
+      "legacy_functions": [
+        "morning_briefing"
+      ],
+      "upstream_dependencies": [
+        "memory/pipeline_runs",
+        "memory/prewarm",
+        "memory/themes.json"
+      ],
+      "freshness_policy": "Prompt data_zone reports data gaps; missing critical fields are surfaced as warnings and missing_critical_inputs.",
+      "error_behavior": [
+        "context_path_outside_workspace",
+        "payload_must_be_object"
+      ],
+      "payload_schema": {
+        "$ref": "#/$defs/report_payload"
+      },
+      "result_schema": {
+        "$ref": "#/$defs/report_prompt_result"
+      },
+      "examples": [
+        {
+          "payload": {}
+        }
+      ]
+    },
+    {
+      "name": "weekly-asset-report",
+      "description": "Build the weekly macro and asset allocation report prompt bundle from current artifacts.",
+      "status": "implemented",
+      "legacy_functions": [
+        "weekly_asset_report"
+      ],
+      "upstream_dependencies": [
+        "memory/pipeline_runs",
+        "memory/prewarm",
+        "memory/themes.json"
+      ],
+      "freshness_policy": "Prompt data_zone reports data gaps; missing critical fields are surfaced as warnings and missing_critical_inputs.",
+      "error_behavior": [
+        "context_path_outside_workspace",
+        "payload_must_be_object"
+      ],
+      "payload_schema": {
+        "$ref": "#/$defs/report_payload"
+      },
+      "result_schema": {
+        "$ref": "#/$defs/report_prompt_result"
+      },
+      "examples": [
+        {
+          "payload": {}
+        }
+      ]
+    },
+    {
+      "name": "market-review",
+      "description": "Build the post-market review prompt bundle from current market, intelligence, and pipeline artifacts.",
+      "status": "implemented",
+      "legacy_functions": [
+        "market_review"
+      ],
+      "upstream_dependencies": [
+        "memory/pipeline_runs",
+        "memory/prewarm",
+        "memory/themes.json"
+      ],
+      "freshness_policy": "Prompt data_zone reports data gaps; missing critical fields are surfaced as warnings and missing_critical_inputs.",
+      "error_behavior": [
+        "context_path_outside_workspace",
+        "payload_must_be_object"
+      ],
+      "payload_schema": {
+        "$ref": "#/$defs/report_payload"
+      },
+      "result_schema": {
+        "$ref": "#/$defs/report_prompt_result"
+      },
+      "examples": [
+        {
+          "payload": {}
+        }
+      ]
+    }
+  ],
+  "$defs": {
+    "advice_item": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "code": {
+          "type": "string"
+        },
+        "symbol": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "title": {
+          "type": "string"
+        },
+        "theme": {
+          "type": "string"
+        },
+        "thesis": {
+          "type": "string"
+        },
+        "reason": {
+          "type": "string"
+        },
+        "summary": {
+          "type": "string"
+        },
+        "action": {
+          "type": "string"
+        },
+        "stance": {
+          "type": "string"
+        },
+        "entry_price": {
+          "type": "number",
+          "minimum": 0
+        },
+        "price": {
+          "type": "number",
+          "minimum": 0
+        },
+        "current_price": {
+          "type": "number",
+          "minimum": 0
+        },
+        "valid_until": {
+          "type": "string"
+        },
+        "invalidation": {
+          "type": "string"
+        },
+        "stop_condition": {
+          "type": "string"
+        },
+        "evidence": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "status": {
+          "type": "string"
+        }
+      }
+    },
+    "investment_advice_payload": {
+      "type": "object",
+      "properties": {
+        "recommendations": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/advice_item"
+          }
+        },
+        "advices": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/advice_item"
+          }
+        },
+        "advice": {
+          "$ref": "#/$defs/advice_item"
+        },
+        "recommendation": {
+          "$ref": "#/$defs/advice_item"
+        }
+      }
+    },
+    "advice_history_payload": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string"
+        },
+        "limit": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 500,
+          "default": 50
+        }
+      }
+    },
+    "advice_price_update_payload": {
+      "type": "object",
+      "properties": {
+        "prices": {
+          "oneOf": [
+            {
+              "type": "object",
+              "additionalProperties": {
+                "type": "number"
+              }
+            },
+            {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "code": {
+                    "type": "string"
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "price": {
+                    "type": "number",
+                    "minimum": 0
+                  },
+                  "current_price": {
+                    "type": "number",
+                    "minimum": 0
+                  }
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    "advice_daily_update_payload": {
+      "type": "object",
+      "properties": {
+        "updates": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/advice_update"
+            },
+            {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/advice_update"
+              }
+            }
+          ]
+        }
+      }
+    },
+    "advice_update": {
+      "type": "object",
+      "required": [
+        "id"
+      ],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        },
+        "note": {
+          "type": "string"
+        }
+      }
+    },
+    "advice_expire_payload": {
+      "type": "object",
+      "properties": {
+        "apply": {
+          "type": "boolean",
+          "default": false
+        }
+      }
+    },
+    "report_payload": {
+      "type": "object",
+      "properties": {
+        "context_results": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "context_path": {
+          "type": "string"
+        },
+        "enable_llm": {
+          "type": "boolean",
+          "default": false
+        },
+        "model": {
+          "type": "string"
+        },
+        "llm_model": {
+          "type": "string"
+        }
+      }
+    },
+    "nightly_section_payload": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/report_payload"
+        },
+        {
+          "type": "object",
+          "required": [
+            "section_id"
+          ],
+          "properties": {
+            "section_id": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 7
+            }
+          }
+        }
+      ]
+    },
+    "advice_command_result": {
+      "type": "object",
+      "required": [
+        "as_of",
+        "decision_allowed",
+        "errors",
+        "freshness",
+        "max_action_level",
+        "missing_critical_inputs",
+        "ok",
+        "requires_human_confirmation",
+        "result",
+        "source",
+        "warnings"
+      ],
+      "properties": {
+        "ok": {
+          "type": "boolean"
+        },
+        "decision_allowed": {
+          "type": "boolean",
+          "const": false
+        },
+        "requires_human_confirmation": {
+          "type": "boolean",
+          "const": true
+        },
+        "max_action_level": {
+          "type": "string",
+          "const": "research_only"
+        },
+        "source": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "sources": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "as_of": {
+          "type": "string"
+        },
+        "freshness": {
+          "type": "object"
+        },
+        "artifacts": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "warnings": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "errors": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "missing_critical_inputs": {
+          "type": "array"
+        },
+        "result": {
+          "type": "object"
+        }
+      }
+    },
+    "report_prompt_result": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/advice_command_result"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "result": {
+              "type": "object",
+              "properties": {
+                "title": {
+                  "type": "string"
+                },
+                "prompt": {
+                  "type": "object",
+                  "properties": {
+                    "system_prompt": {
+                      "type": "string"
+                    },
+                    "user_prompt": {
+                      "type": "string"
+                    },
+                    "data_zone": {
+                      "type": "object"
+                    }
+                  }
+                },
+                "report": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "llm_error": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      ],
+      "properties": {
+        "ok": {
+          "type": "boolean"
+        },
+        "decision_allowed": {
+          "type": "boolean",
+          "const": false
+        },
+        "requires_human_confirmation": {
+          "type": "boolean",
+          "const": true
+        },
+        "as_of": {
+          "type": "string"
+        },
+        "freshness": {
+          "type": "object"
+        },
+        "source": {
+          "type": [
+            "array",
+            "string"
+          ],
+          "items": {
+            "type": "string"
+          }
+        },
+        "sources": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "artifacts": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "warnings": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "errors": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "missing_critical_inputs": {
+          "type": "array"
+        },
+        "result": {
+          "type": "object"
+        },
+        "max_action_level": {
+          "type": "string",
+          "const": "research_only"
+        }
+      },
+      "required": [
+        "decision_allowed",
+        "errors",
+        "ok",
+        "result",
+        "warnings"
+      ]
+    }
+  }
+}

@@ -1,0 +1,371 @@
+{
+  "package": "equity-research",
+  "description": "Fundamental, valuation, narrative, and scoring research for individual equities.",
+  "commands": [
+    {
+      "name": "financial-diagnosis",
+      "description": "Diagnose profitability, growth, leverage, and cash-flow quality from supplied financial metrics.",
+      "status": "implemented",
+      "legacy_functions": [
+        "financial_diagnosis"
+      ],
+      "payload_schema": {
+        "$ref": "#/$defs/equity_metrics_payload"
+      },
+      "result_schema": {
+        "$ref": "#/$defs/equity_research_result"
+      },
+      "upstream_dependencies": [
+        "explicit metrics/financials/context/news",
+        "memory/prewarm/nightly-prewarm-*.json when used"
+      ],
+      "freshness_policy": "Research freshness is inherited from supplied metrics/evidence and latest prewarm artifact when used.",
+      "error_behavior": [
+        "insufficient_financial_metrics",
+        "valuation_metrics_missing",
+        "code_name_or_query_required"
+      ],
+      "example": {
+        "code": "600000",
+        "name": "示例公司",
+        "metrics": {
+          "roe": 0.15,
+          "net_margin": 0.1,
+          "revenue_growth": 0.1
+        }
+      }
+    },
+    {
+      "name": "fundamental-analysis",
+      "description": "Build a fundamental research section from financial metrics and optional business context.",
+      "status": "implemented",
+      "legacy_functions": [
+        "fundamental_analysis"
+      ],
+      "payload_schema": {
+        "$ref": "#/$defs/equity_metrics_payload"
+      },
+      "result_schema": {
+        "$ref": "#/$defs/equity_research_result"
+      },
+      "upstream_dependencies": [
+        "explicit metrics/financials/context/news",
+        "memory/prewarm/nightly-prewarm-*.json when used"
+      ],
+      "freshness_policy": "Research freshness is inherited from supplied metrics/evidence and latest prewarm artifact when used.",
+      "error_behavior": [
+        "insufficient_financial_metrics",
+        "valuation_metrics_missing",
+        "code_name_or_query_required"
+      ],
+      "example": {
+        "code": "600000",
+        "name": "示例公司",
+        "metrics": {
+          "roe": 0.15,
+          "net_margin": 0.1,
+          "revenue_growth": 0.1
+        }
+      }
+    },
+    {
+      "name": "narrative-analysis",
+      "description": "Summarize company or market narrative from payload context and latest prewarm snapshot.",
+      "status": "implemented",
+      "legacy_functions": [
+        "narrative_analysis"
+      ],
+      "payload_schema": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "context": {
+            "type": "object"
+          }
+        }
+      },
+      "result_schema": {
+        "$ref": "#/$defs/equity_research_result"
+      },
+      "upstream_dependencies": [
+        "explicit metrics/financials/context/news",
+        "memory/prewarm/nightly-prewarm-*.json when used"
+      ],
+      "freshness_policy": "Research freshness is inherited from supplied metrics/evidence and latest prewarm artifact when used.",
+      "error_behavior": [
+        "insufficient_financial_metrics",
+        "valuation_metrics_missing",
+        "code_name_or_query_required"
+      ],
+      "example": {
+        "code": "600000",
+        "name": "示例公司",
+        "metrics": {
+          "roe": 0.15,
+          "net_margin": 0.1,
+          "revenue_growth": 0.1
+        }
+      }
+    },
+    {
+      "name": "stock-analysis",
+      "description": "Compose news, narrative, fundamentals, valuation, and score into one research package.",
+      "status": "implemented",
+      "legacy_functions": [
+        "stock_analysis"
+      ],
+      "payload_schema": {
+        "$ref": "#/$defs/equity_metrics_payload"
+      },
+      "result_schema": {
+        "$ref": "#/$defs/equity_research_result"
+      },
+      "upstream_dependencies": [
+        "explicit metrics/financials/context/news",
+        "memory/prewarm/nightly-prewarm-*.json when used"
+      ],
+      "freshness_policy": "Research freshness is inherited from supplied metrics/evidence and latest prewarm artifact when used.",
+      "error_behavior": [
+        "insufficient_financial_metrics",
+        "valuation_metrics_missing",
+        "code_name_or_query_required"
+      ],
+      "example": {
+        "code": "600000",
+        "name": "示例公司",
+        "metrics": {
+          "roe": 0.15,
+          "net_margin": 0.1,
+          "revenue_growth": 0.1
+        }
+      }
+    },
+    {
+      "name": "stock-news",
+      "description": "Filter supplied or prewarm news for a stock code, name, or query.",
+      "status": "implemented",
+      "legacy_functions": [
+        "stock_news"
+      ],
+      "payload_schema": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "query": {
+            "type": "string"
+          },
+          "news": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          }
+        }
+      },
+      "result_schema": {
+        "$ref": "#/$defs/equity_research_result"
+      },
+      "upstream_dependencies": [
+        "explicit metrics/financials/context/news",
+        "memory/prewarm/nightly-prewarm-*.json when used"
+      ],
+      "freshness_policy": "Research freshness is inherited from supplied metrics/evidence and latest prewarm artifact when used.",
+      "error_behavior": [
+        "insufficient_financial_metrics",
+        "valuation_metrics_missing",
+        "code_name_or_query_required"
+      ],
+      "example": {
+        "code": "600000",
+        "name": "示例公司",
+        "metrics": {
+          "roe": 0.15,
+          "net_margin": 0.1,
+          "revenue_growth": 0.1
+        }
+      }
+    },
+    {
+      "name": "stock-score",
+      "description": "Score a stock from financial quality, valuation, and optional narrative score.",
+      "status": "implemented",
+      "legacy_functions": [
+        "stock_score"
+      ],
+      "payload_schema": {
+        "$ref": "#/$defs/equity_metrics_payload"
+      },
+      "result_schema": {
+        "$ref": "#/$defs/equity_research_result"
+      },
+      "upstream_dependencies": [
+        "explicit metrics/financials/context/news",
+        "memory/prewarm/nightly-prewarm-*.json when used"
+      ],
+      "freshness_policy": "Research freshness is inherited from supplied metrics/evidence and latest prewarm artifact when used.",
+      "error_behavior": [
+        "insufficient_financial_metrics",
+        "valuation_metrics_missing",
+        "code_name_or_query_required"
+      ],
+      "example": {
+        "code": "600000",
+        "name": "示例公司",
+        "metrics": {
+          "roe": 0.15,
+          "net_margin": 0.1,
+          "revenue_growth": 0.1
+        }
+      }
+    },
+    {
+      "name": "valuation-check",
+      "description": "Check valuation from PE/PB/dividend/FCF metrics and optional industry comparison.",
+      "status": "implemented",
+      "legacy_functions": [
+        "valuation_check"
+      ],
+      "payload_schema": {
+        "$ref": "#/$defs/equity_metrics_payload"
+      },
+      "result_schema": {
+        "$ref": "#/$defs/equity_research_result"
+      },
+      "upstream_dependencies": [
+        "explicit metrics/financials/context/news",
+        "memory/prewarm/nightly-prewarm-*.json when used"
+      ],
+      "freshness_policy": "Research freshness is inherited from supplied metrics/evidence and latest prewarm artifact when used.",
+      "error_behavior": [
+        "insufficient_financial_metrics",
+        "valuation_metrics_missing",
+        "code_name_or_query_required"
+      ],
+      "example": {
+        "code": "600000",
+        "name": "示例公司",
+        "metrics": {
+          "roe": 0.15,
+          "net_margin": 0.1,
+          "revenue_growth": 0.1
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "equity_metrics_payload": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "metrics": {
+          "type": "object"
+        },
+        "financials": {
+          "type": "object"
+        },
+        "context": {
+          "type": "object"
+        },
+        "news": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "business_model": {
+          "type": "string"
+        },
+        "competitive_position": {
+          "type": "string"
+        }
+      }
+    },
+    "equity_research_result": {
+      "type": "object",
+      "required": [
+        "decision_allowed",
+        "errors",
+        "ok",
+        "result",
+        "warnings"
+      ],
+      "properties": {
+        "ok": {
+          "type": "boolean"
+        },
+        "decision_allowed": {
+          "type": "boolean",
+          "const": false
+        },
+        "max_action_level": {
+          "type": "string",
+          "const": "research_only"
+        },
+        "sources": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "warnings": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "errors": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "result": {
+          "type": "object"
+        },
+        "requires_human_confirmation": {
+          "type": "boolean",
+          "const": true
+        },
+        "as_of": {
+          "type": "string"
+        },
+        "freshness": {
+          "type": "object"
+        },
+        "source": {
+          "type": [
+            "array",
+            "string"
+          ],
+          "items": {
+            "type": "string"
+          }
+        },
+        "artifacts": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "missing_critical_inputs": {
+          "type": "array"
+        }
+      }
+    }
+  }
+}

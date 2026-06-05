@@ -1,0 +1,540 @@
+{
+  "package": "equity-screening",
+  "description": "Universe construction, leader harvesting, stock screening, rating, and local candidate pool maintenance.",
+  "commands": [
+    {
+      "name": "board-universe-sync",
+      "description": "Build or refresh a board/theme universe from payload boards or latest prewarm hot themes.",
+      "status": "implemented",
+      "legacy_functions": [
+        "board_universe_sync"
+      ],
+      "payload_schema": {
+        "$ref": "#/$defs/board_sync_payload"
+      },
+      "result_schema": {
+        "$ref": "#/$defs/screening_result"
+      },
+      "upstream_dependencies": [
+        "explicit candidates or memory/prewarm/nightly-prewarm-*.json",
+        "memory/stock_pool artifacts when used"
+      ],
+      "freshness_policy": "Candidate freshness is inherited from explicit payload evidence or latest prewarm artifact; missing candidates fail closed.",
+      "error_behavior": [
+        "candidates_missing",
+        "evidence_source_missing",
+        "stock_pool_invalid_json",
+        "prewarm_snapshot_missing"
+      ],
+      "example": {
+        "candidates": [
+          {
+            "name": "示例公司",
+            "theme": "示例主题",
+            "net_yi": 1,
+            "news_hits": 1
+          }
+        ]
+      }
+    },
+    {
+      "name": "company-evidence-collect",
+      "description": "Collect matching research reports and news evidence for one company from payload evidence or prewarm data.",
+      "status": "implemented",
+      "legacy_functions": [
+        "company_evidence_collect"
+      ],
+      "payload_schema": {
+        "$ref": "#/$defs/evidence_payload"
+      },
+      "result_schema": {
+        "$ref": "#/$defs/screening_result"
+      },
+      "upstream_dependencies": [
+        "explicit candidates or memory/prewarm/nightly-prewarm-*.json",
+        "memory/stock_pool artifacts when used"
+      ],
+      "freshness_policy": "Candidate freshness is inherited from explicit payload evidence or latest prewarm artifact; missing candidates fail closed.",
+      "error_behavior": [
+        "candidates_missing",
+        "evidence_source_missing",
+        "stock_pool_invalid_json",
+        "prewarm_snapshot_missing"
+      ],
+      "example": {
+        "candidates": [
+          {
+            "name": "示例公司",
+            "theme": "示例主题",
+            "net_yi": 1,
+            "news_hits": 1
+          }
+        ]
+      }
+    },
+    {
+      "name": "layered-stock-screening",
+      "description": "Score candidates and split them into core, watchlist, and reject layers.",
+      "status": "implemented",
+      "legacy_functions": [
+        "layered_stock_screening"
+      ],
+      "payload_schema": {
+        "$ref": "#/$defs/candidate_screen_payload"
+      },
+      "result_schema": {
+        "$ref": "#/$defs/screening_result"
+      },
+      "upstream_dependencies": [
+        "explicit candidates or memory/prewarm/nightly-prewarm-*.json",
+        "memory/stock_pool artifacts when used"
+      ],
+      "freshness_policy": "Candidate freshness is inherited from explicit payload evidence or latest prewarm artifact; missing candidates fail closed.",
+      "error_behavior": [
+        "candidates_missing",
+        "evidence_source_missing",
+        "stock_pool_invalid_json",
+        "prewarm_snapshot_missing"
+      ],
+      "example": {
+        "candidates": [
+          {
+            "name": "示例公司",
+            "theme": "示例主题",
+            "net_yi": 1,
+            "news_hits": 1
+          }
+        ]
+      }
+    },
+    {
+      "name": "leader-source-harvest",
+      "description": "Harvest high-scoring theme or capital-flow leaders from candidates or prewarm snapshot.",
+      "status": "implemented",
+      "legacy_functions": [
+        "leader_source_harvest"
+      ],
+      "payload_schema": {
+        "$ref": "#/$defs/candidate_screen_payload"
+      },
+      "result_schema": {
+        "$ref": "#/$defs/screening_result"
+      },
+      "upstream_dependencies": [
+        "explicit candidates or memory/prewarm/nightly-prewarm-*.json",
+        "memory/stock_pool artifacts when used"
+      ],
+      "freshness_policy": "Candidate freshness is inherited from explicit payload evidence or latest prewarm artifact; missing candidates fail closed.",
+      "error_behavior": [
+        "candidates_missing",
+        "evidence_source_missing",
+        "stock_pool_invalid_json",
+        "prewarm_snapshot_missing"
+      ],
+      "example": {
+        "candidates": [
+          {
+            "name": "示例公司",
+            "theme": "示例主题",
+            "net_yi": 1,
+            "news_hits": 1
+          }
+        ]
+      }
+    },
+    {
+      "name": "stock-pool-incremental-am",
+      "description": "Run morning candidate screening and append new candidates to the local screening pool artifact.",
+      "status": "implemented",
+      "legacy_functions": [
+        "stock_pool_incremental_am"
+      ],
+      "payload_schema": {
+        "$ref": "#/$defs/candidate_screen_payload"
+      },
+      "result_schema": {
+        "$ref": "#/$defs/screening_result"
+      },
+      "upstream_dependencies": [
+        "explicit candidates or memory/prewarm/nightly-prewarm-*.json",
+        "memory/stock_pool artifacts when used"
+      ],
+      "freshness_policy": "Candidate freshness is inherited from explicit payload evidence or latest prewarm artifact; missing candidates fail closed.",
+      "error_behavior": [
+        "candidates_missing",
+        "evidence_source_missing",
+        "stock_pool_invalid_json",
+        "prewarm_snapshot_missing"
+      ],
+      "example": {
+        "candidates": [
+          {
+            "name": "示例公司",
+            "theme": "示例主题",
+            "net_yi": 1,
+            "news_hits": 1
+          }
+        ]
+      }
+    },
+    {
+      "name": "stock-pool-incremental-pm",
+      "description": "Run afternoon candidate screening and append new candidates to the local screening pool artifact.",
+      "status": "implemented",
+      "legacy_functions": [
+        "stock_pool_incremental_pm"
+      ],
+      "payload_schema": {
+        "$ref": "#/$defs/candidate_screen_payload"
+      },
+      "result_schema": {
+        "$ref": "#/$defs/screening_result"
+      },
+      "upstream_dependencies": [
+        "explicit candidates or memory/prewarm/nightly-prewarm-*.json",
+        "memory/stock_pool artifacts when used"
+      ],
+      "freshness_policy": "Candidate freshness is inherited from explicit payload evidence or latest prewarm artifact; missing candidates fail closed.",
+      "error_behavior": [
+        "candidates_missing",
+        "evidence_source_missing",
+        "stock_pool_invalid_json",
+        "prewarm_snapshot_missing"
+      ],
+      "example": {
+        "candidates": [
+          {
+            "name": "示例公司",
+            "theme": "示例主题",
+            "net_yi": 1,
+            "news_hits": 1
+          }
+        ]
+      }
+    },
+    {
+      "name": "stock-pool-maintenance",
+      "description": "Refresh the local screening pool with scored candidates and fail closed if the existing pool is corrupt.",
+      "status": "implemented",
+      "legacy_functions": [
+        "stock_pool_maintenance"
+      ],
+      "payload_schema": {
+        "$ref": "#/$defs/candidate_screen_payload"
+      },
+      "result_schema": {
+        "$ref": "#/$defs/screening_result"
+      },
+      "upstream_dependencies": [
+        "explicit candidates or memory/prewarm/nightly-prewarm-*.json",
+        "memory/stock_pool artifacts when used"
+      ],
+      "freshness_policy": "Candidate freshness is inherited from explicit payload evidence or latest prewarm artifact; missing candidates fail closed.",
+      "error_behavior": [
+        "candidates_missing",
+        "evidence_source_missing",
+        "stock_pool_invalid_json",
+        "prewarm_snapshot_missing"
+      ],
+      "example": {
+        "candidates": [
+          {
+            "name": "示例公司",
+            "theme": "示例主题",
+            "net_yi": 1,
+            "news_hits": 1
+          }
+        ]
+      }
+    },
+    {
+      "name": "stock-rating",
+      "description": "Rate a single candidate using capital-flow, theme, information, and market sentiment factors.",
+      "status": "implemented",
+      "legacy_functions": [
+        "stock_rating"
+      ],
+      "payload_schema": {
+        "$ref": "#/$defs/candidate_rating_payload"
+      },
+      "result_schema": {
+        "$ref": "#/$defs/screening_result"
+      },
+      "upstream_dependencies": [
+        "explicit candidates or memory/prewarm/nightly-prewarm-*.json",
+        "memory/stock_pool artifacts when used"
+      ],
+      "freshness_policy": "Candidate freshness is inherited from explicit payload evidence or latest prewarm artifact; missing candidates fail closed.",
+      "error_behavior": [
+        "candidates_missing",
+        "evidence_source_missing",
+        "stock_pool_invalid_json",
+        "prewarm_snapshot_missing"
+      ],
+      "example": {
+        "candidates": [
+          {
+            "name": "示例公司",
+            "theme": "示例主题",
+            "net_yi": 1,
+            "news_hits": 1
+          }
+        ]
+      }
+    },
+    {
+      "name": "stock-screening",
+      "description": "Score and filter supplied candidates or candidates derived from the latest prewarm snapshot.",
+      "status": "implemented",
+      "legacy_functions": [
+        "stock_screening"
+      ],
+      "payload_schema": {
+        "$ref": "#/$defs/candidate_screen_payload"
+      },
+      "result_schema": {
+        "$ref": "#/$defs/screening_result"
+      },
+      "upstream_dependencies": [
+        "explicit candidates or memory/prewarm/nightly-prewarm-*.json",
+        "memory/stock_pool artifacts when used"
+      ],
+      "freshness_policy": "Candidate freshness is inherited from explicit payload evidence or latest prewarm artifact; missing candidates fail closed.",
+      "error_behavior": [
+        "candidates_missing",
+        "evidence_source_missing",
+        "stock_pool_invalid_json",
+        "prewarm_snapshot_missing"
+      ],
+      "example": {
+        "candidates": [
+          {
+            "name": "示例公司",
+            "theme": "示例主题",
+            "net_yi": 1,
+            "news_hits": 1
+          }
+        ]
+      }
+    },
+    {
+      "name": "stock-screening-v2",
+      "description": "Versioned stock screening entry point with the same fail-closed contract as stock-screening.",
+      "status": "implemented",
+      "legacy_functions": [
+        "stock_screening_v2"
+      ],
+      "payload_schema": {
+        "$ref": "#/$defs/candidate_screen_payload"
+      },
+      "result_schema": {
+        "$ref": "#/$defs/screening_result"
+      },
+      "upstream_dependencies": [
+        "explicit candidates or memory/prewarm/nightly-prewarm-*.json",
+        "memory/stock_pool artifacts when used"
+      ],
+      "freshness_policy": "Candidate freshness is inherited from explicit payload evidence or latest prewarm artifact; missing candidates fail closed.",
+      "error_behavior": [
+        "candidates_missing",
+        "evidence_source_missing",
+        "stock_pool_invalid_json",
+        "prewarm_snapshot_missing"
+      ],
+      "example": {
+        "candidates": [
+          {
+            "name": "示例公司",
+            "theme": "示例主题",
+            "net_yi": 1,
+            "news_hits": 1
+          }
+        ]
+      }
+    }
+  ],
+  "$defs": {
+    "candidate": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "theme": {
+          "type": "string"
+        },
+        "net_yi": {
+          "type": "number"
+        },
+        "limitup": {
+          "type": "number"
+        },
+        "news_hits": {
+          "type": "number"
+        },
+        "research_hits": {
+          "type": "number"
+        },
+        "reason": {
+          "type": "string"
+        },
+        "source": {
+          "type": "string"
+        }
+      }
+    },
+    "candidate_screen_payload": {
+      "type": "object",
+      "properties": {
+        "candidates": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/candidate"
+          }
+        },
+        "min_score": {
+          "type": "number",
+          "default": 0
+        }
+      }
+    },
+    "candidate_rating_payload": {
+      "type": "object",
+      "properties": {
+        "candidate": {
+          "$ref": "#/$defs/candidate"
+        },
+        "code": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "theme": {
+          "type": "string"
+        },
+        "net_yi": {
+          "type": "number"
+        },
+        "news_hits": {
+          "type": "number"
+        },
+        "research_hits": {
+          "type": "number"
+        }
+      }
+    },
+    "board_sync_payload": {
+      "type": "object",
+      "properties": {
+        "boards": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        }
+      }
+    },
+    "evidence_payload": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "query": {
+          "type": "string"
+        },
+        "reports": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "news": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        }
+      }
+    },
+    "screening_result": {
+      "type": "object",
+      "required": [
+        "decision_allowed",
+        "errors",
+        "ok",
+        "result",
+        "warnings"
+      ],
+      "properties": {
+        "ok": {
+          "type": "boolean"
+        },
+        "decision_allowed": {
+          "type": "boolean",
+          "const": false
+        },
+        "max_action_level": {
+          "type": "string",
+          "const": "research_only"
+        },
+        "sources": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "artifacts": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "warnings": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "errors": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "result": {
+          "type": "object"
+        },
+        "requires_human_confirmation": {
+          "type": "boolean",
+          "const": true
+        },
+        "as_of": {
+          "type": "string"
+        },
+        "freshness": {
+          "type": "object"
+        },
+        "source": {
+          "type": [
+            "array",
+            "string"
+          ],
+          "items": {
+            "type": "string"
+          }
+        },
+        "missing_critical_inputs": {
+          "type": "array"
+        }
+      }
+    }
+  }
+}

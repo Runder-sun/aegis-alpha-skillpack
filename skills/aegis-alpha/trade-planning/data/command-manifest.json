@@ -1,0 +1,428 @@
+{
+  "package": "trade-planning",
+  "description": "Trade setup planning and strategy generation.",
+  "commands": [
+    {
+      "name": "full-investment-plan",
+      "description": "Compose short-term setup, themes, targets, strategy, and technical references into a paper-only plan.",
+      "status": "implemented",
+      "legacy_functions": [
+        "full_investment_plan"
+      ],
+      "payload_schema": {
+        "$ref": "#/$defs/trade_plan_payload"
+      },
+      "result_schema": {
+        "$ref": "#/$defs/trade_plan_result"
+      },
+      "upstream_dependencies": [
+        "explicit candidates",
+        "explicit themes",
+        "explicit technical levels",
+        "latest prewarm market gate when used"
+      ],
+      "freshness_policy": "Plan freshness is inherited from supplied market gate, candidates, themes, and technical levels.",
+      "error_behavior": [
+        "candidates_missing",
+        "themes_missing",
+        "technical_inputs_missing",
+        "market_filter_missing"
+      ],
+      "example": {
+        "themesurfer_status": "FULL",
+        "risk_level": "green",
+        "candidates": [
+          {
+            "name": "示例公司"
+          }
+        ],
+        "technical": {
+          "price": 10,
+          "ma20": 9
+        }
+      }
+    },
+    {
+      "name": "short-term-analysis",
+      "description": "Score short-term candidates under market filter and risk caps.",
+      "status": "implemented",
+      "legacy_functions": [
+        "short_term_analysis"
+      ],
+      "payload_schema": {
+        "$ref": "#/$defs/trade_plan_payload"
+      },
+      "result_schema": {
+        "$ref": "#/$defs/trade_plan_result"
+      },
+      "upstream_dependencies": [
+        "explicit candidates",
+        "explicit themes",
+        "explicit technical levels",
+        "latest prewarm market gate when used"
+      ],
+      "freshness_policy": "Plan freshness is inherited from supplied market gate, candidates, themes, and technical levels.",
+      "error_behavior": [
+        "candidates_missing",
+        "themes_missing",
+        "technical_inputs_missing",
+        "market_filter_missing"
+      ],
+      "example": {
+        "themesurfer_status": "FULL",
+        "risk_level": "green",
+        "candidates": [
+          {
+            "name": "示例公司"
+          }
+        ],
+        "technical": {
+          "price": 10,
+          "ma20": 9
+        }
+      }
+    },
+    {
+      "name": "stock-technical-scan",
+      "description": "Calculate technical trend, entry zone, stop reference, and invalidation triggers from supplied levels.",
+      "status": "implemented",
+      "legacy_functions": [
+        "stock_technical_scan"
+      ],
+      "payload_schema": {
+        "type": "object",
+        "required": [
+          "price",
+          "ma20"
+        ],
+        "properties": {
+          "price": {
+            "type": "number"
+          },
+          "ma20": {
+            "type": "number"
+          },
+          "ma60": {
+            "type": "number"
+          },
+          "support": {
+            "type": "number"
+          },
+          "resistance": {
+            "type": "number"
+          },
+          "rsi": {
+            "type": "number"
+          }
+        }
+      },
+      "result_schema": {
+        "$ref": "#/$defs/trade_plan_result"
+      },
+      "upstream_dependencies": [
+        "explicit candidates",
+        "explicit themes",
+        "explicit technical levels",
+        "latest prewarm market gate when used"
+      ],
+      "freshness_policy": "Plan freshness is inherited from supplied market gate, candidates, themes, and technical levels.",
+      "error_behavior": [
+        "candidates_missing",
+        "themes_missing",
+        "technical_inputs_missing",
+        "market_filter_missing"
+      ],
+      "example": {
+        "price": 10,
+        "ma20": 9,
+        "ma60": 8,
+        "support": 8.5,
+        "resistance": 12
+      }
+    },
+    {
+      "name": "strategy-advisor",
+      "description": "Generate paper-only strategy rules from market filter, risk level, and top candidates.",
+      "status": "implemented",
+      "legacy_functions": [
+        "strategy_advisor"
+      ],
+      "payload_schema": {
+        "$ref": "#/$defs/trade_plan_payload"
+      },
+      "result_schema": {
+        "$ref": "#/$defs/trade_plan_result"
+      },
+      "upstream_dependencies": [
+        "explicit candidates",
+        "explicit themes",
+        "explicit technical levels",
+        "latest prewarm market gate when used"
+      ],
+      "freshness_policy": "Plan freshness is inherited from supplied market gate, candidates, themes, and technical levels.",
+      "error_behavior": [
+        "candidates_missing",
+        "themes_missing",
+        "technical_inputs_missing",
+        "market_filter_missing"
+      ],
+      "example": {
+        "themesurfer_status": "FULL",
+        "risk_level": "green",
+        "candidates": [
+          {
+            "name": "示例公司"
+          }
+        ],
+        "technical": {
+          "price": 10,
+          "ma20": 9
+        }
+      }
+    },
+    {
+      "name": "theme-identification",
+      "description": "Identify active themes from payload or latest market prewarm snapshot.",
+      "status": "implemented",
+      "legacy_functions": [
+        "theme_identification"
+      ],
+      "payload_schema": {
+        "$ref": "#/$defs/trade_plan_payload"
+      },
+      "result_schema": {
+        "$ref": "#/$defs/trade_plan_result"
+      },
+      "upstream_dependencies": [
+        "explicit candidates",
+        "explicit themes",
+        "explicit technical levels",
+        "latest prewarm market gate when used"
+      ],
+      "freshness_policy": "Plan freshness is inherited from supplied market gate, candidates, themes, and technical levels.",
+      "error_behavior": [
+        "candidates_missing",
+        "themes_missing",
+        "technical_inputs_missing",
+        "market_filter_missing"
+      ],
+      "example": {
+        "themesurfer_status": "FULL",
+        "risk_level": "green",
+        "candidates": [
+          {
+            "name": "示例公司"
+          }
+        ],
+        "technical": {
+          "price": 10,
+          "ma20": 9
+        }
+      }
+    },
+    {
+      "name": "theme-targets",
+      "description": "Group candidate targets by theme for paper-only planning.",
+      "status": "implemented",
+      "legacy_functions": [
+        "theme_targets"
+      ],
+      "payload_schema": {
+        "$ref": "#/$defs/trade_plan_payload"
+      },
+      "result_schema": {
+        "$ref": "#/$defs/trade_plan_result"
+      },
+      "upstream_dependencies": [
+        "explicit candidates",
+        "explicit themes",
+        "explicit technical levels",
+        "latest prewarm market gate when used"
+      ],
+      "freshness_policy": "Plan freshness is inherited from supplied market gate, candidates, themes, and technical levels.",
+      "error_behavior": [
+        "candidates_missing",
+        "themes_missing",
+        "technical_inputs_missing",
+        "market_filter_missing"
+      ],
+      "example": {
+        "themesurfer_status": "FULL",
+        "risk_level": "green",
+        "candidates": [
+          {
+            "name": "示例公司"
+          }
+        ],
+        "technical": {
+          "price": 10,
+          "ma20": 9
+        }
+      }
+    },
+    {
+      "name": "trading-strategy-v2",
+      "description": "Return the full investment plan under a versioned strategy schema.",
+      "status": "implemented",
+      "legacy_functions": [
+        "trading_strategy_v2"
+      ],
+      "payload_schema": {
+        "$ref": "#/$defs/trade_plan_payload"
+      },
+      "result_schema": {
+        "$ref": "#/$defs/trade_plan_result"
+      },
+      "upstream_dependencies": [
+        "explicit candidates",
+        "explicit themes",
+        "explicit technical levels",
+        "latest prewarm market gate when used"
+      ],
+      "freshness_policy": "Plan freshness is inherited from supplied market gate, candidates, themes, and technical levels.",
+      "error_behavior": [
+        "candidates_missing",
+        "themes_missing",
+        "technical_inputs_missing",
+        "market_filter_missing"
+      ],
+      "example": {
+        "themesurfer_status": "FULL",
+        "risk_level": "green",
+        "candidates": [
+          {
+            "name": "示例公司"
+          }
+        ],
+        "technical": {
+          "price": 10,
+          "ma20": 9
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "trade_plan_payload": {
+      "type": "object",
+      "properties": {
+        "risk_level": {
+          "type": "string"
+        },
+        "themesurfer_status": {
+          "type": "string",
+          "enum": [
+            "FULL",
+            "LOCKOUT",
+            "UNKNOWN"
+          ]
+        },
+        "candidates": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "themes": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "technical": {
+          "type": "object"
+        },
+        "price": {
+          "type": "number"
+        },
+        "ma20": {
+          "type": "number"
+        },
+        "ma60": {
+          "type": "number"
+        },
+        "support": {
+          "type": "number"
+        },
+        "resistance": {
+          "type": "number"
+        },
+        "rsi": {
+          "type": "number"
+        }
+      }
+    },
+    "trade_plan_result": {
+      "type": "object",
+      "required": [
+        "decision_allowed",
+        "errors",
+        "ok",
+        "requires_human_confirmation",
+        "result",
+        "warnings"
+      ],
+      "properties": {
+        "ok": {
+          "type": "boolean"
+        },
+        "decision_allowed": {
+          "type": "boolean",
+          "const": false
+        },
+        "requires_human_confirmation": {
+          "type": "boolean",
+          "const": true
+        },
+        "max_action_level": {
+          "type": "string",
+          "const": "paper_plan_only"
+        },
+        "sources": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "warnings": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "errors": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "result": {
+          "type": "object"
+        },
+        "as_of": {
+          "type": "string"
+        },
+        "freshness": {
+          "type": "object"
+        },
+        "source": {
+          "type": [
+            "array",
+            "string"
+          ],
+          "items": {
+            "type": "string"
+          }
+        },
+        "artifacts": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "missing_critical_inputs": {
+          "type": "array"
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "package": "akshare",
+  "description": "Open-source financial data access via AkShare (public data sources).",
+  "commands": [
+    {"name": "a-stock-daily", "legacy_functions": ["akshare_a_stock_daily"]},
+    {"name": "index-daily", "legacy_functions": ["akshare_index_daily"]},
+    {"name": "north-capital-flow"},
+    {"name": "concept-board-hist"},
+    {"name": "concept-board-list"},
+    {"name": "industry-board-list"},
+    {"name": "industry-board-hist"},
+    {"name": "stock-individual-flow"},
+    {"name": "stock-market-flow"},
+    {"name": "stock-hot-rank"},
+    {"name": "stock-news"},
+    {"name": "stock-minute"},
+    {"name": "fund-etf-daily"},
+    {"name": "margin-detail"},
+    {"name": "limit-up-list"},
+    {"name": "macro-cn-forex"},
+    {"name": "macro-us-cpi"},
+    {"name": "global-bond-yield"},
+    {"name": "macro-pmi", "legacy_functions": ["akshare_macro_pmi"]},
+    {"name": "macro-cpi", "legacy_functions": ["akshare_macro_cpi"]},
+    {"name": "macro-ppi", "legacy_functions": ["akshare_macro_ppi"]}
+  ]
+}

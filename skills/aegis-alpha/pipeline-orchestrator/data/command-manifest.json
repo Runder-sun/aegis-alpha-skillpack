@@ -1,0 +1,8 @@
+{
+  "package": "pipeline-orchestrator",
+  "description": "Execute pipeline-runner templates with optional step skipping and result persistence.",
+  "commands": [
+    {"name": "pipeline-run", "legacy_functions": ["pipeline_orchestrator_run"]},
+    {"name": "pipeline-dry-run", "legacy_functions": ["pipeline_orchestrator_dry_run"]}
+  ]
+}

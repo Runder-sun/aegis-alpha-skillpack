@@ -1,0 +1,10 @@
+{
+  "package": "content-extract",
+  "description": "Info-gathering URL-to-Markdown extraction with MinerU fallback.",
+  "commands": [
+    {
+      "name": "extract-url",
+      "legacy_functions": []
+    }
+  ]
+}

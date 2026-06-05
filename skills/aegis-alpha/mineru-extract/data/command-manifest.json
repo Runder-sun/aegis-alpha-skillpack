@@ -1,0 +1,14 @@
+{
+  "package": "mineru-extract",
+  "description": "Info-gathering high-fidelity parsing via MinerU official API.",
+  "commands": [
+    {
+      "name": "parse-documents",
+      "legacy_functions": []
+    },
+    {
+      "name": "extract-url",
+      "legacy_functions": []
+    }
+  ]
+}

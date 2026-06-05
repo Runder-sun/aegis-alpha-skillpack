@@ -1,0 +1,76 @@
+{
+  "name": "aegis-alpha",
+  "display_name": "Aegis Alpha",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Research-only multi-agent investment skillpack with fail-closed data, provenance, screening, research, paper planning, portfolio review, advice lifecycle, and report evolution workflows.",
+  "canonical_source": "skills/aegis-alpha",
+  "public_skill_limit": 15,
+  "public_skills": [
+    "information-retrieval",
+    "market-data",
+    "market-intel",
+    "macro-regime",
+    "theme-cycle",
+    "equity-screening",
+    "equity-research",
+    "trade-planning",
+    "portfolio-ops",
+    "advice-lifecycle",
+    "pipeline",
+    "quality-gate",
+    "quant-validation",
+    "report-evolution",
+    "execution-automation"
+  ],
+  "supported_agents": {
+    "codex": {
+      "adapter": "adapters/codex",
+      "layout": "wrapper",
+      "default_target": "$CODEX_HOME/skills/aegis-alpha or ~/.codex/skills/aegis-alpha"
+    },
+    "hermes": {
+      "adapter": "adapters/hermes",
+      "layout": "package",
+      "default_target": "$HERMES_HOME/skills/aegis-alpha or ~/.hermes/skills/aegis-alpha"
+    },
+    "openclaw": {
+      "adapter": "adapters/openclaw",
+      "layout": "package",
+      "default_target": "$OPENCLAW_HOME/skills/aegis-alpha or ~/.openclaw/skills/aegis-alpha"
+    },
+    "claude-code": {
+      "adapter": "adapters/claude-code",
+      "layout": "wrapper",
+      "default_target": "$CLAUDE_CODE_SKILLS_HOME/aegis-alpha or ./.claude/skills/aegis-alpha"
+    }
+  },
+  "environment": {
+    "workspace": "AEGIS_ALPHA_WORKSPACE",
+    "default_workspace": "~/.aegis-alpha/workspace",
+    "repo": "AEGIS_ALPHA_REPO"
+  },
+  "safety_policy": {
+    "decision_allowed": false,
+    "requires_human_confirmation": true,
+    "fail_closed": true,
+    "no_silent_fallback": true,
+    "no_empty_success_for_missing_evidence": true,
+    "max_action_levels": [
+      "data_only",
+      "research_only",
+      "paper_plan_only",
+      "analysis_only",
+      "quality_validation_only",
+      "report_review_only",
+      "automation_only"
+    ]
+  },
+  "validation": {
+    "final_acceptance": "tools/check_final_acceptance.py",
+    "public_contracts": "tools/check_public_contracts.py",
+    "pipeline_integrity": "tools/check_pipeline_integrity.py",
+    "critical_smoke": "tools/smoke_portfolio_position_research.py",
+    "closed_loop_smoke": "tools/smoke_investment_closed_loop.py"
+  }
+}

@@ -1,0 +1,3 @@
+display_name: Macro Regime
+short_description: Macro regime and liquidity condition analysis.
+default_prompt: Use `macro-regime` commands to complete this task.

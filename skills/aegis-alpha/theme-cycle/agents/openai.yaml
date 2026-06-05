@@ -1,0 +1,3 @@
+display_name: Theme Cycle
+short_description: Theme lifecycle discovery, rotation, and signal tracking.
+default_prompt: Use `theme-cycle` commands to complete this task.

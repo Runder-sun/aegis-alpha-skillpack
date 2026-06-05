@@ -1,0 +1,377 @@
+{
+  "pipelines": [
+    {
+      "id": "nightly",
+      "label": "晚间策略",
+      "description": "晚间策略报告链路 (宏观 → 主题 → 扫描 → 分析 → 决策)",
+      "steps": [
+        {
+          "package": "execution-automation",
+          "command": "nightly-prewarm",
+          "optional": false,
+          "note": "预热关键数据源, 贴近出报告时间"
+        },
+        {
+          "package": "quality-gate",
+          "command": "nightly-quality-gate",
+          "optional": false,
+          "note": "晚间质量门禁"
+        },
+        {
+          "package": "quant-validation",
+          "command": "nightly-eval-12m",
+          "optional": true,
+          "note": "夜间量化回测"
+        },
+        {
+          "package": "market-data",
+          "command": "snapshot-full",
+          "optional": false,
+          "note": "盘后市场情绪/题材/连板/龙虎榜/行业资金"
+        },
+        {
+          "package": "market-data",
+          "command": "margin-full",
+          "optional": true,
+          "note": "两融资金变动"
+        },
+        {
+          "package": "market-data",
+          "command": "calendar-week",
+          "optional": true,
+          "note": "交易日/解禁/业绩/交割日"
+        },
+        {
+          "package": "market-intel",
+          "command": "black-swan-monitor",
+          "optional": true,
+          "note": "极端风险监测"
+        },
+        {
+          "package": "market-intel",
+          "command": "daily-news-scan",
+          "optional": true,
+          "note": "新闻/政策扫描"
+        },
+        {
+          "package": "market-intel",
+          "command": "global-sentiment-scan",
+          "optional": true,
+          "note": "全球社媒情绪"
+        },
+        {
+          "package": "market-intel",
+          "command": "forum-sentiment",
+          "optional": true,
+          "note": "论坛/情绪扫描"
+        },
+        {
+          "package": "market-intel",
+          "command": "market-sentiment-index",
+          "optional": true,
+          "note": "情绪指数"
+        },
+        {
+          "package": "market-intel",
+          "command": "kol-tracker",
+          "optional": true,
+          "note": "KOL/机构观点"
+        },
+        {
+          "package": "market-intel",
+          "command": "research-reports",
+          "optional": true,
+          "note": "研报摘要"
+        },
+        {
+          "package": "market-intel",
+          "command": "event-calendar-scan",
+          "optional": true,
+          "note": "事件日历"
+        },
+        {
+          "package": "market-intel",
+          "command": "global-event-scan",
+          "optional": true,
+          "note": "全球事件扫描(宏观/地缘/央行)"
+        },
+        {
+          "package": "market-intel",
+          "command": "policy-analysis",
+          "optional": true,
+          "note": "政策库扫描"
+        },
+        {
+          "package": "market-data",
+          "command": "macro-pmi",
+          "optional": true,
+          "note": "宏观 PMI"
+        },
+        {
+          "package": "market-data",
+          "command": "macro-cpi",
+          "optional": true,
+          "note": "宏观 CPI"
+        },
+        {
+          "package": "market-data",
+          "command": "macro-ppi",
+          "optional": true,
+          "note": "宏观 PPI"
+        },
+        {
+          "package": "market-data",
+          "command": "index-daily",
+          "optional": true,
+          "note": "指数日线(如上证)",
+          "payload": {
+            "symbol": "sh.000001"
+          }
+        },
+        {
+          "package": "macro-regime",
+          "command": "domestic-macro",
+          "optional": true,
+          "note": "国内宏观环境"
+        },
+        {
+          "package": "macro-regime",
+          "command": "global-macro-analysis",
+          "optional": true,
+          "note": "全球宏观环境"
+        },
+        {
+          "package": "macro-regime",
+          "command": "capital-flow-analysis",
+          "optional": true,
+          "note": "资金面与流动性"
+        },
+        {
+          "package": "macro-regime",
+          "command": "sector-rotation",
+          "optional": true,
+          "note": "板块轮动"
+        },
+        {
+          "package": "theme-cycle",
+          "command": "discover-themes",
+          "optional": true,
+          "note": "主题发现"
+        },
+        {
+          "package": "theme-cycle",
+          "command": "sector-cycle-panorama",
+          "optional": true,
+          "note": "板块周期全景"
+        },
+        {
+          "package": "theme-cycle",
+          "command": "mainline-update",
+          "optional": true,
+          "note": "更新主线系统 (全球/A股)"
+        },
+        {
+          "package": "themesurfer-signal",
+          "command": "signal",
+          "optional": true,
+          "note": "MA20 市场过滤器 (FULL/LOCKOUT)"
+        },
+        {
+          "package": "equity-screening",
+          "command": "stock-screening-v2",
+          "optional": true,
+          "note": "候选池筛选"
+        },
+        {
+          "package": "equity-research",
+          "command": "narrative-analysis",
+          "optional": true,
+          "note": "叙事/基本面分析"
+        },
+        {
+          "package": "trade-planning",
+          "command": "short-term-analysis",
+          "optional": true,
+          "note": "短线交易计划"
+        },
+        {
+          "package": "position-ops",
+          "command": "position-management-v2",
+          "optional": true,
+          "note": "持仓评估"
+        },
+        {
+          "package": "advice-lifecycle",
+          "command": "nightly-strategy",
+          "optional": false,
+          "note": "生成晚间策略报告"
+        },
+        {
+          "package": "execution-automation",
+          "command": "nightly-push",
+          "optional": true,
+          "note": "推送报告"
+        }
+      ]
+    },
+    {
+      "id": "morning",
+      "label": "盘前计划",
+      "description": "盘前计划报告链路 (隔夜+宏观+过滤器确认)",
+      "steps": [
+        {
+          "package": "execution-automation",
+          "command": "morning-prewarm",
+          "optional": false,
+          "note": "盘前数据预热"
+        },
+        {
+          "package": "market-data",
+          "command": "calendar-week",
+          "optional": true,
+          "note": "交易日/解禁/业绩/交割日"
+        },
+        {
+          "package": "market-intel",
+          "command": "daily-news-scan",
+          "optional": true,
+          "note": "隔夜新闻扫描"
+        },
+        {
+          "package": "macro-regime",
+          "command": "global-macro-analysis",
+          "optional": true,
+          "note": "全球宏观环境"
+        },
+        {
+          "package": "themesurfer-signal",
+          "command": "signal",
+          "optional": true,
+          "note": "市场过滤器确认"
+        },
+        {
+          "package": "advice-lifecycle",
+          "command": "morning-briefing",
+          "optional": false,
+          "note": "生成盘前计划"
+        },
+        {
+          "package": "execution-automation",
+          "command": "morning-push",
+          "optional": true,
+          "note": "推送报告"
+        }
+      ]
+    },
+    {
+      "id": "market-review",
+      "label": "盘后复盘",
+      "description": "盘后复盘报告链路 (盘后快照+宏观复盘)",
+      "steps": [
+        {
+          "package": "execution-automation",
+          "command": "midday-prewarm",
+          "optional": false,
+          "note": "盘后预热"
+        },
+        {
+          "package": "market-data",
+          "command": "snapshot-full",
+          "optional": false,
+          "note": "盘后市场快照"
+        },
+        {
+          "package": "market-data",
+          "command": "margin-full",
+          "optional": true,
+          "note": "两融资金变动"
+        },
+        {
+          "package": "market-intel",
+          "command": "daily-news-scan",
+          "optional": true,
+          "note": "新闻/政策扫描"
+        },
+        {
+          "package": "macro-regime",
+          "command": "market-review",
+          "optional": false,
+          "note": "生成盘后复盘"
+        },
+        {
+          "package": "advice-lifecycle",
+          "command": "market-review",
+          "optional": false,
+          "note": "盘后复盘报告生成"
+        },
+        {
+          "package": "theme-cycle",
+          "command": "sector-cycle-panorama",
+          "optional": true,
+          "note": "板块周期全景"
+        },
+        {
+          "package": "execution-automation",
+          "command": "intraday-push",
+          "optional": true,
+          "note": "推送报告"
+        }
+      ]
+    },
+    {
+      "id": "weekly",
+      "label": "周报",
+      "description": "周度资产报告链路 (宏观+主题+资产配置)",
+      "steps": [
+        {
+          "package": "execution-automation",
+          "command": "weekly-prewarm",
+          "optional": false,
+          "note": "周报前置预热"
+        },
+        {
+          "package": "quality-gate",
+          "command": "backtest-loop",
+          "optional": true,
+          "note": "回测循环"
+        },
+        {
+          "package": "market-intel",
+          "command": "research-reports",
+          "optional": true,
+          "note": "研报摘要"
+        },
+        {
+          "package": "theme-cycle",
+          "command": "global-medium-long-strategy",
+          "optional": true,
+          "note": "全球中长期策略"
+        },
+        {
+          "package": "macro-regime",
+          "command": "global-macro-analysis",
+          "optional": true,
+          "note": "全球宏观环境"
+        },
+        {
+          "package": "weekly-stock-pool",
+          "command": "weekly-stock-pool",
+          "optional": true,
+          "note": "周度股票池整理"
+        },
+        {
+          "package": "advice-lifecycle",
+          "command": "weekly-asset-report",
+          "optional": false,
+          "note": "生成周报"
+        },
+        {
+          "package": "execution-automation",
+          "command": "weekly-push",
+          "optional": true,
+          "note": "推送报告"
+        }
+      ]
+    }
+  ]
+}

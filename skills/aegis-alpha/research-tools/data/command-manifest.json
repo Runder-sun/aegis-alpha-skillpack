@@ -1,0 +1,99 @@
+{
+  "package": "research-tools",
+  "description": "Shared research and information-retrieval routing tools.",
+  "commands": [
+    {
+      "name": "analysis-history",
+      "description": "List recent report, pipeline, and evidence artifacts from workspace memory.",
+      "status": "implemented",
+      "legacy_functions": ["analysis_history"],
+      "payload_schema": {
+        "type": "object",
+        "properties": {
+          "limit": {"type": "integer", "minimum": 1, "maximum": 100, "default": 10}
+        }
+      },
+      "result_schema": {"$ref": "#/$defs/research_tool_result"}
+    },
+    {
+      "name": "help",
+      "description": "Show public research-tools commands and rehomed legacy commands.",
+      "status": "implemented",
+      "legacy_functions": ["help"],
+      "payload_schema": {"type": "object", "properties": {}},
+      "result_schema": {"$ref": "#/$defs/research_tool_result"}
+    },
+    {
+      "name": "search-and-extract",
+      "description": "Route a query to search-layer search, or route a URL to content-extract.",
+      "status": "implemented",
+      "legacy_functions": ["search_and_extract"],
+      "payload_schema": {
+        "type": "object",
+        "properties": {
+          "query": {"type": "string"},
+          "queries": {"type": "array", "items": {"type": "string"}},
+          "url": {"type": "string"},
+          "intent": {"type": "string"},
+          "freshness": {"type": "string"},
+          "num": {"type": "integer", "minimum": 1},
+          "extract_refs": {"type": "boolean", "default": true}
+        }
+      },
+      "result_schema": {"$ref": "#/$defs/research_tool_result"}
+    },
+    {
+      "name": "set-preference",
+      "description": "Persist a research preference under workspace memory.",
+      "status": "implemented",
+      "legacy_functions": ["set_preference"],
+      "payload_schema": {
+        "type": "object",
+        "required": ["key"],
+        "properties": {
+          "key": {"type": "string"},
+          "value": {}
+        }
+      },
+      "result_schema": {"$ref": "#/$defs/research_tool_result"}
+    },
+    {
+      "name": "web-content-fetch",
+      "description": "Fetch and normalize a URL through content-extract.",
+      "status": "implemented",
+      "legacy_functions": ["web_content_fetch"],
+      "payload_schema": {
+        "type": "object",
+        "required": ["url"],
+        "properties": {
+          "url": {"type": "string"},
+          "max_chars": {"type": "integer", "minimum": 1},
+          "force": {"type": "boolean"}
+        }
+      },
+      "result_schema": {"$ref": "#/$defs/research_tool_result"}
+    }
+  ],
+  "retired_commands": {
+    "asset-allocation": "Use macro-regime/theme-cycle/trade-planning.",
+    "asset-bull-bear": "Use macro-regime.",
+    "global-asset-scan": "Use macro-regime::global-macro-analysis.",
+    "grok-search": "No configured Grok API; use search-layer."
+  },
+  "$defs": {
+    "research_tool_result": {
+      "type": "object",
+      "required": ["ok", "decision_allowed", "warnings", "errors", "result"],
+      "properties": {
+        "ok": {"type": "boolean"},
+        "decision_allowed": {"type": "boolean", "const": false},
+        "max_action_level": {"type": "string", "const": "research_only"},
+        "sources": {"type": "array", "items": {"type": "string"}},
+        "artifacts": {"type": "array", "items": {"type": "string"}},
+        "warnings": {"type": "array", "items": {"type": "string"}},
+        "errors": {"type": "array", "items": {"type": "string"}},
+        "result": {"type": "object"}
+      }
+    }
+  }
+}

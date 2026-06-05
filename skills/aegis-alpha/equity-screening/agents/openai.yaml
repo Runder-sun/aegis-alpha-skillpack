@@ -1,0 +1,3 @@
+display_name: Equity Screening
+short_description: Universe construction and candidate stock screening.
+default_prompt: Use `equity-screening` commands to complete this task.

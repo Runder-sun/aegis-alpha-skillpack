@@ -1,0 +1,13 @@
+{
+  "phase": "phase-1",
+  "pipelines": ["nightly"],
+  "capture_commands": ["capture-report-evidence"],
+  "align_commands": ["align-report-outcome"],
+  "timezone": "Asia/Shanghai",
+  "system_version": "phase1-bootstrap",
+  "persona_bundle_version": "unconfigured",
+  "evidence_root": "memory/report_evidence",
+  "evolution_log_root": "memory/evolution/logs",
+  "version_root": "memory/evolution/versions",
+  "rollback_root": "memory/evolution/rollback"
+}

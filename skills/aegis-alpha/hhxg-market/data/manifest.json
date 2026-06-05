@@ -1,0 +1,22 @@
+{
+  "package": "hhxg-market",
+  "description": "A 股量化数据助手（恢恢量化）— 日报快照、A股日历、融资融券",
+  "commands": [
+    {"name": "snapshot-full",     "description": "完整盘后日报快照"},
+    {"name": "snapshot-market",   "description": "赚钱效应 / 涨跌停 / 炸板"},
+    {"name": "snapshot-themes",   "description": "热门题材排行"},
+    {"name": "snapshot-ladder",   "description": "连板天梯"},
+    {"name": "snapshot-hotmoney", "description": "游资龙虎榜"},
+    {"name": "snapshot-sectors",  "description": "行业板块资金流向"},
+    {"name": "snapshot-news",     "description": "焦点新闻"},
+    {"name": "snapshot-summary",  "description": "AI 一句话总结"},
+    {"name": "calendar-week",     "description": "本周 A 股日历"},
+    {"name": "calendar-trading",  "description": "查询某天是否交易日"},
+    {"name": "calendar-unlock",   "description": "某月限售股解禁"},
+    {"name": "calendar-earnings", "description": "某月业绩预告"},
+    {"name": "calendar-delivery", "description": "全年期货交割日"},
+    {"name": "margin-full",       "description": "融资融券完整报告"},
+    {"name": "margin-overview",   "description": "融资融券市场总览"},
+    {"name": "margin-top",        "description": "融资净买入/净卖出 TOP"}
+  ]
+}

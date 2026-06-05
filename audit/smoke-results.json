@@ -1,0 +1,3693 @@
+{
+  "ok": true,
+  "workspace": "/tmp/aegis-alpha-smoke",
+  "checks": [
+    {
+      "name": "portfolio-view fails closed when state is missing",
+      "ok": true,
+      "detail": {
+        "ok": false,
+        "package": "portfolio-ops",
+        "command": "portfolio-view",
+        "payload": {},
+        "as_of": "2026-06-05T07:27:51.958755+00:00",
+        "freshness": {
+          "status": "delegated"
+        },
+        "decision_allowed": false,
+        "requires_human_confirmation": true,
+        "max_action_level": "analysis_only",
+        "source": "portfolio-management::portfolio-view",
+        "sources": [
+          "portfolio-management::portfolio-view"
+        ],
+        "artifacts": [],
+        "warnings": [],
+        "errors": [
+          "portfolio_state_missing"
+        ],
+        "missing_critical_inputs": [
+          "portfolio_state_missing"
+        ],
+        "result": {
+          "delegated": {
+            "package": "portfolio-management",
+            "command": "portfolio-view",
+            "payload": {},
+            "ok": false,
+            "decision_allowed": false,
+            "max_action_level": "analysis_only",
+            "sources": [],
+            "artifacts": [],
+            "warnings": [],
+            "errors": [
+              "portfolio_state_missing"
+            ],
+            "result": {
+              "portfolio_state_known": false,
+              "positions": null,
+              "note": "Portfolio state is unavailable; do not infer an empty portfolio."
+            }
+          }
+        },
+        "_returncode": 2
+      }
+    },
+    {
+      "name": "portfolio-add creates state artifact",
+      "ok": true,
+      "detail": {
+        "ok": true,
+        "package": "portfolio-ops",
+        "command": "portfolio-add",
+        "payload": {
+          "code": "600519",
+          "name": "贵州茅台",
+          "quantity": 10,
+          "price": 1500
+        },
+        "as_of": "2026-06-05T07:27:52.077135+00:00",
+        "freshness": {
+          "status": "delegated"
+        },
+        "decision_allowed": false,
+        "requires_human_confirmation": true,
+        "max_action_level": "analysis_only",
+        "source": "portfolio-management::portfolio-add",
+        "sources": [
+          "portfolio-management::portfolio-add"
+        ],
+        "artifacts": [
+          "/tmp/aegis-alpha-smoke/memory/positions.json",
+          "/tmp/aegis-alpha-smoke/memory/trades.jsonl"
+        ],
+        "warnings": [],
+        "errors": [],
+        "missing_critical_inputs": [],
+        "result": {
+          "delegated": {
+            "package": "portfolio-management",
+            "command": "portfolio-add",
+            "payload": {
+              "code": "600519",
+              "name": "贵州茅台",
+              "quantity": 10,
+              "price": 1500
+            },
+            "ok": true,
+            "decision_allowed": false,
+            "max_action_level": "analysis_only",
+            "sources": [],
+            "artifacts": [
+              "/tmp/aegis-alpha-smoke/memory/positions.json",
+              "/tmp/aegis-alpha-smoke/memory/trades.jsonl"
+            ],
+            "warnings": [],
+            "errors": [],
+            "result": {
+              "portfolio_state_known": true,
+              "position": {
+                "code": "600519",
+                "name": "贵州茅台",
+                "quantity": 10.0,
+                "cost_basis": 1500.0,
+                "opened_at": "2026-06-05T07:27:52.069235+00:00",
+                "updated_at": "2026-06-05T07:27:52.069235+00:00",
+                "notes": ""
+              },
+              "position_count": 1
+            }
+          }
+        },
+        "_returncode": 0
+      }
+    },
+    {
+      "name": "record-trade sell updates remaining quantity",
+      "ok": true,
+      "detail": {
+        "ok": true,
+        "package": "portfolio-ops",
+        "command": "record-trade",
+        "payload": {
+          "code": "600519",
+          "side": "sell",
+          "quantity": 3,
+          "price": 1600
+        },
+        "as_of": "2026-06-05T07:27:52.197182+00:00",
+        "freshness": {
+          "status": "delegated"
+        },
+        "decision_allowed": false,
+        "requires_human_confirmation": true,
+        "max_action_level": "analysis_only",
+        "source": "portfolio-management::record-trade",
+        "sources": [
+          "portfolio-management::record-trade"
+        ],
+        "artifacts": [
+          "/tmp/aegis-alpha-smoke/memory/positions.json",
+          "/tmp/aegis-alpha-smoke/memory/trades.jsonl"
+        ],
+        "warnings": [],
+        "errors": [],
+        "missing_critical_inputs": [],
+        "result": {
+          "delegated": {
+            "package": "portfolio-management",
+            "command": "record-trade",
+            "payload": {
+              "code": "600519",
+              "side": "sell",
+              "quantity": 3,
+              "price": 1600
+            },
+            "ok": true,
+            "decision_allowed": false,
+            "max_action_level": "analysis_only",
+            "sources": [],
+            "artifacts": [
+              "/tmp/aegis-alpha-smoke/memory/positions.json",
+              "/tmp/aegis-alpha-smoke/memory/trades.jsonl"
+            ],
+            "warnings": [],
+            "errors": [],
+            "result": {
+              "portfolio_state_known": true,
+              "position_count": 1,
+              "remaining_quantity": 7.0
+            }
+          }
+        },
+        "_returncode": 0
+      }
+    },
+    {
+      "name": "record-trade oversell fails closed",
+      "ok": true,
+      "detail": {
+        "ok": false,
+        "package": "portfolio-ops",
+        "command": "record-trade",
+        "payload": {
+          "code": "600519",
+          "side": "sell",
+          "quantity": 99,
+          "price": 1600
+        },
+        "as_of": "2026-06-05T07:27:52.338549+00:00",
+        "freshness": {
+          "status": "delegated"
+        },
+        "decision_allowed": false,
+        "requires_human_confirmation": true,
+        "max_action_level": "analysis_only",
+        "source": "portfolio-management::record-trade",
+        "sources": [
+          "portfolio-management::record-trade"
+        ],
+        "artifacts": [],
+        "warnings": [
+          "set allow_negative=true only for explicit short/borrow workflows"
+        ],
+        "errors": [
+          "sell_quantity_exceeds_position"
+        ],
+        "missing_critical_inputs": [
+          "sell_quantity_exceeds_position"
+        ],
+        "result": {
+          "delegated": {
+            "package": "portfolio-management",
+            "command": "record-trade",
+            "payload": {
+              "code": "600519",
+              "side": "sell",
+              "quantity": 99,
+              "price": 1600
+            },
+            "ok": false,
+            "decision_allowed": false,
+            "max_action_level": "analysis_only",
+            "sources": [],
+            "artifacts": [],
+            "warnings": [
+              "set allow_negative=true only for explicit short/borrow workflows"
+            ],
+            "errors": [
+              "sell_quantity_exceeds_position"
+            ],
+            "result": {
+              "portfolio_state_known": true,
+              "positions": null,
+              "note": "Portfolio state is known, but the requested operation is not allowed."
+            }
+          }
+        },
+        "_returncode": 2
+      }
+    },
+    {
+      "name": "position-management-v2 reads known state",
+      "ok": true,
+      "detail": {
+        "ok": true,
+        "package": "portfolio-ops",
+        "command": "position-management",
+        "payload": {},
+        "as_of": "2026-06-05T07:27:52.484599+00:00",
+        "freshness": {
+          "status": "delegated"
+        },
+        "decision_allowed": false,
+        "requires_human_confirmation": true,
+        "max_action_level": "analysis_only",
+        "source": "position-ops::position-management-v2",
+        "sources": [
+          "position-ops::position-management-v2"
+        ],
+        "artifacts": [],
+        "warnings": [],
+        "errors": [],
+        "missing_critical_inputs": [],
+        "result": {
+          "delegated": {
+            "package": "position-ops",
+            "command": "position-management-v2",
+            "payload": {},
+            "ok": true,
+            "decision_allowed": false,
+            "max_action_level": "analysis_only",
+            "sources": [
+              "/tmp/aegis-alpha-smoke/memory/positions.json"
+            ],
+            "warnings": [],
+            "errors": [],
+            "result": {
+              "portfolio_state_known": true,
+              "positions": [
+                {
+                  "code": "600519",
+                  "name": "贵州茅台",
+                  "quantity": 7.0,
+                  "cost_basis": 1500.0,
+                  "opened_at": "2026-06-05T07:27:52.069235+00:00",
+                  "updated_at": "2026-06-05T07:27:52.188573+00:00",
+                  "notes": ""
+                }
+              ],
+              "count": 1
+            }
+          }
+        },
+        "_returncode": 0
+      }
+    },
+    {
+      "name": "portfolio-risk-check flags concentration",
+      "ok": true,
+      "detail": {
+        "ok": true,
+        "package": "portfolio-ops",
+        "command": "portfolio-risk-check",
+        "payload": {
+          "max_single_position_pct": 0.5
+        },
+        "as_of": "2026-06-05T07:27:52.659274+00:00",
+        "freshness": {
+          "status": "delegated"
+        },
+        "decision_allowed": false,
+        "requires_human_confirmation": true,
+        "max_action_level": "analysis_only",
+        "source": "position-ops::portfolio-risk-check",
+        "sources": [
+          "position-ops::portfolio-risk-check"
+        ],
+        "artifacts": [],
+        "warnings": [
+          "risk_check_uses_cost_value_when_current_price_missing"
+        ],
+        "errors": [],
+        "missing_critical_inputs": [],
+        "result": {
+          "delegated": {
+            "package": "position-ops",
+            "command": "portfolio-risk-check",
+            "payload": {
+              "max_single_position_pct": 0.5
+            },
+            "ok": true,
+            "decision_allowed": false,
+            "max_action_level": "analysis_only",
+            "sources": [
+              "/tmp/aegis-alpha-smoke/memory/positions.json"
+            ],
+            "warnings": [
+              "risk_check_uses_cost_value_when_current_price_missing"
+            ],
+            "errors": [],
+            "result": {
+              "portfolio_state_known": true,
+              "position_count": 1,
+              "total_value_estimate": 10500.0,
+              "max_single_position_pct": 0.5,
+              "positions": [
+                {
+                  "code": "600519",
+                  "name": "贵州茅台",
+                  "value": 10500.0,
+                  "value_mode": "cost_value",
+                  "weight": 1.0
+                }
+              ],
+              "risk_flags": [
+                {
+                  "code": "600519",
+                  "risk": "single_position_concentration",
+                  "weight": 1.0,
+                  "limit": 0.5
+                }
+              ],
+              "risk_flag_count": 1
+            }
+          }
+        },
+        "_returncode": 0
+      }
+    },
+    {
+      "name": "position-sizing-advisor fails closed on missing inputs",
+      "ok": true,
+      "detail": {
+        "ok": false,
+        "package": "portfolio-ops",
+        "command": "position-sizing-advisor",
+        "payload": {
+          "portfolio_value": 100000
+        },
+        "as_of": "2026-06-05T07:27:52.854735+00:00",
+        "freshness": {
+          "status": "delegated"
+        },
+        "decision_allowed": false,
+        "requires_human_confirmation": true,
+        "max_action_level": "analysis_only",
+        "source": "position-ops::position-sizing-advisor",
+        "sources": [
+          "position-ops::position-sizing-advisor"
+        ],
+        "artifacts": [],
+        "warnings": [],
+        "errors": [
+          "missing_required_input:risk_budget_pct",
+          "missing_required_input:stop_loss_pct"
+        ],
+        "missing_critical_inputs": [
+          "missing_required_input:risk_budget_pct",
+          "missing_required_input:stop_loss_pct"
+        ],
+        "result": {
+          "delegated": {
+            "package": "position-ops",
+            "command": "position-sizing-advisor",
+            "payload": {
+              "portfolio_value": 100000
+            },
+            "ok": false,
+            "decision_allowed": false,
+            "max_action_level": "analysis_only",
+            "sources": [],
+            "warnings": [],
+            "errors": [
+              "missing_required_input:risk_budget_pct",
+              "missing_required_input:stop_loss_pct"
+            ],
+            "result": {
+              "portfolio_state_known": null,
+              "positions": null,
+              "note": "Sizing inputs are incomplete; do not use a derived position size."
+            }
+          }
+        },
+        "_returncode": 2
+      }
+    },
+    {
+      "name": "information-retrieval research-history returns local artifact envelope",
+      "ok": true,
+      "detail": {
+        "ok": true,
+        "package": "information-retrieval",
+        "command": "research-history",
+        "payload": {},
+        "as_of": "2026-06-05T07:27:52.980526+00:00",
+        "freshness": {
+          "status": "delegated"
+        },
+        "decision_allowed": false,
+        "requires_human_confirmation": true,
+        "max_action_level": "research_only",
+        "source": "research-tools::analysis-history",
+        "sources": [
+          "research-tools::analysis-history"
+        ],
+        "artifacts": [],
+        "warnings": [],
+        "errors": [],
+        "missing_critical_inputs": [],
+        "result": {
+          "delegated": {
+            "package": "research-tools",
+            "command": "analysis-history",
+            "payload": {},
+            "ok": true,
+            "decision_allowed": false,
+            "max_action_level": "research_only",
+            "sources": [
+              "/tmp/aegis-alpha-smoke/memory"
+            ],
+            "artifacts": [],
+            "warnings": [],
+            "errors": [],
+            "result": {
+              "items": [],
+              "count": 0,
+              "total_found": 0
+            }
+          }
+        },
+        "_returncode": 0
+      }
+    },
+    {
+      "name": "information-retrieval set-research-preference writes artifact",
+      "ok": true,
+      "detail": {
+        "ok": true,
+        "package": "information-retrieval",
+        "command": "set-research-preference",
+        "payload": {
+          "key": "preferred_sources",
+          "value": [
+            "official",
+            "exchange",
+            "company"
+          ]
+        },
+        "as_of": "2026-06-05T07:27:53.076139+00:00",
+        "freshness": {
+          "status": "delegated"
+        },
+        "decision_allowed": false,
+        "requires_human_confirmation": true,
+        "max_action_level": "research_only",
+        "source": "research-tools::set-preference",
+        "sources": [
+          "research-tools::set-preference"
+        ],
+        "artifacts": [
+          "/tmp/aegis-alpha-smoke/memory/research/preferences.json"
+        ],
+        "warnings": [],
+        "errors": [],
+        "missing_critical_inputs": [],
+        "result": {
+          "delegated": {
+            "package": "research-tools",
+            "command": "set-preference",
+            "payload": {
+              "key": "preferred_sources",
+              "value": [
+                "official",
+                "exchange",
+                "company"
+              ]
+            },
+            "ok": true,
+            "decision_allowed": false,
+            "max_action_level": "research_only",
+            "sources": [],
+            "artifacts": [
+              "/tmp/aegis-alpha-smoke/memory/research/preferences.json"
+            ],
+            "warnings": [],
+            "errors": [],
+            "result": {
+              "key": "preferred_sources",
+              "value": [
+                "official",
+                "exchange",
+                "company"
+              ]
+            }
+          }
+        },
+        "_returncode": 0
+      }
+    },
+    {
+      "name": "equity financial-diagnosis scores supplied metrics",
+      "ok": true,
+      "detail": {
+        "package": "equity-research",
+        "command": "financial-diagnosis",
+        "payload": {
+          "code": "600519",
+          "name": "贵州茅台",
+          "metrics": {
+            "roe": 0.28,
+            "net_margin": 0.42,
+            "revenue_growth": 0.12,
+            "net_profit_growth": 0.15,
+            "debt_to_asset": 0.22,
+            "operating_cashflow": 720,
+            "net_profit": 650,
+            "price": 1500,
+            "eps": 60,
+            "industry_pe": 30,
+            "dividend_yield": 0.035
+          },
+          "context": {
+            "summary": "高端白酒龙头，现金流强。",
+            "thesis": "品牌和渠道壁垒支撑长期盈利。",
+            "risks": [
+              "消费疲弱",
+              "估值波动"
+            ]
+          },
+          "news": [
+            {
+              "title": "贵州茅台发布经营数据",
+              "content": "贵州茅台收入增长稳健"
+            }
+          ],
+          "narrative_score": 75
+        },
+        "as_of": "2026-06-05T07:27:53.123383+00:00",
+        "freshness": {
+          "status": "current",
+          "as_of": "2026-06-05T07:27:53.123383+00:00",
+          "policy": "research freshness is inherited from supplied metrics, evidence, and latest prewarm artifact when used"
+        },
+        "ok": true,
+        "decision_allowed": false,
+        "requires_human_confirmation": true,
+        "max_action_level": "research_only",
+        "source": [],
+        "sources": [],
+        "artifacts": [],
+        "warnings": [],
+        "errors": [],
+        "missing_critical_inputs": [],
+        "result": {
+          "metrics_used": [
+            "debt_to_asset",
+            "net_margin",
+            "net_profit",
+            "net_profit_growth",
+            "operating_cashflow",
+            "revenue_growth",
+            "roe"
+          ],
+          "cashflow_quality": 1.1076923076923078,
+          "strengths": [
+            "cashflow_supports_profit",
+            "healthy_net_margin",
+            "revenue_growth_positive",
+            "roe_strong"
+          ],
+          "risks": [],
+          "flags": [],
+          "financial_quality_score": 82,
+          "grade": "strong"
+        },
+        "_returncode": 0
+      }
+    },
+    {
+      "name": "equity valuation-check fails closed without valuation metrics",
+      "ok": true,
+      "detail": {
+        "package": "equity-research",
+        "command": "valuation-check",
+        "payload": {
+          "code": "600519"
+        },
+        "as_of": "2026-06-05T07:27:53.170590+00:00",
+        "freshness": {
+          "status": "unavailable",
+          "as_of": "2026-06-05T07:27:53.170590+00:00",
+          "policy": "research freshness is inherited from supplied metrics, evidence, and latest prewarm artifact when used"
+        },
+        "ok": false,
+        "decision_allowed": false,
+        "requires_human_confirmation": true,
+        "max_action_level": "research_only",
+        "source": [],
+        "sources": [],
+        "artifacts": [],
+        "warnings": [
+          "provide pe/pb/dividend_yield/fcf_yield or price+eps"
+        ],
+        "errors": [
+          "valuation_metrics_missing"
+        ],
+        "missing_critical_inputs": [
+          "valuation_metrics_missing"
+        ],
+        "result": {
+          "note": "Equity research evidence is incomplete; do not infer an investment conclusion.",
+          "missing_critical_inputs": [
+            "valuation_metrics_missing"
+          ]
+        },
+        "_returncode": 0
+      }
+    },
+    {
+      "name": "equity stock-analysis composes complete research package",
+      "ok": true,
+      "detail": {
+        "package": "equity-research",
+        "command": "stock-analysis",
+        "payload": {
+          "code": "600519",
+          "name": "贵州茅台",
+          "metrics": {
+            "roe": 0.28,
+            "net_margin": 0.42,
+            "revenue_growth": 0.12,
+            "net_profit_growth": 0.15,
+            "debt_to_asset": 0.22,
+            "operating_cashflow": 720,
+            "net_profit": 650,
+            "price": 1500,
+            "eps": 60,
+            "industry_pe": 30,
+            "dividend_yield": 0.035
+          },
+          "context": {
+            "summary": "高端白酒龙头，现金流强。",
+            "thesis": "品牌和渠道壁垒支撑长期盈利。",
+            "risks": [
+              "消费疲弱",
+              "估值波动"
+            ]
+          },
+          "news": [
+            {
+              "title": "贵州茅台发布经营数据",
+              "content": "贵州茅台收入增长稳健"
+            }
+          ],
+          "narrative_score": 75
+        },
+        "as_of": "2026-06-05T07:27:53.215377+00:00",
+        "freshness": {
+          "status": "current",
+          "as_of": "2026-06-05T07:27:53.215377+00:00",
+          "policy": "research freshness is inherited from supplied metrics, evidence, and latest prewarm artifact when used"
+        },
+        "ok": true,
+        "decision_allowed": false,
+        "requires_human_confirmation": true,
+        "max_action_level": "research_only",
+        "source": [],
+        "sources": [
+          "payload.context",
+          "payload.news"
+        ],
+        "artifacts": [],
+        "warnings": [],
+        "errors": [],
+        "missing_critical_inputs": [],
+        "result": {
+          "sections": {
+            "news": {
+              "code": "600519",
+              "name": "贵州茅台",
+              "query": "600519",
+              "items": [
+                {
+                  "title": "贵州茅台发布经营数据",
+                  "content": "贵州茅台收入增长稳健"
+                }
+              ],
+              "count": 1,
+              "total_found": 1
+            },
+            "narrative": {
+              "summary": "高端白酒龙头，现金流强。",
+              "themes": [],
+              "thesis": "品牌和渠道壁垒支撑长期盈利。",
+              "risks": [
+                "消费疲弱",
+                "估值波动"
+              ],
+              "source": "payload.context + prewarm.hhxg_snapshot"
+            },
+            "fundamental": {
+              "quality": {
+                "metrics_used": [
+                  "debt_to_asset",
+                  "net_margin",
+                  "net_profit",
+                  "net_profit_growth",
+                  "operating_cashflow",
+                  "revenue_growth",
+                  "roe"
+                ],
+                "cashflow_quality": 1.1076923076923078,
+                "strengths": [
+                  "cashflow_supports_profit",
+                  "healthy_net_margin",
+                  "revenue_growth_positive",
+                  "roe_strong"
+                ],
+                "risks": [],
+                "flags": [],
+                "financial_quality_score": 82,
+                "grade": "strong"
+              },
+              "business_model": null,
+              "competitive_position": null,
+              "key_questions": [
+                "Can growth persist without margin erosion?",
+                "Is cash flow quality consistent across cycles?",
+                "Does balance-sheet risk constrain strategy?"
+              ]
+            },
+            "valuation": {
+              "pe": 25.0,
+              "pb": null,
+              "peg": 1.6666666666666667,
+              "industry_pe": 30.0,
+              "dividend_yield": 0.035,
+              "fcf_yield": null,
+              "positives": [
+                "shareholder_return_support"
+              ],
+              "valuation_flags": [],
+              "valuation_score": 68,
+              "grade": "fair"
+            },
+            "score": {
+              "score": 75.7,
+              "components": {
+                "financial_quality": 82,
+                "valuation": 68,
+                "narrative": 75.0
+              },
+              "weights": {
+                "financial_quality": 0.45,
+                "valuation": 0.35,
+                "narrative": 0.2
+              },
+              "risk_penalty": 0,
+              "grade": "watchlist"
+            }
+          },
+          "missing_sections": [],
+          "research_complete": true,
+          "decision_allowed": false
+        },
+        "_returncode": 0
+      }
+    },
+    {
+      "name": "equity-screening stock-screening scores payload candidates",
+      "ok": true,
+      "detail": {
+        "package": "equity-screening",
+        "command": "stock-screening",
+        "payload": {
+          "candidates": [
+            {
+              "name": "贵州茅台",
+              "theme": "消费",
+              "net_yi": 5,
+              "news_hits": 2,
+              "research_hits": 1
+            },
+            {
+              "name": "宁德时代",
+              "theme": "新能源",
+              "net_yi": 8,
+              "limitup": 2,
+              "news_hits": 3
+            }
+          ],
+          "min_score": 50
+        },
+        "as_of": "2026-06-05T07:27:53.262570+00:00",
+        "freshness": {
+          "status": "current",
+          "as_of": "2026-06-05T07:27:53.262570+00:00",
+          "policy": "screening freshness is inherited from supplied candidates or the latest prewarm artifact"
+        },
+        "ok": true,
+        "decision_allowed": false,
+        "requires_human_confirmation": true,
+        "max_action_level": "research_only",
+        "source": [],
+        "sources": [
+          "payload.candidates"
+        ],
+        "artifacts": [],
+        "warnings": [],
+        "errors": [],
+        "missing_critical_inputs": [],
+        "result": {
+          "candidates": [
+            {
+              "name": "宁德时代",
+              "theme": "新能源",
+              "net_yi": 8,
+              "limitup": 2,
+              "news_hits": 3,
+              "score": 70.5,
+              "score_breakdown": {
+                "capital": 80.0,
+                "theme_match": 100,
+                "info": 50.0,
+                "sentiment": 50.0,
+                "risk_penalty": 0
+              }
+            },
+            {
+              "name": "贵州茅台",
+              "theme": "消费",
+              "net_yi": 5,
+              "news_hits": 2,
+              "research_hits": 1,
+              "score": 60.0,
+              "score_breakdown": {
+                "capital": 50.0,
+                "theme_match": 100,
+                "info": 50.0,
+                "sentiment": 50.0,
+                "risk_penalty": 0
+              }
+            }
+          ],
+          "count": 2,
+          "total_input": 2,
+          "score_schema": {
+            "capital": 0.35,
+            "theme_match": 0.2,
+            "info": 0.25,
+            "sentiment": 0.2
+          }
+        },
+        "_returncode": 0
+      }
+    },
+    {
+      "name": "equity-screening stock-screening fails closed without candidates or prewarm",
+      "ok": true,
+      "detail": {
+        "package": "equity-screening",
+        "command": "stock-screening",
+        "payload": {},
+        "as_of": "2026-06-05T07:27:53.307679+00:00",
+        "freshness": {
+          "status": "unavailable",
+          "as_of": "2026-06-05T07:27:53.307679+00:00",
+          "policy": "screening freshness is inherited from supplied candidates or the latest prewarm artifact"
+        },
+        "ok": false,
+        "decision_allowed": false,
+        "requires_human_confirmation": true,
+        "max_action_level": "research_only",
+        "source": [],
+        "sources": [],
+        "artifacts": [],
+        "warnings": [
+          "provide candidates or run market prewarm"
+        ],
+        "errors": [
+          "candidates_missing"
+        ],
+        "missing_critical_inputs": [
+          "candidates_missing"
+        ],
+        "result": {
+          "note": "Screening evidence is incomplete; do not infer an empty opportunity set.",
+          "missing_critical_inputs": [
+            "candidates_missing"
+          ]
+        },
+        "_returncode": 0
+      }
+    },
+    {
+      "name": "equity-screening layered-stock-screening returns candidate layers",
+      "ok": true,
+      "detail": {
+        "package": "equity-screening",
+        "command": "layered-stock-screening",
+        "payload": {
+          "candidates": [
+            {
+              "name": "贵州茅台",
+              "theme": "消费",
+              "net_yi": 5,
+              "news_hits": 2,
+              "research_hits": 1
+            },
+            {
+              "name": "宁德时代",
+              "theme": "新能源",
+              "net_yi": 8,
+              "limitup": 2,
+              "news_hits": 3
+            }
+          ],
+          "min_score": 50
+        },
+        "as_of": "2026-06-05T07:27:53.352664+00:00",
+        "freshness": {
+          "status": "current",
+          "as_of": "2026-06-05T07:27:53.352664+00:00",
+          "policy": "screening freshness is inherited from supplied candidates or the latest prewarm artifact"
+        },
+        "ok": true,
+        "decision_allowed": false,
+        "requires_human_confirmation": true,
+        "max_action_level": "research_only",
+        "source": [],
+        "sources": [
+          "payload.candidates"
+        ],
+        "artifacts": [],
+        "warnings": [],
+        "errors": [],
+        "missing_critical_inputs": [],
+        "result": {
+          "layers": {
+            "core": [],
+            "watchlist": [
+              {
+                "name": "宁德时代",
+                "theme": "新能源",
+                "net_yi": 8,
+                "limitup": 2,
+                "news_hits": 3,
+                "score": 70.5,
+                "score_breakdown": {
+                  "capital": 80.0,
+                  "theme_match": 100,
+                  "info": 50.0,
+                  "sentiment": 50.0,
+                  "risk_penalty": 0
+                }
+              },
+              {
+                "name": "贵州茅台",
+                "theme": "消费",
+                "net_yi": 5,
+                "news_hits": 2,
+                "research_hits": 1,
+                "score": 60.0,
+                "score_breakdown": {
+                  "capital": 50.0,
+                  "theme_match": 100,
+                  "info": 50.0,
+                  "sentiment": 50.0,
+                  "risk_penalty": 0
+                }
+              }
+            ],
+            "reject": []
+          },
+          "count": 2,
+          "total_input": 2,
+          "score_schema": {
+            "capital": 0.35,
+            "theme_match": 0.2,
+            "info": 0.25,
+            "sentiment": 0.2
+          }
+        },
+        "_returncode": 0
+      }
+    },
+    {
+      "name": "equity-screening stock-rating rates one candidate",
+      "ok": true,
+      "detail": {
+        "package": "equity-screening",
+        "command": "stock-rating",
+        "payload": {
+          "candidate": {
+            "name": "贵州茅台",
+            "theme": "消费",
+            "net_yi": 5,
+            "news_hits": 2,
+            "research_hits": 1
+          }
+        },
+        "as_of": "2026-06-05T07:27:53.398275+00:00",
+        "freshness": {
+          "status": "current",
+          "as_of": "2026-06-05T07:27:53.398275+00:00",
+          "policy": "screening freshness is inherited from supplied candidates or the latest prewarm artifact"
+        },
+        "ok": true,
+        "decision_allowed": false,
+        "requires_human_confirmation": true,
+        "max_action_level": "research_only",
+        "source": [],
+        "sources": [],
+        "artifacts": [],
+        "warnings": [],
+        "errors": [],
+        "missing_critical_inputs": [],
+        "result": {
+          "candidate": {
+            "name": "贵州茅台",
+            "theme": "消费",
+            "net_yi": 5,
+            "news_hits": 2,
+            "research_hits": 1,
+            "score": 60.0,
+            "score_breakdown": {
+              "capital": 50.0,
+              "theme_match": 100,
+              "info": 50.0,
+              "sentiment": 50.0,
+              "risk_penalty": 0
+            }
+          },
+          "grade": "watchlist"
+        },
+        "_returncode": 0
+      }
+    },
+    {
+      "name": "equity-screening evidence collection fails closed without evidence source",
+      "ok": true,
+      "detail": {
+        "package": "equity-screening",
+        "command": "company-evidence-collect",
+        "payload": {
+          "name": "贵州茅台"
+        },
+        "as_of": "2026-06-05T07:27:53.442842+00:00",
+        "freshness": {
+          "status": "unavailable",
+          "as_of": "2026-06-05T07:27:53.442842+00:00",
+          "policy": "screening freshness is inherited from supplied candidates or the latest prewarm artifact"
+        },
+        "ok": false,
+        "decision_allowed": false,
+        "requires_human_confirmation": true,
+        "max_action_level": "research_only",
+        "source": [],
+        "sources": [],
+        "artifacts": [],
+        "warnings": [
+          "provide reports/news payload or run market prewarm"
+        ],
+        "errors": [
+          "evidence_source_missing"
+        ],
+        "missing_critical_inputs": [
+          "evidence_source_missing"
+        ],
+        "result": {
+          "note": "Screening evidence is incomplete; do not infer an empty opportunity set.",
+          "missing_critical_inputs": [
+            "evidence_source_missing"
+          ]
+        },
+        "_returncode": 0
+      }
+    },
+    {
+      "name": "equity-screening evidence collection uses payload evidence",
+      "ok": true,
+      "detail": {
+        "package": "equity-screening",
+        "command": "company-evidence-collect",
+        "payload": {
+          "name": "贵州茅台",
+          "news": [
+            {
+              "title": "贵州茅台发布经营数据",
+              "content": "贵州茅台收入增长稳健"
+            }
+          ]
+        },
+        "as_of": "2026-06-05T07:27:53.491415+00:00",
+        "freshness": {
+          "status": "current",
+          "as_of": "2026-06-05T07:27:53.491415+00:00",
+          "policy": "screening freshness is inherited from supplied candidates or the latest prewarm artifact"
+        },
+        "ok": true,
+        "decision_allowed": false,
+        "requires_human_confirmation": true,
+        "max_action_level": "research_only",
+        "source": [],
+        "sources": [
+          "payload.news"
+        ],
+        "artifacts": [],
+        "warnings": [],
+        "errors": [],
+        "missing_critical_inputs": [],
+        "result": {
+          "reports": [],
+          "news": [
+            {
+              "title": "贵州茅台发布经营数据",
+              "content": "贵州茅台收入增长稳健"
+            }
+          ],
+          "code": "",
+          "name": "贵州茅台"
+        },
+        "_returncode": 0
+      }
+    },
+    {
+      "name": "equity-screening stock-pool update writes artifact",
+      "ok": true,
+      "detail": {
+        "package": "equity-screening",
+        "command": "stock-pool-incremental-am",
+        "payload": {
+          "candidates": [
+            {
+              "name": "贵州茅台",
+              "theme": "消费",
+              "net_yi": 5,
+              "news_hits": 2,
+              "research_hits": 1
+            },
+            {
+              "name": "宁德时代",
+              "theme": "新能源",
+              "net_yi": 8,
+              "limitup": 2,
+              "news_hits": 3
+            }
+          ],
+          "min_score": 50
+        },
+        "as_of": "2026-06-05T07:27:53.537662+00:00",
+        "freshness": {
+          "status": "current",
+          "as_of": "2026-06-05T07:27:53.537662+00:00",
+          "policy": "screening freshness is inherited from supplied candidates or the latest prewarm artifact"
+        },
+        "ok": true,
+        "decision_allowed": false,
+        "requires_human_confirmation": true,
+        "max_action_level": "research_only",
+        "source": [],
+        "sources": [
+          "payload.candidates"
+        ],
+        "artifacts": [
+          "/tmp/aegis-alpha-smoke/memory/stock_pool/screening-pool.json"
+        ],
+        "warnings": [],
+        "errors": [],
+        "missing_critical_inputs": [],
+        "result": {
+          "added": [
+            {
+              "name": "宁德时代",
+              "theme": "新能源",
+              "net_yi": 8,
+              "limitup": 2,
+              "news_hits": 3,
+              "score": 70.5,
+              "score_breakdown": {
+                "capital": 80.0,
+                "theme_match": 100,
+                "info": 50.0,
+                "sentiment": 50.0,
+                "risk_penalty": 0
+              },
+              "session": "am"
+            },
+            {
+              "name": "贵州茅台",
+              "theme": "消费",
+              "net_yi": 5,
+              "news_hits": 2,
+              "research_hits": 1,
+              "score": 60.0,
+              "score_breakdown": {
+                "capital": 50.0,
+                "theme_match": 100,
+                "info": 50.0,
+                "sentiment": 50.0,
+                "risk_penalty": 0
+              },
+              "session": "am"
+            }
+          ],
+          "added_count": 2,
+          "pool_count": 2
+        },
+        "_returncode": 0
+      }
+    },
+    {
+      "name": "equity-screening stock-pool maintenance fails closed on corrupt pool",
+      "ok": true,
+      "detail": {
+        "package": "equity-screening",
+        "command": "stock-pool-maintenance",
+        "payload": {
+          "candidates": [
+            {
+              "name": "贵州茅台",
+              "theme": "消费",
+              "net_yi": 5,
+              "news_hits": 2,
+              "research_hits": 1
+            },
+            {
+              "name": "宁德时代",
+              "theme": "新能源",
+              "net_yi": 8,
+              "limitup": 2,
+              "news_hits": 3
+            }
+          ],
+          "min_score": 50
+        },
+        "as_of": "2026-06-05T07:27:53.587672+00:00",
+        "freshness": {
+          "status": "unavailable",
+          "as_of": "2026-06-05T07:27:53.587672+00:00",
+          "policy": "screening freshness is inherited from supplied candidates or the latest prewarm artifact"
+        },
+        "ok": false,
+        "decision_allowed": false,
+        "requires_human_confirmation": true,
+        "max_action_level": "research_only",
+        "source": [],
+        "sources": [],
+        "artifacts": [],
+        "warnings": [],
+        "errors": [
+          "stock_pool_invalid_json"
+        ],
+        "missing_critical_inputs": [
+          "stock_pool_invalid_json"
+        ],
+        "result": {
+          "note": "Screening evidence is incomplete; do not infer an empty opportunity set.",
+          "missing_critical_inputs": [
+            "stock_pool_invalid_json"
+          ]
+        },
+        "_returncode": 0
+      }
+    },
+    {
+      "name": "trade short-term-analysis fails closed without candidates or prewarm",
+      "ok": true,
+      "detail": {
+        "package": "trade-planning",
+        "command": "short-term-analysis",
+        "payload": {
+          "themesurfer_status": "FULL"
+        },
+        "as_of": "2026-06-05T07:27:53.633054+00:00",
+        "freshness": {
+          "status": "unavailable",
+          "as_of": "2026-06-05T07:27:53.633054+00:00",
+          "policy": "trade-planning freshness is inherited from supplied candidates, technical inputs, and latest prewarm artifact"
+        },
+        "ok": false,
+        "decision_allowed": false,
+        "max_action_level": "paper_plan_only",
+        "requires_human_confirmation": true,
+        "source": [],
+        "sources": [],
+        "artifacts": [],
+        "warnings": [
+          "provide candidates or run market prewarm"
+        ],
+        "errors": [
+          "candidates_missing"
+        ],
+        "missing_critical_inputs": [
+          "candidates_missing"
+        ],
+        "result": {
+          "note": "Trade plan inputs are incomplete; do not infer an executable plan.",
+          "missing_critical_inputs": [
+            "candidates_missing"
+          ]
+        },
+        "_returncode": 0
+      }
+    },
+    {
+      "name": "theme-cycle themesurfer-check fails closed without market risk inputs",
+      "ok": true,
+      "detail": {
+        "package": "theme-cycle",
+        "command": "themesurfer-check",
+        "payload": {},
+        "as_of": "2026-06-05T07:27:53.687568+00:00",
+        "freshness": {
+          "status": "unavailable",
+          "as_of": "2026-06-05T07:27:53.687568+00:00",
+          "policy": "theme-cycle freshness is inherited from latest prewarm artifact, theme store, and macro-regime outputs"
+        },
+        "ok": false,
+        "decision_allowed": false,
+        "requires_human_confirmation": true,
+        "max_action_level": "research_only",
+        "source": [],
+        "sources": [],
+        "artifacts": [],
+        "warnings": [],
+        "errors": [
+          "market_risk_inputs_missing"
+        ],
+        "missing_critical_inputs": [
+          "market_risk_inputs_missing"
+        ],
+        "result": {
+          "note": "Theme-cycle evidence is incomplete; do not infer rotation, theme status, or portfolio action.",
+          "missing_critical_inputs": [
+            "market_risk_inputs_missing"
+          ]
+        },
+        "_returncode": 0
+      }
+    },
+    {
+      "name": "market-intel sentiment index fails closed without snapshot inputs",
+      "ok": true,
+      "detail": {
+        "package": "market-intel",
+        "command": "market-sentiment-index",
+        "payload": {},
+        "as_of": "2026-06-05T07:27:53.760309+00:00",
+        "freshness": {
+          "status": "unavailable",
+          "as_of": "2026-06-05T07:27:53.760309+00:00",
+          "policy": "market intelligence freshness is inherited from latest prewarm artifact and explicit provider result timestamps"
+        },
+        "ok": false,
+        "decision_allowed": false,
+        "requires_human_confirmation": true,
+        "max_action_level": "research_only",
+        "source": [],
+        "sources": [],
+        "artifacts": [],
+        "warnings": [],
+        "errors": [
+          "market_sentiment_inputs_missing"
+        ],
+        "missing_critical_inputs": [
+          "market_sentiment_inputs_missing"
+        ],
+        "result": {
+          "note": "Market intelligence evidence is incomplete; do not infer sentiment, event impact, or trading action.",
+          "missing_critical_inputs": [
+            "market_sentiment_inputs_missing"
+          ]
+        },
+        "_returncode": 0
+      }
+    },
+    {
+      "name": "macro-regime query fails closed without snapshot inputs",
+      "ok": true,
+      "detail": {
+        "package": "macro-regime",
+        "command": "macro-regime-query",
+        "payload": {},
+        "as_of": "2026-06-05T07:27:53.842343+00:00",
+        "freshness": {
+          "status": "unavailable",
+          "as_of": "2026-06-05T07:27:53.842343+00:00",
+          "policy": "macro-regime freshness is inherited from latest prewarm artifact, macro cache, and explicit provider timestamps"
+        },
+        "ok": false,
+        "decision_allowed": false,
+        "requires_human_confirmation": true,
+        "max_action_level": "research_only",
+        "source": [],
+        "sources": [],
+        "artifacts": [],
+        "warnings": [],
+        "errors": [
+          "macro_regime_inputs_missing"
+        ],
+        "missing_critical_inputs": [
+          "macro_regime_inputs_missing"
+        ],
+        "result": {
+          "note": "Macro evidence is incomplete; do not infer a market regime or portfolio action.",
+          "missing_critical_inputs": [
+            "macro_regime_inputs_missing"
+          ]
+        },
+        "_returncode": 0
+      }
+    },
+    {
+      "name": "macro-regime query returns risk-off bundle from snapshot",
+      "ok": true,
+      "detail": {
+        "package": "macro-regime",
+        "command": "macro-regime-query",
+        "payload": {},
+        "as_of": "2026-06-05T07:27:53.925315+00:00",
+        "freshness": {
+          "status": "current",
+          "as_of": "2026-06-05T07:27:53.925315+00:00",
+          "policy": "macro-regime freshness is inherited from latest prewarm artifact, macro cache, and explicit provider timestamps"
+        },
+        "ok": true,
+        "decision_allowed": false,
+        "requires_human_confirmation": true,
+        "max_action_level": "research_only",
+        "source": [],
+        "sources": [
+          "hhxg_snapshot"
+        ],
+        "artifacts": [],
+        "warnings": [],
+        "errors": [],
+        "missing_critical_inputs": [],
+        "result": {
+          "risk": {
+            "risk_score": 7,
+            "risk_level": "red",
+            "risk_mode": "risk_off",
+            "reasons": [
+              "sentiment_index_below_30",
+              "limit_down_above_10",
+              "fried_board_above_30",
+              "promotion_rate_below_25pct"
+            ],
+            "inputs": {
+              "sentiment_index": 28.0,
+              "limit_down": 12.0,
+              "fried": 35.0,
+              "promotion_rate": 0.2
+            }
+          },
+          "risk_budget_reference": {
+            "max_equity": 0.2,
+            "cash_min": 0.5,
+            "new_position_allowed": false
+          },
+          "capital_flow": {
+            "hotmoney_total_net_yi": 21.5,
+            "top_net_buy": [
+              {
+                "name": "贵州茅台",
+                "code": "600519",
+                "net_yi": 5.2
+              }
+            ],
+            "sector_strong_net": [
+              {
+                "label": "行业",
+                "name": "半导体",
+                "leader": "中芯国际",
+                "net_yi": 6,
+                "limitup_count": 2
+              }
+            ],
+            "source": "hhxg_snapshot"
+          },
+          "sector_rotation": {
+            "sectors": [
+              {
+                "label": "行业",
+                "strong": [
+                  {
+                    "name": "半导体",
+                    "leader": "中芯国际",
+                    "net_yi": 6,
+                    "limitup_count": 2
+                  }
+                ],
+                "weak": [
+                  {
+                    "name": "地产"
+                  }
+                ]
+              }
+            ],
+            "source": "hhxg_snapshot.sectors"
+          },
+          "concept_heat": {
+            "heat": [
+              {
+                "name": "AI算力",
+                "score": 100.0,
+                "net_yi": 8.0,
+                "limitup_count": 3.0,
+                "stock_count": 18.0,
+                "top_stocks": [
+                  {
+                    "name": "中科曙光"
+                  }
+                ],
+                "source": "hhxg_snapshot.hot_themes"
+              }
+            ],
+            "source": "hhxg_snapshot.hot_themes/sectors"
+          },
+          "source": "hhxg_snapshot"
+        },
+        "_returncode": 0
+      }
+    },
+    {
+      "name": "macro-regime concept-heat ranks hot themes",
+      "ok": true,
+      "detail": {
+        "package": "macro-regime",
+        "command": "concept-heat",
+        "payload": {},
+        "as_of": "2026-06-05T07:27:54.026107+00:00",
+        "freshness": {
+          "status": "current",
+          "as_of": "2026-06-05T07:27:54.026107+00:00",
+          "policy": "macro-regime freshness is inherited from latest prewarm artifact, macro cache, and explicit provider timestamps"
+        },
+        "ok": true,
+        "decision_allowed": false,
+        "requires_human_confirmation": true,
+        "max_action_level": "research_only",
+        "source": [],
+        "sources": [
+          "hhxg_snapshot.hot_themes/sectors"
+        ],
+        "artifacts": [],
+        "warnings": [],
+        "errors": [],
+        "missing_critical_inputs": [],
+        "result": {
+          "heat": [
+            {
+              "name": "AI算力",
+              "score": 100.0,
+              "net_yi": 8.0,
+              "limitup_count": 3.0,
+              "stock_count": 18.0,
+              "top_stocks": [
+                {
+                  "name": "中科曙光"
+                }
+              ],
+              "source": "hhxg_snapshot.hot_themes"
+            }
+          ],
+          "source": "hhxg_snapshot.hot_themes/sectors"
+        },
+        "_returncode": 0
+      }
+    },
+    {
+      "name": "macro-regime alert check emits high risk alerts",
+      "ok": true,
+      "detail": {
+        "package": "macro-regime",
+        "command": "macro-alert-check",
+        "payload": {},
+        "as_of": "2026-06-05T07:27:54.125102+00:00",
+        "freshness": {
+          "status": "current",
+          "as_of": "2026-06-05T07:27:54.125102+00:00",
+          "policy": "macro-regime freshness is inherited from latest prewarm artifact, macro cache, and explicit provider timestamps"
+        },
+        "ok": true,
+        "decision_allowed": false,
+        "requires_human_confirmation": true,
+        "max_action_level": "research_only",
+        "source": [],
+        "sources": [
+          "hhxg_snapshot.market"
+        ],
+        "artifacts": [],
+        "warnings": [],
+        "errors": [],
+        "missing_critical_inputs": [],
+        "result": {
+          "risk": {
+            "risk_score": 7,
+            "risk_level": "red",
+            "risk_mode": "risk_off",
+            "reasons": [
+              "sentiment_index_below_30",
+              "limit_down_above_10",
+              "fried_board_above_30",
+              "promotion_rate_below_25pct"
+            ],
+            "inputs": {
+              "sentiment_index": 28.0,
+              "limit_down": 12.0,
+              "fried": 35.0,
+              "promotion_rate": 0.2
+            }
+          },
+          "alerts": [
+            {
+              "severity": "high",
+              "code": "sentiment_index_below_30",
+              "message": "Macro/market risk trigger: sentiment_index_below_30"
+            },
+            {
+              "severity": "high",
+              "code": "limit_down_above_10",
+              "message": "Macro/market risk trigger: limit_down_above_10"
+            },
+            {
+              "severity": "high",
+              "code": "fried_board_above_30",
+              "message": "Macro/market risk trigger: fried_board_above_30"
+            },
+            {
+              "severity": "high",
+              "code": "promotion_rate_below_25pct",
+              "message": "Macro/market risk trigger: promotion_rate_below_25pct"
+            }
+          ],
+          "source": "hhxg_snapshot.market"
+        },
+        "_returncode": 0
+      }
+    },
+    {
+      "name": "market-intel sentiment index reads snapshot inputs",
+      "ok": true,
+      "detail": {
+        "package": "market-intel",
+        "command": "market-sentiment-index",
+        "payload": {},
+        "as_of": "2026-06-05T07:27:54.200688+00:00",
+        "freshness": {
+          "status": "current",
+          "as_of": "2026-06-05T07:27:54.200688+00:00",
+          "policy": "market intelligence freshness is inherited from latest prewarm artifact and explicit provider result timestamps"
+        },
+        "ok": true,
+        "decision_allowed": false,
+        "requires_human_confirmation": true,
+        "max_action_level": "research_only",
+        "source": [],
+        "sources": [
+          "hhxg_snapshot.market"
+        ],
+        "artifacts": [],
+        "warnings": [],
+        "errors": [],
+        "missing_critical_inputs": [],
+        "result": {
+          "date": null,
+          "sentiment_index": 28,
+          "sentiment_label": null,
+          "limit_up": null,
+          "limit_down": 12,
+          "fried": 35,
+          "promotion_rate": 0.2,
+          "source": "hhxg_snapshot.market"
+        },
+        "_returncode": 0
+      }
+    },
+    {
+      "name": "market-intel daily news scan reads prewarm news",
+      "ok": true,
+      "detail": {
+        "package": "market-intel",
+        "command": "daily-news-scan",
+        "payload": {},
+        "as_of": "2026-06-05T07:27:54.279040+00:00",
+        "freshness": {
+          "status": "current",
+          "as_of": "2026-06-05T07:27:54.279040+00:00",
+          "policy": "market intelligence freshness is inherited from latest prewarm artifact and explicit provider result timestamps"
+        },
+        "ok": true,
+        "decision_allowed": false,
+        "requires_human_confirmation": true,
+        "max_action_level": "research_only",
+        "source": [],
+        "sources": [
+          "hhxg_news",
+          "jin10",
+          "tushare.news",
+          "tushare.major_news",
+          "tavily",
+          "qveris"
+        ],
+        "artifacts": [],
+        "warnings": [],
+        "errors": [],
+        "missing_critical_inputs": [],
+        "result": {
+          "count": 2,
+          "a_share": [
+            {
+              "title": "A股收评：半导体走强",
+              "summary": "半导体板块走强",
+              "datetime": null,
+              "source": "hhxg_news",
+              "scope": "a_share"
+            }
+          ],
+          "global": [
+            {
+              "title": "Fed signals rate cut",
+              "summary": "global markets risk on",
+              "datetime": null,
+              "source": "tushare.major_news",
+              "scope": "global"
+            }
+          ],
+          "china_macro": [
+            {
+              "title": "中国PMI发布",
+              "summary": "中国PMI保持扩张",
+              "datetime": null,
+              "source": "tushare.news",
+              "scope": "china_macro"
+            }
+          ],
+          "source": [
+            "hhxg_news",
+            "jin10",
+            "tushare.news",
+            "tushare.major_news",
+            "tavily",
+            "qveris"
+          ]
+        },
+        "_returncode": 0
+      }
+    },
+    {
+      "name": "market-intel policy-analysis reads policy feed",
+      "ok": true,
+      "detail": {
+        "package": "market-intel",
+        "command": "policy-analysis",
+        "payload": {},
+        "as_of": "2026-06-05T07:27:54.367520+00:00",
+        "freshness": {
+          "status": "current",
+          "as_of": "2026-06-05T07:27:54.367520+00:00",
+          "policy": "market intelligence freshness is inherited from latest prewarm artifact and explicit provider result timestamps"
+        },
+        "ok": true,
+        "decision_allowed": false,
+        "requires_human_confirmation": true,
+        "max_action_level": "research_only",
+        "source": [],
+        "sources": [
+          "tushare.npr"
+        ],
+        "artifacts": [],
+        "warnings": [],
+        "errors": [],
+        "missing_critical_inputs": [],
+        "result": {
+          "policies": [
+            {
+              "title": "支持科技创新政策",
+              "issue_date": "20260604",
+              "doc_type": null,
+              "source": null,
+              "summary": "支持半导体和AI"
+            }
+          ],
+          "source": "tushare.npr"
+        },
+        "_returncode": 0
+      }
+    },
+    {
+      "name": "market-intel research-reports reads report feed",
+      "ok": true,
+      "detail": {
+        "package": "market-intel",
+        "command": "research-reports",
+        "payload": {},
+        "as_of": "2026-06-05T07:27:54.443888+00:00",
+        "freshness": {
+          "status": "current",
+          "as_of": "2026-06-05T07:27:54.443888+00:00",
+          "policy": "market intelligence freshness is inherited from latest prewarm artifact and explicit provider result timestamps"
+        },
+        "ok": true,
+        "decision_allowed": false,
+        "requires_human_confirmation": true,
+        "max_action_level": "research_only",
+        "source": [],
+        "sources": [
+          "hhxg_snapshot.focus_news/macro_news + tushare.research_report"
+        ],
+        "artifacts": [],
+        "warnings": [],
+        "errors": [],
+        "missing_critical_inputs": [],
+        "result": {
+          "focus_news": [],
+          "macro_news": [],
+          "research_reports": [
+            {
+              "title": "半导体行业研究",
+              "org": "券商",
+              "author": "分析师",
+              "issue_date": "20260604",
+              "summary": "景气改善",
+              "ts_code": "000001.SZ"
+            }
+          ],
+          "source": "hhxg_snapshot.focus_news/macro_news + tushare.research_report"
+        },
+        "_returncode": 0
+      }
+    },
+    {
+      "name": "theme-cycle themesurfer-check returns lockout under red risk",
+      "ok": true,
+      "detail": {
+        "package": "theme-cycle",
+        "command": "themesurfer-check",
+        "payload": {},
+        "as_of": "2026-06-05T07:27:54.503549+00:00",
+        "freshness": {
+          "status": "current",
+          "as_of": "2026-06-05T07:27:54.503549+00:00",
+          "policy": "theme-cycle freshness is inherited from latest prewarm artifact, theme store, and macro-regime outputs"
+        },
+        "ok": true,
+        "decision_allowed": false,
+        "requires_human_confirmation": true,
+        "max_action_level": "research_only",
+        "source": [],
+        "sources": [
+          "hhxg_snapshot.market"
+        ],
+        "artifacts": [],
+        "warnings": [],
+        "errors": [],
+        "missing_critical_inputs": [],
+        "result": {
+          "status": "LOCKOUT",
+          "allow_new_positions": false,
+          "risk_level": "red",
+          "risk_score": 6,
+          "reasons": [
+            "sentiment_index_below_30",
+            "limit_down_above_10",
+            "fried_board_above_30"
+          ],
+          "inputs": {
+            "sentiment_index": 28.0,
+            "limit_down": 12.0,
+            "fried": 35.0
+          },
+          "source": "hhxg_snapshot.market"
+        },
+        "_returncode": 0
+      }
+    },
+    {
+      "name": "theme-cycle event-analysis maps event to active theme",
+      "ok": true,
+      "detail": {
+        "package": "theme-cycle",
+        "command": "event-analysis",
+        "payload": {
+          "events": [
+            {
+              "title": "AI算力政策催化，通胀风险升温"
+            }
+          ]
+        },
+        "as_of": "2026-06-05T07:27:54.564588+00:00",
+        "freshness": {
+          "status": "current",
+          "as_of": "2026-06-05T07:27:54.564588+00:00",
+          "policy": "theme-cycle freshness is inherited from latest prewarm artifact, theme store, and macro-regime outputs"
+        },
+        "ok": true,
+        "decision_allowed": false,
+        "requires_human_confirmation": true,
+        "max_action_level": "research_only",
+        "source": [],
+        "sources": [
+          "payload.events/prewarm.events + themes"
+        ],
+        "artifacts": [],
+        "warnings": [],
+        "errors": [],
+        "missing_critical_inputs": [],
+        "result": {
+          "events": [
+            {
+              "event": "AI算力政策催化，通胀风险升温",
+              "matched_themes": [
+                "AI算力"
+              ],
+              "risk_flag": true,
+              "source": "payload/prewarm"
+            }
+          ],
+          "theme_count": 2,
+          "source": "payload.events/prewarm.events + themes"
+        },
+        "_returncode": 0
+      }
+    },
+    {
+      "name": "theme-cycle rebalance-check returns paper-only lockout actions",
+      "ok": true,
+      "detail": {
+        "package": "theme-cycle",
+        "command": "rebalance-check",
+        "payload": {},
+        "as_of": "2026-06-05T07:27:54.633852+00:00",
+        "freshness": {
+          "status": "current",
+          "as_of": "2026-06-05T07:27:54.633852+00:00",
+          "policy": "theme-cycle freshness is inherited from latest prewarm artifact, theme store, and macro-regime outputs"
+        },
+        "ok": true,
+        "decision_allowed": false,
+        "requires_human_confirmation": true,
+        "max_action_level": "research_only",
+        "source": [],
+        "sources": [
+          "theme-store/snapshot + market risk"
+        ],
+        "artifacts": [],
+        "warnings": [],
+        "errors": [],
+        "missing_critical_inputs": [],
+        "result": {
+          "risk": {
+            "risk_score": 6,
+            "risk_level": "red",
+            "themesurfer_status": "LOCKOUT",
+            "allow_new_positions": false,
+            "reasons": [
+              "sentiment_index_below_30",
+              "limit_down_above_10",
+              "fried_board_above_30"
+            ],
+            "inputs": {
+              "sentiment_index": 28.0,
+              "limit_down": 12.0,
+              "fried": 35.0
+            }
+          },
+          "actions": [
+            {
+              "theme": "半导体",
+              "action": "no_new_adds",
+              "reason": "market risk lockout",
+              "paper_only": true
+            },
+            {
+              "theme": "AI算力",
+              "action": "no_new_adds",
+              "reason": "market risk lockout",
+              "paper_only": true
+            }
+          ],
+          "source": "theme-store/snapshot + market risk"
+        },
+        "_returncode": 0
+      }
+    },
+    {
+      "name": "theme-cycle theme-tracker reads local theme store",
+      "ok": true,
+      "detail": {
+        "package": "theme-cycle",
+        "command": "theme-tracker",
+        "payload": {},
+        "as_of": "2026-06-05T07:27:54.689826+00:00",
+        "freshness": {
+          "status": "current",
+          "as_of": "2026-06-05T07:27:54.689826+00:00",
+          "policy": "theme-cycle freshness is inherited from latest prewarm artifact, theme store, and macro-regime outputs"
+        },
+        "ok": true,
+        "decision_allowed": false,
+        "requires_human_confirmation": true,
+        "max_action_level": "research_only",
+        "source": [],
+        "sources": [
+          "theme-store"
+        ],
+        "artifacts": [
+          "/tmp/aegis-alpha-smoke/memory/themes.json"
+        ],
+        "warnings": [],
+        "errors": [],
+        "missing_critical_inputs": [],
+        "result": {
+          "themes": [
+            {
+              "name": "AI算力",
+              "horizon": "ultra_short",
+              "asset_class": "A股",
+              "status": "active",
+              "lifecycle": "accelerating",
+              "history": [
+                {
+                  "date": "2026-06-04",
+                  "changes": {
+                    "created": true
+                  }
+                }
+              ]
+            }
+          ],
+          "count": 1,
+          "store_path": "/tmp/aegis-alpha-smoke/memory/themes.json",
+          "source": "theme-store"
+        },
+        "_returncode": 0
+      }
+    },
+    {
+      "name": "theme-cycle weekly stats summarizes local theme store",
+      "ok": true,
+      "detail": {
+        "package": "theme-cycle",
+        "command": "themesurfer-weekly-stats",
+        "payload": {},
+        "as_of": "2026-06-05T07:27:54.746710+00:00",
+        "freshness": {
+          "status": "current",
+          "as_of": "2026-06-05T07:27:54.746710+00:00",
+          "policy": "theme-cycle freshness is inherited from latest prewarm artifact, theme store, and macro-regime outputs"
+        },
+        "ok": true,
+        "decision_allowed": false,
+        "requires_human_confirmation": true,
+        "max_action_level": "research_only",
+        "source": [],
+        "sources": [
+          "theme-store"
+        ],
+        "artifacts": [],
+        "warnings": [],
+        "errors": [],
+        "missing_critical_inputs": [],
+        "result": {
+          "theme_count": 1,
+          "lifecycle_counts": {
+            "accelerating": 1
+          },
+          "status_counts": {
+            "active": 1
+          },
+          "history_events": 1,
+          "source": "theme-store"
+        },
+        "_returncode": 0
+      }
+    },
+    {
+      "name": "trade short-term-analysis returns paper-only candidates",
+      "ok": true,
+      "detail": {
+        "package": "trade-planning",
+        "command": "short-term-analysis",
+        "payload": {
+          "themesurfer_status": "FULL",
+          "risk_level": "green",
+          "themes": [
+            {
+              "name": "消费",
+              "strength": 0.8
+            }
+          ],
+          "candidates": [
+            {
+              "name": "贵州茅台",
+              "theme": "消费",
+              "net_yi": 5,
+              "limitup": 1,
+              "news_hits": 2,
+              "research_hits": 1
+            }
+          ],
+          "technical": {
+            "price": 1500,
+            "ma20": 1450,
+            "ma60": 1400,
+            "support": 1380,
+            "resistance": 1680,
+            "rsi": 62
+          }
+        },
+        "as_of": "2026-06-05T07:27:54.811598+00:00",
+        "freshness": {
+          "status": "current",
+          "as_of": "2026-06-05T07:27:54.811598+00:00",
+          "policy": "trade-planning freshness is inherited from supplied candidates, technical inputs, and latest prewarm artifact"
+        },
+        "ok": true,
+        "decision_allowed": false,
+        "max_action_level": "paper_plan_only",
+        "requires_human_confirmation": true,
+        "source": [],
+        "sources": [
+          "/tmp/aegis-alpha-smoke/memory/prewarm/nightly-prewarm-2026-06-04.json",
+          "payload.candidates"
+        ],
+        "artifacts": [],
+        "warnings": [],
+        "errors": [],
+        "missing_critical_inputs": [],
+        "result": {
+          "themesurfer_status": "FULL",
+          "allow_new_positions": true,
+          "risk_level": "green",
+          "risk_reason": "payload risk level",
+          "position_cap": 0.6,
+          "single_position_cap": 0.1,
+          "candidates": [
+            {
+              "name": "贵州茅台",
+              "theme": "消费",
+              "net_yi": 5,
+              "limitup": 1,
+              "news_hits": 2,
+              "research_hits": 1,
+              "score": 37.5,
+              "score_breakdown": {
+                "event": 33.33,
+                "trend": 25.0,
+                "heat": 50.0,
+                "sentiment": 50.0,
+                "risk_penalty": 0
+              }
+            }
+          ],
+          "score_schema": {
+            "event": 0.3,
+            "trend": 0.3,
+            "heat": 0.2,
+            "sentiment": 0.2,
+            "risk_penalty": "depends on risk_level"
+          },
+          "note": "paper plan only; human confirmation required"
+        },
+        "_returncode": 0
+      }
+    },
+    {
+      "name": "trade full-investment-plan composes complete paper plan",
+      "ok": true,
+      "detail": {
+        "package": "trade-planning",
+        "command": "full-investment-plan",
+        "payload": {
+          "themesurfer_status": "FULL",
+          "risk_level": "green",
+          "themes": [
+            {
+              "name": "消费",
+              "strength": 0.8
+            }
+          ],
+          "candidates": [
+            {
+              "name": "贵州茅台",
+              "theme": "消费",
+              "net_yi": 5,
+              "limitup": 1,
+              "news_hits": 2,
+              "research_hits": 1
+            }
+          ],
+          "technical": {
+            "price": 1500,
+            "ma20": 1450,
+            "ma60": 1400,
+            "support": 1380,
+            "resistance": 1680,
+            "rsi": 62
+          }
+        },
+        "as_of": "2026-06-05T07:27:54.872940+00:00",
+        "freshness": {
+          "status": "current",
+          "as_of": "2026-06-05T07:27:54.872940+00:00",
+          "policy": "trade-planning freshness is inherited from supplied candidates, technical inputs, and latest prewarm artifact"
+        },
+        "ok": true,
+        "decision_allowed": false,
+        "max_action_level": "paper_plan_only",
+        "requires_human_confirmation": true,
+        "source": [],
+        "sources": [
+          "/tmp/aegis-alpha-smoke/memory/prewarm/nightly-prewarm-2026-06-04.json",
+          "payload.candidates",
+          "payload.themes"
+        ],
+        "artifacts": [],
+        "warnings": [],
+        "errors": [],
+        "missing_critical_inputs": [],
+        "result": {
+          "plan_complete": true,
+          "missing_sections": [],
+          "sections": {
+            "short_term": {
+              "themesurfer_status": "FULL",
+              "allow_new_positions": true,
+              "risk_level": "green",
+              "risk_reason": "payload risk level",
+              "position_cap": 0.6,
+              "single_position_cap": 0.1,
+              "candidates": [
+                {
+                  "name": "贵州茅台",
+                  "theme": "消费",
+                  "net_yi": 5,
+                  "limitup": 1,
+                  "news_hits": 2,
+                  "research_hits": 1,
+                  "score": 37.5,
+                  "score_breakdown": {
+                    "event": 33.33,
+                    "trend": 25.0,
+                    "heat": 50.0,
+                    "sentiment": 50.0,
+                    "risk_penalty": 0
+                  }
+                }
+              ],
+              "score_schema": {
+                "event": 0.3,
+                "trend": 0.3,
+                "heat": 0.2,
+                "sentiment": 0.2,
+                "risk_penalty": "depends on risk_level"
+              },
+              "note": "paper plan only; human confirmation required"
+            },
+            "themes": {
+              "themes": [
+                {
+                  "name": "消费",
+                  "strength": 0.8
+                }
+              ],
+              "count": 1
+            },
+            "targets": {
+              "theme_targets": [
+                {
+                  "theme": "消费",
+                  "targets": [
+                    {
+                      "name": "贵州茅台",
+                      "theme": "消费",
+                      "net_yi": 5,
+                      "limitup": 1,
+                      "news_hits": 2,
+                      "research_hits": 1
+                    }
+                  ]
+                }
+              ],
+              "theme_count": 1
+            },
+            "strategy": {
+              "strategy": "pilot_then_scale",
+              "rules": [
+                "Start with pilot size only after human confirmation.",
+                "Scale only after thesis confirmation and market filter remains FULL.",
+                "Cut exposure when invalidation trigger is hit."
+              ],
+              "risk_level": "green",
+              "themesurfer_status": "FULL",
+              "position_cap": 0.6,
+              "single_position_cap": 0.1,
+              "top_candidates": [
+                {
+                  "name": "贵州茅台",
+                  "theme": "消费",
+                  "net_yi": 5,
+                  "limitup": 1,
+                  "news_hits": 2,
+                  "research_hits": 1,
+                  "score": 37.5,
+                  "score_breakdown": {
+                    "event": 33.33,
+                    "trend": 25.0,
+                    "heat": 50.0,
+                    "sentiment": 50.0,
+                    "risk_penalty": 0
+                  }
+                }
+              ]
+            },
+            "technical": {
+              "trend": "uptrend",
+              "flags": [],
+              "entry_zone": [
+                1470.0,
+                1515.0
+              ],
+              "stop_loss_reference": 1380.0,
+              "take_profit_reference": 1680.0,
+              "invalid_if": [
+                "price closes below stop_loss_reference",
+                "market filter enters LOCKOUT"
+              ]
+            }
+          },
+          "execution_policy": {
+            "decision_allowed": false,
+            "requires_human_confirmation": true,
+            "max_action_level": "paper_plan_only"
+          }
+        },
+        "_returncode": 0
+      }
+    },
+    {
+      "name": "advice-lifecycle history fails closed without ledger",
+      "ok": true,
+      "detail": {
+        "package": "advice-lifecycle",
+        "command": "advice-history",
+        "payload": {},
+        "as_of": "2026-06-05T07:27:54Z",
+        "freshness": {
+          "status": "unavailable",
+          "as_of": "2026-06-05T07:27:54Z",
+          "policy": "workspace ledger and supplied payload are current only at command runtime; market freshness is inherited from source artifacts."
+        },
+        "ok": false,
+        "decision_allowed": false,
+        "requires_human_confirmation": true,
+        "max_action_level": "research_only",
+        "source": [],
+        "sources": [],
+        "artifacts": [],
+        "warnings": [],
+        "errors": [
+          "advice_ledger_missing"
+        ],
+        "missing_critical_inputs": [
+          "advice_ledger_missing"
+        ],
+        "result": {
+          "note": "Advice lifecycle evidence is incomplete; do not infer, execute, or refresh investment advice.",
+          "missing_critical_inputs": [
+            "advice_ledger_missing"
+          ]
+        },
+        "_returncode": 0
+      }
+    },
+    {
+      "name": "advice-lifecycle investment-advice records explicit paper advice",
+      "ok": true,
+      "detail": {
+        "package": "advice-lifecycle",
+        "command": "investment-advice",
+        "payload": {
+          "recommendations": [
+            {
+              "id": "adv-600519",
+              "code": "600519",
+              "name": "贵州茅台",
+              "theme": "消费",
+              "thesis": "品牌壁垒强，仅作研究跟踪",
+              "entry_price": 1500,
+              "valid_until": "2020-01-01",
+              "invalidation": "基本面恶化"
+            }
+          ]
+        },
+        "as_of": "2026-06-05T07:27:55Z",
+        "freshness": {
+          "status": "current",
+          "as_of": "2026-06-05T07:27:55Z",
+          "policy": "workspace ledger and supplied payload are current only at command runtime; market freshness is inherited from source artifacts."
+        },
+        "ok": true,
+        "decision_allowed": false,
+        "requires_human_confirmation": true,
+        "max_action_level": "research_only",
+        "source": [
+          "payload.recommendations"
+        ],
+        "sources": [
+          "payload.recommendations"
+        ],
+        "artifacts": [
+          "/tmp/aegis-alpha-smoke/memory/advice/advice-ledger.json"
+        ],
+        "warnings": [],
+        "errors": [],
+        "missing_critical_inputs": [],
+        "result": {
+          "created": [
+            {
+              "id": "adv-600519",
+              "created_at": "2026-06-05T07:27:55Z",
+              "updated_at": "2026-06-05T07:27:55Z",
+              "status": "active",
+              "code": "600519",
+              "name": "贵州茅台",
+              "theme": "消费",
+              "thesis": "品牌壁垒强，仅作研究跟踪",
+              "action_label": "research_watch",
+              "entry_price": 1500.0,
+              "current_price": 1500.0,
+              "valid_until": "2020-01-01",
+              "invalidation": "基本面恶化",
+              "evidence": [],
+              "paper_only": true,
+              "decision_allowed": false,
+              "requires_human_confirmation": true,
+              "history": [
+                {
+                  "at": "2026-06-05T07:27:55Z",
+                  "event": "created",
+                  "note": "recorded from explicit payload"
+                }
+              ]
+            }
+          ],
+          "created_count": 1,
+          "ledger_count": 1,
+          "ledger_path": "/tmp/aegis-alpha-smoke/memory/advice/advice-ledger.json"
+        },
+        "_returncode": 0
+      }
+    },
+    {
+      "name": "advice-lifecycle advice-update-prices updates explicit price",
+      "ok": true,
+      "detail": {
+        "package": "advice-lifecycle",
+        "command": "advice-update-prices",
+        "payload": {
+          "prices": {
+            "adv-600519": 1650
+          }
+        },
+        "as_of": "2026-06-05T07:27:55Z",
+        "freshness": {
+          "status": "current",
+          "as_of": "2026-06-05T07:27:55Z",
+          "policy": "workspace ledger and supplied payload are current only at command runtime; market freshness is inherited from source artifacts."
+        },
+        "ok": true,
+        "decision_allowed": false,
+        "requires_human_confirmation": true,
+        "max_action_level": "research_only",
+        "source": [
+          "payload.prices"
+        ],
+        "sources": [
+          "payload.prices"
+        ],
+        "artifacts": [
+          "/tmp/aegis-alpha-smoke/memory/advice/advice-ledger.json"
+        ],
+        "warnings": [],
+        "errors": [],
+        "missing_critical_inputs": [],
+        "result": {
+          "updated": [
+            {
+              "id": "adv-600519",
+              "price": 1650.0
+            }
+          ],
+          "updated_count": 1,
+          "ledger_path": "/tmp/aegis-alpha-smoke/memory/advice/advice-ledger.json"
+        },
+        "_returncode": 0
+      }
+    },
+    {
+      "name": "advice-lifecycle advice-track-stats computes paper return",
+      "ok": true,
+      "detail": {
+        "package": "advice-lifecycle",
+        "command": "advice-track-stats",
+        "payload": {},
+        "as_of": "2026-06-05T07:27:55Z",
+        "freshness": {
+          "status": "current",
+          "as_of": "2026-06-05T07:27:55Z",
+          "policy": "workspace ledger and supplied payload are current only at command runtime; market freshness is inherited from source artifacts."
+        },
+        "ok": true,
+        "decision_allowed": false,
+        "requires_human_confirmation": true,
+        "max_action_level": "research_only",
+        "source": [
+          "advice-ledger"
+        ],
+        "sources": [
+          "advice-ledger"
+        ],
+        "artifacts": [
+          "/tmp/aegis-alpha-smoke/memory/advice/advice-ledger.json"
+        ],
+        "warnings": [],
+        "errors": [],
+        "missing_critical_inputs": [],
+        "result": {
+          "count": 1,
+          "status_counts": {
+            "active": 1
+          },
+          "priced_count": 1,
+          "avg_return_pct": 10.0,
+          "positive_count": 1,
+          "negative_count": 0
+        },
+        "_returncode": 0
+      }
+    },
+    {
+      "name": "advice-lifecycle expire check is review-only by default",
+      "ok": true,
+      "detail": {
+        "package": "advice-lifecycle",
+        "command": "advice-expire-check",
+        "payload": {},
+        "as_of": "2026-06-05T07:27:55Z",
+        "freshness": {
+          "status": "current",
+          "as_of": "2026-06-05T07:27:55Z",
+          "policy": "workspace ledger and supplied payload are current only at command runtime; market freshness is inherited from source artifacts."
+        },
+        "ok": true,
+        "decision_allowed": false,
+        "requires_human_confirmation": true,
+        "max_action_level": "research_only",
+        "source": [
+          "advice-ledger"
+        ],
+        "sources": [
+          "advice-ledger"
+        ],
+        "artifacts": [],
+        "warnings": [],
+        "errors": [],
+        "missing_critical_inputs": [],
+        "result": {
+          "expired": [
+            {
+              "id": "adv-600519",
+              "created_at": "2026-06-05T07:27:55Z",
+              "updated_at": "2026-06-05T07:27:55Z",
+              "status": "active",
+              "code": "600519",
+              "name": "贵州茅台",
+              "theme": "消费",
+              "thesis": "品牌壁垒强，仅作研究跟踪",
+              "action_label": "research_watch",
+              "entry_price": 1500.0,
+              "current_price": 1650.0,
+              "valid_until": "2020-01-01",
+              "invalidation": "基本面恶化",
+              "evidence": [],
+              "paper_only": true,
+              "decision_allowed": false,
+              "requires_human_confirmation": true,
+              "history": [
+                {
+                  "at": "2026-06-05T07:27:55Z",
+                  "event": "created",
+                  "note": "recorded from explicit payload"
+                },
+                {
+                  "at": "2026-06-05T07:27:55Z",
+                  "event": "price_update",
+                  "price": 1650.0
+                }
+              ],
+              "price_updated_at": "2026-06-05T07:27:55Z"
+            }
+          ],
+          "expired_count": 1,
+          "applied": false
+        },
+        "_returncode": 0
+      }
+    },
+    {
+      "name": "execution-automation nightly-prewarm supports dry-run without network",
+      "ok": true,
+      "detail": {
+        "package": "execution-automation",
+        "command": "nightly-prewarm",
+        "payload": {
+          "dry_run": true
+        },
+        "as_of": "2026-06-05T07:27:55Z",
+        "freshness": {
+          "status": "not_run",
+          "as_of": "2026-06-05T07:27:55Z",
+          "policy": "automation status is current at command runtime; market data freshness is inherited from prewarm artifacts"
+        },
+        "ok": true,
+        "decision_allowed": false,
+        "requires_human_confirmation": true,
+        "max_action_level": "automation_only",
+        "source": [],
+        "sources": [],
+        "artifacts": [],
+        "warnings": [],
+        "errors": [],
+        "missing_critical_inputs": [],
+        "result": {
+          "phase": "nightly",
+          "dry_run": true,
+          "planned_script": "/root/hermes-agent/aegis-alpha-skillpack/skills/aegis-alpha/execution-automation/scripts/nightly_prewarm.py",
+          "artifact_written": false
+        },
+        "_returncode": 0
+      }
+    },
+    {
+      "name": "execution-automation prewarm-status fails closed without artifact",
+      "ok": true,
+      "detail": {
+        "package": "execution-automation",
+        "command": "prewarm-status",
+        "payload": {},
+        "as_of": "2026-06-05T07:27:55Z",
+        "freshness": {
+          "status": "unavailable",
+          "as_of": "2026-06-05T07:27:55Z",
+          "policy": "automation status is current at command runtime; market data freshness is inherited from prewarm artifacts"
+        },
+        "ok": false,
+        "decision_allowed": false,
+        "requires_human_confirmation": true,
+        "max_action_level": "automation_only",
+        "source": [],
+        "sources": [],
+        "artifacts": [],
+        "warnings": [],
+        "errors": [
+          "prewarm_directory_missing"
+        ],
+        "missing_critical_inputs": [
+          "prewarm_directory_missing"
+        ],
+        "result": {
+          "note": "Execution automation could not prove required evidence or explicit send authorization.",
+          "missing_critical_inputs": [
+            "prewarm_directory_missing"
+          ]
+        },
+        "_returncode": 0
+      }
+    },
+    {
+      "name": "execution-automation prewarm-status validates latest artifact",
+      "ok": true,
+      "detail": {
+        "package": "execution-automation",
+        "command": "prewarm-status",
+        "payload": {
+          "max_age_minutes": 720
+        },
+        "as_of": "2026-06-05T07:27:55Z",
+        "freshness": {
+          "status": "partial",
+          "as_of": "2026-06-05T07:27:55Z",
+          "policy": "automation status is current at command runtime; market data freshness is inherited from prewarm artifacts"
+        },
+        "ok": true,
+        "decision_allowed": false,
+        "requires_human_confirmation": true,
+        "max_action_level": "automation_only",
+        "source": [
+          "memory/prewarm"
+        ],
+        "sources": [
+          "memory/prewarm"
+        ],
+        "artifacts": [
+          "/tmp/aegis-alpha-smoke/memory/prewarm/nightly-prewarm-2026-06-04.json"
+        ],
+        "warnings": [
+          "critical_data_gaps_present",
+          "prewarm_partial"
+        ],
+        "errors": [],
+        "missing_critical_inputs": [
+          "index_daily_missing",
+          "macro_pmi_missing"
+        ],
+        "result": {
+          "artifact": "/tmp/aegis-alpha-smoke/memory/prewarm/nightly-prewarm-2026-06-04.json",
+          "age_seconds": 1.7123420238494873,
+          "stale": false,
+          "critical_gaps": [
+            "index_daily_missing",
+            "macro_pmi_missing"
+          ],
+          "keys": [
+            "hhxg_calendar",
+            "hhxg_news",
+            "hhxg_snapshot",
+            "tushare_eco_cal",
+            "tushare_major_news",
+            "tushare_news",
+            "tushare_policy",
+            "tushare_research_report"
+          ]
+        },
+        "_returncode": 0
+      }
+    },
+    {
+      "name": "execution-automation market-heartbeat reads prewarm evidence",
+      "ok": true,
+      "detail": {
+        "package": "execution-automation",
+        "command": "market-heartbeat",
+        "payload": {
+          "max_age_minutes": 720
+        },
+        "as_of": "2026-06-05T07:27:55Z",
+        "freshness": {
+          "status": "current",
+          "as_of": "2026-06-05T07:27:55Z",
+          "policy": "automation status is current at command runtime; market data freshness is inherited from prewarm artifacts"
+        },
+        "ok": true,
+        "decision_allowed": false,
+        "requires_human_confirmation": true,
+        "max_action_level": "automation_only",
+        "source": [
+          "memory/prewarm"
+        ],
+        "sources": [
+          "memory/prewarm"
+        ],
+        "artifacts": [
+          "/tmp/aegis-alpha-smoke/memory/prewarm/nightly-prewarm-2026-06-04.json"
+        ],
+        "warnings": [],
+        "errors": [],
+        "missing_critical_inputs": [],
+        "result": {
+          "artifact": "/tmp/aegis-alpha-smoke/memory/prewarm/nightly-prewarm-2026-06-04.json",
+          "age_seconds": 1.7923758029937744,
+          "alerts": [
+            {
+              "type": "sentiment_low",
+              "value": 28
+            },
+            {
+              "type": "limit_down_high",
+              "value": 12
+            },
+            {
+              "type": "fried_board_high",
+              "value": 35
+            },
+            {
+              "type": "promotion_rate_low",
+              "value": 0.2
+            }
+          ],
+          "alert_count": 4,
+          "heartbeat_status": "ALERT",
+          "market": {
+            "sentiment_index": 28,
+            "limit_down": 12,
+            "fried": 35,
+            "promotion_rate": 0.2
+          },
+          "top_themes": [
+            {
+              "name": "AI算力",
+              "net_yi": 8,
+              "limitup_count": 3
+            }
+          ]
+        },
+        "_returncode": 0
+      }
+    },
+    {
+      "name": "execution-automation push dry-run does not send externally",
+      "ok": true,
+      "detail": {
+        "package": "execution-automation",
+        "command": "nightly-push",
+        "payload": {
+          "text": "research-only nightly report",
+          "dry_run": true
+        },
+        "as_of": "2026-06-05T07:27:55Z",
+        "freshness": {
+          "status": "not_sent",
+          "as_of": "2026-06-05T07:27:55Z",
+          "policy": "automation status is current at command runtime; market data freshness is inherited from prewarm artifacts"
+        },
+        "ok": true,
+        "decision_allowed": false,
+        "requires_human_confirmation": true,
+        "max_action_level": "automation_only",
+        "source": [],
+        "sources": [],
+        "artifacts": [],
+        "warnings": [],
+        "errors": [],
+        "missing_critical_inputs": [],
+        "result": {
+          "dry_run": true,
+          "push_type": "nightly",
+          "report_title": "报告推送",
+          "text_chars": 28,
+          "sent": false
+        },
+        "_returncode": 0
+      }
+    },
+    {
+      "name": "execution-automation push fails closed without explicit confirmation",
+      "ok": true,
+      "detail": {
+        "package": "execution-automation",
+        "command": "nightly-push",
+        "payload": {
+          "text": "research-only nightly report"
+        },
+        "as_of": "2026-06-05T07:27:55Z",
+        "freshness": {
+          "status": "unavailable",
+          "as_of": "2026-06-05T07:27:55Z",
+          "policy": "automation status is current at command runtime; market data freshness is inherited from prewarm artifacts"
+        },
+        "ok": false,
+        "decision_allowed": false,
+        "requires_human_confirmation": true,
+        "max_action_level": "automation_only",
+        "source": [],
+        "sources": [],
+        "artifacts": [],
+        "warnings": [],
+        "errors": [
+          "external_send_requires_confirm"
+        ],
+        "missing_critical_inputs": [
+          "external_send_requires_confirm"
+        ],
+        "result": {
+          "note": "Execution automation could not prove required evidence or explicit send authorization.",
+          "missing_critical_inputs": [
+            "external_send_requires_confirm"
+          ]
+        },
+        "_returncode": 0
+      }
+    },
+    {
+      "name": "quant-validation strategy-backtest fails closed without history",
+      "ok": true,
+      "detail": {
+        "package": "quant-validation",
+        "command": "strategy-backtest",
+        "payload": {},
+        "as_of": "2026-06-05T07:27:55Z",
+        "freshness": {
+          "status": "unavailable",
+          "as_of": "2026-06-05T07:27:55Z",
+          "policy": "backtest freshness is inherited from the supplied price/return series"
+        },
+        "ok": false,
+        "decision_allowed": false,
+        "requires_human_confirmation": true,
+        "max_action_level": "research_validation_only",
+        "source": [],
+        "sources": [],
+        "artifacts": [],
+        "warnings": [],
+        "errors": [
+          "historical_series_required"
+        ],
+        "missing_critical_inputs": [
+          "historical_series_required"
+        ],
+        "result": {
+          "note": "Quant validation cannot prove the strategy without explicit, sufficient historical data.",
+          "missing_critical_inputs": [
+            "historical_series_required"
+          ]
+        },
+        "_returncode": 0
+      }
+    },
+    {
+      "name": "quant-validation strategy-backtest computes metrics from explicit series",
+      "ok": true,
+      "detail": {
+        "package": "quant-validation",
+        "command": "strategy-backtest",
+        "payload": {
+          "price_series": [
+            {
+              "date": "d1",
+              "close": 10
+            },
+            {
+              "date": "d2",
+              "close": 11
+            },
+            {
+              "date": "d3",
+              "close": 12
+            },
+            {
+              "date": "d4",
+              "close": 11
+            },
+            {
+              "date": "d5",
+              "close": 13
+            },
+            {
+              "date": "d6",
+              "close": 14
+            }
+          ],
+          "periods_per_year": 6,
+          "strategy": {
+            "type": "buy_and_hold"
+          }
+        },
+        "as_of": "2026-06-05T07:27:55Z",
+        "freshness": {
+          "status": "current",
+          "as_of": "2026-06-05T07:27:55Z",
+          "policy": "backtest freshness is inherited from the supplied price/return series"
+        },
+        "ok": true,
+        "decision_allowed": false,
+        "requires_human_confirmation": true,
+        "max_action_level": "research_validation_only",
+        "source": [
+          "payload.price_series"
+        ],
+        "sources": [
+          "payload.price_series"
+        ],
+        "artifacts": [],
+        "warnings": [],
+        "errors": [],
+        "missing_critical_inputs": [],
+        "result": {
+          "strategy_id": "buy_and_hold",
+          "strategy": {
+            "type": "buy_and_hold"
+          },
+          "series_source": "payload.price_series",
+          "start": "d1",
+          "end": "d6",
+          "periods_per_year": 6,
+          "cost_bps": 0.0,
+          "exposure": 1.0,
+          "turnover": 1.0,
+          "metrics": {
+            "period_count": 5,
+            "total_return_pct": 40.0,
+            "annualized_return_pct": 49.7455,
+            "max_drawdown_pct": -8.3333,
+            "volatility_pct": 23.6684,
+            "sharpe": 1.8572,
+            "win_rate": 0.8,
+            "ending_equity": 1.4,
+            "score": 37.8811
+          },
+          "benchmark": {
+            "period_count": 5,
+            "total_return_pct": 40.0,
+            "annualized_return_pct": 49.7455,
+            "max_drawdown_pct": -8.3333,
+            "volatility_pct": 23.6684,
+            "sharpe": 1.8572,
+            "win_rate": 0.8,
+            "ending_equity": 1.4,
+            "score": 37.8811
+          },
+          "interpretation": {
+            "alpha_total_return_pct": 0.0,
+            "verdict": "not_validated",
+            "paper_only": true
+          }
+        },
+        "_returncode": 0
+      }
+    },
+    {
+      "name": "quant-validation batch-backtest ranks valid strategies",
+      "ok": true,
+      "detail": {
+        "package": "quant-validation",
+        "command": "batch-backtest",
+        "payload": {
+          "price_series": [
+            {
+              "date": "d1",
+              "close": 10
+            },
+            {
+              "date": "d2",
+              "close": 11
+            },
+            {
+              "date": "d3",
+              "close": 12
+            },
+            {
+              "date": "d4",
+              "close": 11
+            },
+            {
+              "date": "d5",
+              "close": 13
+            },
+            {
+              "date": "d6",
+              "close": 14
+            }
+          ],
+          "periods_per_year": 6,
+          "strategies": [
+            {
+              "id": "hold",
+              "type": "buy_and_hold"
+            },
+            {
+              "id": "cash",
+              "type": "cash"
+            }
+          ]
+        },
+        "as_of": "2026-06-05T07:27:56Z",
+        "freshness": {
+          "status": "current",
+          "as_of": "2026-06-05T07:27:56Z",
+          "policy": "backtest freshness is inherited from the supplied price/return series"
+        },
+        "ok": true,
+        "decision_allowed": false,
+        "requires_human_confirmation": true,
+        "max_action_level": "research_validation_only",
+        "source": [
+          "payload.strategies"
+        ],
+        "sources": [
+          "payload.strategies"
+        ],
+        "artifacts": [],
+        "warnings": [],
+        "errors": [],
+        "missing_critical_inputs": [],
+        "result": {
+          "count": 2,
+          "valid_count": 2,
+          "results": [
+            {
+              "strategy_id": "hold",
+              "strategy": {
+                "type": "buy_and_hold"
+              },
+              "series_source": "payload.price_series",
+              "start": "d1",
+              "end": "d6",
+              "periods_per_year": 6,
+              "cost_bps": 0.0,
+              "exposure": 1.0,
+              "turnover": 1.0,
+              "metrics": {
+                "period_count": 5,
+                "total_return_pct": 40.0,
+                "annualized_return_pct": 49.7455,
+                "max_drawdown_pct": -8.3333,
+                "volatility_pct": 23.6684,
+                "sharpe": 1.8572,
+                "win_rate": 0.8,
+                "ending_equity": 1.4,
+                "score": 37.8811
+              },
+              "benchmark": {
+                "period_count": 5,
+                "total_return_pct": 40.0,
+                "annualized_return_pct": 49.7455,
+                "max_drawdown_pct": -8.3333,
+                "volatility_pct": 23.6684,
+                "sharpe": 1.8572,
+                "win_rate": 0.8,
+                "ending_equity": 1.4,
+                "score": 37.8811
+              },
+              "interpretation": {
+                "alpha_total_return_pct": 0.0,
+                "verdict": "not_validated",
+                "paper_only": true
+              }
+            },
+            {
+              "strategy_id": "cash",
+              "strategy": {
+                "type": "cash"
+              },
+              "series_source": "payload.price_series",
+              "start": "d1",
+              "end": "d6",
+              "periods_per_year": 6,
+              "cost_bps": 0.0,
+              "exposure": 0.0,
+              "turnover": 0.0,
+              "metrics": {
+                "period_count": 5,
+                "total_return_pct": 0.0,
+                "annualized_return_pct": 0.0,
+                "max_drawdown_pct": 0.0,
+                "volatility_pct": 0.0,
+                "sharpe": null,
+                "win_rate": 0.0,
+                "ending_equity": 1.0,
+                "score": 0.0
+              },
+              "benchmark": {
+                "period_count": 5,
+                "total_return_pct": 40.0,
+                "annualized_return_pct": 49.7455,
+                "max_drawdown_pct": -8.3333,
+                "volatility_pct": 23.6684,
+                "sharpe": 1.8572,
+                "win_rate": 0.8,
+                "ending_equity": 1.4,
+                "score": 37.8811
+              },
+              "interpretation": {
+                "alpha_total_return_pct": -40.0,
+                "verdict": "not_validated",
+                "paper_only": true
+              }
+            }
+          ],
+          "ranking": [
+            {
+              "strategy_id": "hold",
+              "score": 37.8811
+            },
+            {
+              "strategy_id": "cash",
+              "score": 0.0
+            }
+          ],
+          "best": {
+            "strategy_id": "hold",
+            "strategy": {
+              "type": "buy_and_hold"
+            },
+            "series_source": "payload.price_series",
+            "start": "d1",
+            "end": "d6",
+            "periods_per_year": 6,
+            "cost_bps": 0.0,
+            "exposure": 1.0,
+            "turnover": 1.0,
+            "metrics": {
+              "period_count": 5,
+              "total_return_pct": 40.0,
+              "annualized_return_pct": 49.7455,
+              "max_drawdown_pct": -8.3333,
+              "volatility_pct": 23.6684,
+              "sharpe": 1.8572,
+              "win_rate": 0.8,
+              "ending_equity": 1.4,
+              "score": 37.8811
+            },
+            "benchmark": {
+              "period_count": 5,
+              "total_return_pct": 40.0,
+              "annualized_return_pct": 49.7455,
+              "max_drawdown_pct": -8.3333,
+              "volatility_pct": 23.6684,
+              "sharpe": 1.8572,
+              "win_rate": 0.8,
+              "ending_equity": 1.4,
+              "score": 37.8811
+            },
+            "interpretation": {
+              "alpha_total_return_pct": 0.0,
+              "verdict": "not_validated",
+              "paper_only": true
+            }
+          }
+        },
+        "_returncode": 0
+      }
+    },
+    {
+      "name": "quant-validation grid-search-advisor evaluates bounded grid",
+      "ok": true,
+      "detail": {
+        "package": "quant-validation",
+        "command": "grid-search-advisor",
+        "payload": {
+          "price_series": [
+            {
+              "date": "d1",
+              "close": 10
+            },
+            {
+              "date": "d2",
+              "close": 11
+            },
+            {
+              "date": "d3",
+              "close": 12
+            },
+            {
+              "date": "d4",
+              "close": 11
+            },
+            {
+              "date": "d5",
+              "close": 13
+            },
+            {
+              "date": "d6",
+              "close": 14
+            }
+          ],
+          "periods_per_year": 6,
+          "grid": {
+            "short_window": [
+              1,
+              2
+            ],
+            "long_window": [
+              3,
+              4
+            ]
+          }
+        },
+        "as_of": "2026-06-05T07:27:56Z",
+        "freshness": {
+          "status": "current",
+          "as_of": "2026-06-05T07:27:56Z",
+          "policy": "backtest freshness is inherited from the supplied price/return series"
+        },
+        "ok": true,
+        "decision_allowed": false,
+        "requires_human_confirmation": true,
+        "max_action_level": "research_validation_only",
+        "source": [
+          "payload.grid",
+          "payload.price_series"
+        ],
+        "sources": [
+          "payload.grid",
+          "payload.price_series"
+        ],
+        "artifacts": [],
+        "warnings": [],
+        "errors": [],
+        "missing_critical_inputs": [],
+        "result": {
+          "evaluated": 4,
+          "grid": [
+            {
+              "long_window": 3,
+              "short_window": 1
+            },
+            {
+              "long_window": 3,
+              "short_window": 2
+            },
+            {
+              "long_window": 4,
+              "short_window": 1
+            },
+            {
+              "long_window": 4,
+              "short_window": 2
+            }
+          ],
+          "ranking": [
+            {
+              "strategy_id": "long_window4-short_window2",
+              "score": 30.4425
+            },
+            {
+              "strategy_id": "long_window4-short_window1",
+              "score": 9.8831
+            },
+            {
+              "strategy_id": "long_window3-short_window2",
+              "score": 3.4892
+            },
+            {
+              "strategy_id": "long_window3-short_window1",
+              "score": -7.2262
+            }
+          ],
+          "best": {
+            "strategy_id": "long_window4-short_window2",
+            "strategy": {
+              "type": "ma_cross",
+              "short_window": 2,
+              "long_window": 4
+            },
+            "series_source": "payload.price_series",
+            "start": "d1",
+            "end": "d6",
+            "periods_per_year": 6,
+            "cost_bps": 0.0,
+            "exposure": 0.4,
+            "turnover": 1.0,
+            "metrics": {
+              "period_count": 5,
+              "total_return_pct": 27.2727,
+              "annualized_return_pct": 33.5618,
+              "max_drawdown_pct": 0.0,
+              "volatility_pct": 19.5904,
+              "sharpe": 1.5849,
+              "win_rate": 0.4,
+              "ending_equity": 1.272727,
+              "score": 30.4425
+            },
+            "benchmark": {
+              "period_count": 5,
+              "total_return_pct": 40.0,
+              "annualized_return_pct": 49.7455,
+              "max_drawdown_pct": -8.3333,
+              "volatility_pct": 23.6684,
+              "sharpe": 1.8572,
+              "win_rate": 0.8,
+              "ending_equity": 1.4,
+              "score": 37.8811
+            },
+            "interpretation": {
+              "alpha_total_return_pct": -12.7273,
+              "verdict": "not_validated",
+              "paper_only": true
+            }
+          },
+          "recommendation": {
+            "paper_only": true,
+            "note": "Use the best parameters only as research input; do not deploy without out-of-sample validation."
+          }
+        },
+        "_returncode": 0
+      }
+    },
+    {
+      "name": "information-retrieval research-search fails closed without query",
+      "ok": true,
+      "detail": {
+        "ok": false,
+        "package": "information-retrieval",
+        "command": "research-search",
+        "payload": {},
+        "as_of": "2026-06-05T07:27:56.216817+00:00",
+        "freshness": {
+          "status": "delegated"
+        },
+        "decision_allowed": false,
+        "requires_human_confirmation": true,
+        "max_action_level": "research_only",
+        "source": "search-layer::search",
+        "sources": [
+          "search-layer::search"
+        ],
+        "artifacts": [],
+        "warnings": [],
+        "errors": [
+          "query_or_queries_required"
+        ],
+        "missing_critical_inputs": [
+          "query_or_queries_required"
+        ],
+        "result": {
+          "delegated": {
+            "package": "search-layer",
+            "command": "search",
+            "payload": {},
+            "as_of": "2026-06-05T07:27:56Z",
+            "freshness": {
+              "status": "unavailable",
+              "as_of": "2026-06-05T07:27:56Z",
+              "policy": "search freshness is caller requested; provider freshness is preserved in result fields when available"
+            },
+            "ok": false,
+            "decision_allowed": false,
+            "requires_human_confirmation": true,
+            "max_action_level": "research_only",
+            "source": [],
+            "sources": [],
+            "artifacts": [],
+            "warnings": [],
+            "errors": [
+              "query_or_queries_required"
+            ],
+            "missing_critical_inputs": [
+              "query_or_queries_required"
+            ],
+            "result": {
+              "note": "Search evidence is unavailable; do not infer facts from missing retrieval results.",
+              "missing_critical_inputs": [
+                "query_or_queries_required"
+              ]
+            }
+          }
+        },
+        "_returncode": 2
+      }
+    },
+    {
+      "name": "information-retrieval research-search returns structured delegated envelope",
+      "ok": true,
+      "detail": {
+        "ok": true,
+        "package": "information-retrieval",
+        "command": "research-search",
+        "payload": {
+          "query": "OpenAI python issue 1",
+          "extract_refs": true,
+          "extract_refs_urls": [
+            "https://github.com/openai/openai-python/issues/1"
+          ]
+        },
+        "as_of": "2026-06-05T07:27:56.512777+00:00",
+        "freshness": {
+          "status": "delegated"
+        },
+        "decision_allowed": false,
+        "requires_human_confirmation": true,
+        "max_action_level": "research_only",
+        "source": "search-layer::search",
+        "sources": [
+          "search-layer::search"
+        ],
+        "artifacts": [],
+        "warnings": [],
+        "errors": [],
+        "missing_critical_inputs": [],
+        "result": {
+          "delegated": {
+            "package": "search-layer",
+            "command": "search",
+            "payload": {
+              "query": "OpenAI python issue 1",
+              "extract_refs": true,
+              "extract_refs_urls": [
+                "https://github.com/openai/openai-python/issues/1"
+              ]
+            },
+            "as_of": "2026-06-05T07:27:56Z",
+            "freshness": {
+              "status": "current",
+              "as_of": "2026-06-05T07:27:56Z",
+              "policy": "search freshness is caller requested; provider freshness is preserved in result fields when available"
+            },
+            "ok": true,
+            "decision_allowed": false,
+            "requires_human_confirmation": true,
+            "max_action_level": "research_only",
+            "source": [],
+            "sources": [],
+            "artifacts": [],
+            "warnings": [],
+            "errors": [],
+            "missing_critical_inputs": [],
+            "result": {
+              "mode": "deep",
+              "intent": null,
+              "queries": [
+                "OpenAI python issue 1"
+              ],
+              "count": 0,
+              "results": [],
+              "refs": [
+                {
+                  "source_url": "https://github.com/openai/openai-python/issues/1",
+                  "refs": [],
+                  "ref_count": 0
+                }
+              ]
+            }
+          }
+        },
+        "_returncode": 0
+      }
+    },
+    {
+      "name": "weekly-stock-pool fails closed without weekly artifacts",
+      "ok": true,
+      "detail": {
+        "ok": false,
+        "package": "weekly-stock-pool",
+        "command": "weekly-stock-pool",
+        "payload": {},
+        "as_of": "2026-06-05T07:27:56.556127+00:00",
+        "freshness": {
+          "status": "unknown",
+          "max_age_minutes": null
+        },
+        "decision_allowed": false,
+        "requires_human_confirmation": true,
+        "max_action_level": "research_only",
+        "source": "weekly-stock-pool",
+        "sources": [
+          "memory/pipeline_runs/weekly-*.json",
+          "memory/pipeline_context/weekly-context-*.json",
+          "memory/prewarm/nightly-prewarm-*.json"
+        ],
+        "artifacts": [],
+        "warnings": [],
+        "errors": [
+          "weekly_pipeline_runs_missing",
+          "weekly_pipeline_context_missing",
+          "prewarm_snapshot_missing"
+        ],
+        "missing_critical_inputs": [
+          "weekly_pipeline_runs",
+          "weekly_pipeline_context",
+          "prewarm_snapshot"
+        ],
+        "result": {
+          "candidate_count": 0,
+          "candidates": null,
+          "filters": [],
+          "pool_state": "unavailable",
+          "failure_policy": "fail_closed"
+        },
+        "_returncode": 2
+      }
+    },
+    {
+      "name": "weekly-stock-pool consolidates verified weekly artifacts",
+      "ok": true,
+      "detail": {
+        "ok": true,
+        "package": "weekly-stock-pool",
+        "command": "weekly-stock-pool",
+        "payload": {
+          "min_candidates": 2
+        },
+        "as_of": "2026-06-05T07:27:56.604669+00:00",
+        "freshness": {
+          "status": "artifact_derived",
+          "max_age_minutes": null
+        },
+        "decision_allowed": false,
+        "requires_human_confirmation": true,
+        "max_action_level": "research_only",
+        "source": "weekly-stock-pool",
+        "sources": [
+          "memory/pipeline_runs/weekly-*.json",
+          "memory/pipeline_context/weekly-context-*.json",
+          "memory/prewarm/nightly-prewarm-*.json"
+        ],
+        "artifacts": [
+          "/tmp/aegis-alpha-smoke/memory/pipeline_runs/weekly-2026-06-04.json",
+          "/tmp/aegis-alpha-smoke/memory/pipeline_context/weekly-context-2026-06-04.json",
+          "/tmp/aegis-alpha-smoke/memory/prewarm/nightly-prewarm-2026-06-04.json",
+          "/tmp/aegis-alpha-smoke/memory/stock_pool/weekly-stock-pool-20260605-152756.json"
+        ],
+        "warnings": [],
+        "errors": [],
+        "missing_critical_inputs": [],
+        "result": {
+          "candidate_count": 2,
+          "candidates": [
+            {
+              "name": "贵州茅台",
+              "code": "600519",
+              "theme": "消费",
+              "score": 82,
+              "source": "smoke-weekly-pipeline"
+            },
+            {
+              "name": "宁德时代",
+              "code": "300750",
+              "theme": "新能源",
+              "score": 76
+            }
+          ],
+          "filters": [
+            "backtest-loop",
+            "global-medium-long-strategy",
+            "global-macro-analysis"
+          ],
+          "pool_state": "available",
+          "prewarm_keys": [
+            "hhxg_calendar",
+            "hhxg_news",
+            "hhxg_snapshot",
+            "tushare_eco_cal",
+            "tushare_major_news",
+            "tushare_news",
+            "tushare_policy",
+            "tushare_research_report"
+          ],
+          "source": {
+            "pipeline_runs": "memory/pipeline_runs/weekly-*.json",
+            "pipeline_context": "memory/pipeline_context/weekly-context-*.json",
+            "prewarm": "memory/prewarm/nightly-prewarm-*.json"
+          }
+        },
+        "_returncode": 0
+      }
+    }
+  ],
+  "failed": []
+}

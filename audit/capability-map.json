@@ -1,0 +1,2920 @@
+{
+  "source": "/root/hermes-agent/aegis-alpha-skillpack/skills/aegis-alpha",
+  "skill_count": 31,
+  "command_count": 217,
+  "skills": [
+    {
+      "name": "advice-lifecycle",
+      "path": "/root/hermes-agent/aegis-alpha-skillpack/skills/aegis-alpha/advice-lifecycle",
+      "description": "Paper-only investment advice recording, tracking, expiry review, and evidence-bound report prompt generation.",
+      "visibility": "public",
+      "facade": "",
+      "skill_status": "implemented",
+      "command_count": 12,
+      "dispatch_lines": 1613,
+      "contract_lines": 106,
+      "scenario_lines": 41,
+      "risks": [],
+      "commands": [
+        {
+          "name": "investment-advice",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch"
+          ],
+          "manifest_has_description": true,
+          "manifest_has_payload_schema": true,
+          "manifest_has_result_schema": true
+        },
+        {
+          "name": "advice-history",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch"
+          ],
+          "manifest_has_description": true,
+          "manifest_has_payload_schema": true,
+          "manifest_has_result_schema": true
+        },
+        {
+          "name": "advice-update-prices",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch"
+          ],
+          "manifest_has_description": true,
+          "manifest_has_payload_schema": true,
+          "manifest_has_result_schema": true
+        },
+        {
+          "name": "update-daily-advice",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch"
+          ],
+          "manifest_has_description": true,
+          "manifest_has_payload_schema": true,
+          "manifest_has_result_schema": true
+        },
+        {
+          "name": "advice-expire-check",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch"
+          ],
+          "manifest_has_description": true,
+          "manifest_has_payload_schema": true,
+          "manifest_has_result_schema": true
+        },
+        {
+          "name": "advice-track-report",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch"
+          ],
+          "manifest_has_description": true,
+          "manifest_has_payload_schema": true,
+          "manifest_has_result_schema": true
+        },
+        {
+          "name": "advice-track-stats",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch"
+          ],
+          "manifest_has_description": true,
+          "manifest_has_payload_schema": true,
+          "manifest_has_result_schema": true
+        },
+        {
+          "name": "nightly-strategy",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch"
+          ],
+          "manifest_has_description": true,
+          "manifest_has_payload_schema": true,
+          "manifest_has_result_schema": true
+        },
+        {
+          "name": "nightly-section",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch"
+          ],
+          "manifest_has_description": true,
+          "manifest_has_payload_schema": true,
+          "manifest_has_result_schema": true
+        },
+        {
+          "name": "morning-briefing",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch"
+          ],
+          "manifest_has_description": true,
+          "manifest_has_payload_schema": true,
+          "manifest_has_result_schema": true
+        },
+        {
+          "name": "weekly-asset-report",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch"
+          ],
+          "manifest_has_description": true,
+          "manifest_has_payload_schema": true,
+          "manifest_has_result_schema": true
+        },
+        {
+          "name": "market-review",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch"
+          ],
+          "manifest_has_description": true,
+          "manifest_has_payload_schema": true,
+          "manifest_has_result_schema": true
+        }
+      ]
+    },
+    {
+      "name": "akshare",
+      "path": "/root/hermes-agent/aegis-alpha-skillpack/skills/aegis-alpha/akshare",
+      "description": "Open-source financial data access via AkShare (public data sources).",
+      "visibility": "internal",
+      "facade": "market-data",
+      "skill_status": "implemented",
+      "command_count": 21,
+      "dispatch_lines": 272,
+      "contract_lines": 5,
+      "scenario_lines": 9,
+      "risks": [
+        "manifest_missing_payload_schema",
+        "manifest_missing_result_schema",
+        "thin_contract"
+      ],
+      "commands": [
+        {
+          "name": "a-stock-daily",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch",
+            "manifest missing payload schema",
+            "manifest missing result schema",
+            "manifest missing description"
+          ],
+          "manifest_has_description": false,
+          "manifest_has_payload_schema": false,
+          "manifest_has_result_schema": false
+        },
+        {
+          "name": "index-daily",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch",
+            "manifest missing payload schema",
+            "manifest missing result schema",
+            "manifest missing description"
+          ],
+          "manifest_has_description": false,
+          "manifest_has_payload_schema": false,
+          "manifest_has_result_schema": false
+        },
+        {
+          "name": "north-capital-flow",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch",
+            "manifest missing payload schema",
+            "manifest missing result schema",
+            "manifest missing description"
+          ],
+          "manifest_has_description": false,
+          "manifest_has_payload_schema": false,
+          "manifest_has_result_schema": false
+        },
+        {
+          "name": "concept-board-hist",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch",
+            "manifest missing payload schema",
+            "manifest missing result schema",
+            "manifest missing description"
+          ],
+          "manifest_has_description": false,
+          "manifest_has_payload_schema": false,
+          "manifest_has_result_schema": false
+        },
+        {
+          "name": "concept-board-list",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch",
+            "manifest missing payload schema",
+            "manifest missing result schema",
+            "manifest missing description"
+          ],
+          "manifest_has_description": false,
+          "manifest_has_payload_schema": false,
+          "manifest_has_result_schema": false
+        },
+        {
+          "name": "industry-board-list",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch",
+            "manifest missing payload schema",
+            "manifest missing result schema",
+            "manifest missing description"
+          ],
+          "manifest_has_description": false,
+          "manifest_has_payload_schema": false,
+          "manifest_has_result_schema": false
+        },
+        {
+          "name": "industry-board-hist",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch",
+            "manifest missing payload schema",
+            "manifest missing result schema",
+            "manifest missing description"
+          ],
+          "manifest_has_description": false,
+          "manifest_has_payload_schema": false,
+          "manifest_has_result_schema": false
+        },
+        {
+          "name": "stock-individual-flow",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch",
+            "manifest missing payload schema",
+            "manifest missing result schema",
+            "manifest missing description"
+          ],
+          "manifest_has_description": false,
+          "manifest_has_payload_schema": false,
+          "manifest_has_result_schema": false
+        },
+        {
+          "name": "stock-market-flow",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch",
+            "manifest missing payload schema",
+            "manifest missing result schema",
+            "manifest missing description"
+          ],
+          "manifest_has_description": false,
+          "manifest_has_payload_schema": false,
+          "manifest_has_result_schema": false
+        },
+        {
+          "name": "stock-hot-rank",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch",
+            "manifest missing payload schema",
+            "manifest missing result schema",
+            "manifest missing description"
+          ],
+          "manifest_has_description": false,
+          "manifest_has_payload_schema": false,
+          "manifest_has_result_schema": false
+        },
+        {
+          "name": "stock-news",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch",
+            "manifest missing payload schema",
+            "manifest missing result schema",
+            "manifest missing description"
+          ],
+          "manifest_has_description": false,
+          "manifest_has_payload_schema": false,
+          "manifest_has_result_schema": false
+        },
+        {
+          "name": "stock-minute",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch",
+            "manifest missing payload schema",
+            "manifest missing result schema",
+            "manifest missing description"
+          ],
+          "manifest_has_description": false,
+          "manifest_has_payload_schema": false,
+          "manifest_has_result_schema": false
+        },
+        {
+          "name": "fund-etf-daily",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch",
+            "manifest missing payload schema",
+            "manifest missing result schema",
+            "manifest missing description"
+          ],
+          "manifest_has_description": false,
+          "manifest_has_payload_schema": false,
+          "manifest_has_result_schema": false
+        },
+        {
+          "name": "margin-detail",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch",
+            "manifest missing payload schema",
+            "manifest missing result schema",
+            "manifest missing description"
+          ],
+          "manifest_has_description": false,
+          "manifest_has_payload_schema": false,
+          "manifest_has_result_schema": false
+        },
+        {
+          "name": "limit-up-list",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch",
+            "manifest missing payload schema",
+            "manifest missing result schema",
+            "manifest missing description"
+          ],
+          "manifest_has_description": false,
+          "manifest_has_payload_schema": false,
+          "manifest_has_result_schema": false
+        },
+        {
+          "name": "macro-cn-forex",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch",
+            "manifest missing payload schema",
+            "manifest missing result schema",
+            "manifest missing description"
+          ],
+          "manifest_has_description": false,
+          "manifest_has_payload_schema": false,
+          "manifest_has_result_schema": false
+        },
+        {
+          "name": "macro-us-cpi",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch",
+            "manifest missing payload schema",
+            "manifest missing result schema",
+            "manifest missing description"
+          ],
+          "manifest_has_description": false,
+          "manifest_has_payload_schema": false,
+          "manifest_has_result_schema": false
+        },
+        {
+          "name": "global-bond-yield",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch",
+            "manifest missing payload schema",
+            "manifest missing result schema",
+            "manifest missing description"
+          ],
+          "manifest_has_description": false,
+          "manifest_has_payload_schema": false,
+          "manifest_has_result_schema": false
+        },
+        {
+          "name": "macro-pmi",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch",
+            "manifest missing payload schema",
+            "manifest missing result schema",
+            "manifest missing description"
+          ],
+          "manifest_has_description": false,
+          "manifest_has_payload_schema": false,
+          "manifest_has_result_schema": false
+        },
+        {
+          "name": "macro-cpi",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch",
+            "manifest missing payload schema",
+            "manifest missing result schema",
+            "manifest missing description"
+          ],
+          "manifest_has_description": false,
+          "manifest_has_payload_schema": false,
+          "manifest_has_result_schema": false
+        },
+        {
+          "name": "macro-ppi",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch",
+            "manifest missing payload schema",
+            "manifest missing result schema",
+            "manifest missing description"
+          ],
+          "manifest_has_description": false,
+          "manifest_has_payload_schema": false,
+          "manifest_has_result_schema": false
+        }
+      ]
+    },
+    {
+      "name": "baostock",
+      "path": "/root/hermes-agent/aegis-alpha-skillpack/skills/aegis-alpha/baostock",
+      "description": "BaoStock data access (A-share and index history).",
+      "visibility": "internal",
+      "facade": "market-data",
+      "skill_status": "implemented",
+      "command_count": 8,
+      "dispatch_lines": 216,
+      "contract_lines": 5,
+      "scenario_lines": 9,
+      "risks": [
+        "manifest_missing_payload_schema",
+        "manifest_missing_result_schema",
+        "thin_contract"
+      ],
+      "commands": [
+        {
+          "name": "a-stock-daily",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch",
+            "manifest missing payload schema",
+            "manifest missing result schema",
+            "manifest missing description"
+          ],
+          "manifest_has_description": false,
+          "manifest_has_payload_schema": false,
+          "manifest_has_result_schema": false
+        },
+        {
+          "name": "index-daily",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch",
+            "manifest missing payload schema",
+            "manifest missing result schema",
+            "manifest missing description"
+          ],
+          "manifest_has_description": false,
+          "manifest_has_payload_schema": false,
+          "manifest_has_result_schema": false
+        },
+        {
+          "name": "stock-weekly",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch",
+            "manifest missing payload schema",
+            "manifest missing result schema",
+            "manifest missing description"
+          ],
+          "manifest_has_description": false,
+          "manifest_has_payload_schema": false,
+          "manifest_has_result_schema": false
+        },
+        {
+          "name": "fundamental-data",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch",
+            "manifest missing payload schema",
+            "manifest missing result schema",
+            "manifest missing description"
+          ],
+          "manifest_has_description": false,
+          "manifest_has_payload_schema": false,
+          "manifest_has_result_schema": false
+        },
+        {
+          "name": "balance-sheet",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch",
+            "manifest missing payload schema",
+            "manifest missing result schema",
+            "manifest missing description"
+          ],
+          "manifest_has_description": false,
+          "manifest_has_payload_schema": false,
+          "manifest_has_result_schema": false
+        },
+        {
+          "name": "cash-flow",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch",
+            "manifest missing payload schema",
+            "manifest missing result schema",
+            "manifest missing description"
+          ],
+          "manifest_has_description": false,
+          "manifest_has_payload_schema": false,
+          "manifest_has_result_schema": false
+        },
+        {
+          "name": "dupont-data",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch",
+            "manifest missing payload schema",
+            "manifest missing result schema",
+            "manifest missing description"
+          ],
+          "manifest_has_description": false,
+          "manifest_has_payload_schema": false,
+          "manifest_has_result_schema": false
+        },
+        {
+          "name": "dividend-data",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch",
+            "manifest missing payload schema",
+            "manifest missing result schema",
+            "manifest missing description"
+          ],
+          "manifest_has_description": false,
+          "manifest_has_payload_schema": false,
+          "manifest_has_result_schema": false
+        }
+      ]
+    },
+    {
+      "name": "content-extract",
+      "path": "/root/hermes-agent/aegis-alpha-skillpack/skills/aegis-alpha/content-extract",
+      "description": "信息搜集内容抽取层：把网页 URL 转成可读 Markdown，并在普通抓取不稳时走 MinerU 兜底。",
+      "visibility": "internal",
+      "facade": "information-retrieval",
+      "skill_status": "implemented",
+      "command_count": 1,
+      "dispatch_lines": 84,
+      "contract_lines": 8,
+      "scenario_lines": 5,
+      "risks": [
+        "manifest_missing_payload_schema",
+        "manifest_missing_result_schema"
+      ],
+      "commands": [
+        {
+          "name": "extract-url",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch",
+            "manifest missing payload schema",
+            "manifest missing result schema",
+            "manifest missing description"
+          ],
+          "manifest_has_description": false,
+          "manifest_has_payload_schema": false,
+          "manifest_has_result_schema": false
+        }
+      ]
+    },
+    {
+      "name": "equity-research",
+      "path": "/root/hermes-agent/aegis-alpha-skillpack/skills/aegis-alpha/equity-research",
+      "description": "Fundamental and narrative deep-dive research.",
+      "visibility": "public",
+      "facade": "",
+      "skill_status": "implemented",
+      "command_count": 7,
+      "dispatch_lines": 423,
+      "contract_lines": 82,
+      "scenario_lines": 29,
+      "risks": [],
+      "commands": [
+        {
+          "name": "financial-diagnosis",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch"
+          ],
+          "manifest_has_description": true,
+          "manifest_has_payload_schema": true,
+          "manifest_has_result_schema": true
+        },
+        {
+          "name": "fundamental-analysis",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch"
+          ],
+          "manifest_has_description": true,
+          "manifest_has_payload_schema": true,
+          "manifest_has_result_schema": true
+        },
+        {
+          "name": "narrative-analysis",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch"
+          ],
+          "manifest_has_description": true,
+          "manifest_has_payload_schema": true,
+          "manifest_has_result_schema": true
+        },
+        {
+          "name": "stock-analysis",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch"
+          ],
+          "manifest_has_description": true,
+          "manifest_has_payload_schema": true,
+          "manifest_has_result_schema": true
+        },
+        {
+          "name": "stock-news",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch"
+          ],
+          "manifest_has_description": true,
+          "manifest_has_payload_schema": true,
+          "manifest_has_result_schema": true
+        },
+        {
+          "name": "stock-score",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch"
+          ],
+          "manifest_has_description": true,
+          "manifest_has_payload_schema": true,
+          "manifest_has_result_schema": true
+        },
+        {
+          "name": "valuation-check",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch"
+          ],
+          "manifest_has_description": true,
+          "manifest_has_payload_schema": true,
+          "manifest_has_result_schema": true
+        }
+      ]
+    },
+    {
+      "name": "equity-screening",
+      "path": "/root/hermes-agent/aegis-alpha-skillpack/skills/aegis-alpha/equity-screening",
+      "description": "Build equity universes, harvest leaders, screen candidate stocks, rate candidates, and maintain the local screening pool with fail-closed investment safety.",
+      "visibility": "public",
+      "facade": "",
+      "skill_status": "implemented",
+      "command_count": 10,
+      "dispatch_lines": 457,
+      "contract_lines": 81,
+      "scenario_lines": 41,
+      "risks": [],
+      "commands": [
+        {
+          "name": "board-universe-sync",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch"
+          ],
+          "manifest_has_description": true,
+          "manifest_has_payload_schema": true,
+          "manifest_has_result_schema": true
+        },
+        {
+          "name": "company-evidence-collect",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch"
+          ],
+          "manifest_has_description": true,
+          "manifest_has_payload_schema": true,
+          "manifest_has_result_schema": true
+        },
+        {
+          "name": "layered-stock-screening",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch"
+          ],
+          "manifest_has_description": true,
+          "manifest_has_payload_schema": true,
+          "manifest_has_result_schema": true
+        },
+        {
+          "name": "leader-source-harvest",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch"
+          ],
+          "manifest_has_description": true,
+          "manifest_has_payload_schema": true,
+          "manifest_has_result_schema": true
+        },
+        {
+          "name": "stock-pool-incremental-am",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch"
+          ],
+          "manifest_has_description": true,
+          "manifest_has_payload_schema": true,
+          "manifest_has_result_schema": true
+        },
+        {
+          "name": "stock-pool-incremental-pm",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch"
+          ],
+          "manifest_has_description": true,
+          "manifest_has_payload_schema": true,
+          "manifest_has_result_schema": true
+        },
+        {
+          "name": "stock-pool-maintenance",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch"
+          ],
+          "manifest_has_description": true,
+          "manifest_has_payload_schema": true,
+          "manifest_has_result_schema": true
+        },
+        {
+          "name": "stock-rating",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch"
+          ],
+          "manifest_has_description": true,
+          "manifest_has_payload_schema": true,
+          "manifest_has_result_schema": true
+        },
+        {
+          "name": "stock-screening",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch"
+          ],
+          "manifest_has_description": true,
+          "manifest_has_payload_schema": true,
+          "manifest_has_result_schema": true
+        },
+        {
+          "name": "stock-screening-v2",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch"
+          ],
+          "manifest_has_description": true,
+          "manifest_has_payload_schema": true,
+          "manifest_has_result_schema": true
+        }
+      ]
+    },
+    {
+      "name": "execution-automation",
+      "path": "/root/hermes-agent/aegis-alpha-skillpack/skills/aegis-alpha/execution-automation",
+      "description": "Fail-closed investment workflow automation for data prewarm, market heartbeat/alerts, monitor state markers, and explicit-confirmation report pushes.",
+      "visibility": "public",
+      "facade": "",
+      "skill_status": "implemented",
+      "command_count": 14,
+      "dispatch_lines": 587,
+      "contract_lines": 95,
+      "scenario_lines": 57,
+      "risks": [],
+      "commands": [
+        {
+          "name": "nightly-prewarm",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch"
+          ],
+          "manifest_has_description": true,
+          "manifest_has_payload_schema": true,
+          "manifest_has_result_schema": true
+        },
+        {
+          "name": "morning-prewarm",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch"
+          ],
+          "manifest_has_description": true,
+          "manifest_has_payload_schema": true,
+          "manifest_has_result_schema": true
+        },
+        {
+          "name": "midday-prewarm",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch"
+          ],
+          "manifest_has_description": true,
+          "manifest_has_payload_schema": true,
+          "manifest_has_result_schema": true
+        },
+        {
+          "name": "evening-prewarm",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch"
+          ],
+          "manifest_has_description": true,
+          "manifest_has_payload_schema": true,
+          "manifest_has_result_schema": true
+        },
+        {
+          "name": "weekly-prewarm",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch"
+          ],
+          "manifest_has_description": true,
+          "manifest_has_payload_schema": true,
+          "manifest_has_result_schema": true
+        },
+        {
+          "name": "prewarm-status",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch"
+          ],
+          "manifest_has_description": true,
+          "manifest_has_payload_schema": true,
+          "manifest_has_result_schema": true
+        },
+        {
+          "name": "market-heartbeat",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch"
+          ],
+          "manifest_has_description": true,
+          "manifest_has_payload_schema": true,
+          "manifest_has_result_schema": true
+        },
+        {
+          "name": "realtime-market-scan",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch"
+          ],
+          "manifest_has_description": true,
+          "manifest_has_payload_schema": true,
+          "manifest_has_result_schema": true
+        },
+        {
+          "name": "realtime-alerts-summary",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch"
+          ],
+          "manifest_has_description": true,
+          "manifest_has_payload_schema": true,
+          "manifest_has_result_schema": true
+        },
+        {
+          "name": "realtime-monitor-control",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch"
+          ],
+          "manifest_has_description": true,
+          "manifest_has_payload_schema": true,
+          "manifest_has_result_schema": true
+        },
+        {
+          "name": "nightly-push",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch"
+          ],
+          "manifest_has_description": true,
+          "manifest_has_payload_schema": true,
+          "manifest_has_result_schema": true
+        },
+        {
+          "name": "morning-push",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch"
+          ],
+          "manifest_has_description": true,
+          "manifest_has_payload_schema": true,
+          "manifest_has_result_schema": true
+        },
+        {
+          "name": "intraday-push",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch"
+          ],
+          "manifest_has_description": true,
+          "manifest_has_payload_schema": true,
+          "manifest_has_result_schema": true
+        },
+        {
+          "name": "weekly-push",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch"
+          ],
+          "manifest_has_description": true,
+          "manifest_has_payload_schema": true,
+          "manifest_has_result_schema": true
+        }
+      ]
+    },
+    {
+      "name": "hhxg-market",
+      "path": "/root/hermes-agent/aegis-alpha-skillpack/skills/aegis-alpha/hhxg-market",
+      "description": "A 股量化数据助手 — 日报快照、A股日历、融资融券，零配置无需安装任何依赖。",
+      "visibility": "internal",
+      "facade": "market-data",
+      "skill_status": "implemented",
+      "command_count": 16,
+      "dispatch_lines": 135,
+      "contract_lines": 11,
+      "scenario_lines": 14,
+      "risks": [
+        "manifest_missing_payload_schema",
+        "manifest_missing_result_schema"
+      ],
+      "commands": [
+        {
+          "name": "snapshot-full",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch",
+            "manifest missing payload schema",
+            "manifest missing result schema"
+          ],
+          "manifest_has_description": true,
+          "manifest_has_payload_schema": false,
+          "manifest_has_result_schema": false
+        },
+        {
+          "name": "snapshot-market",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch",
+            "manifest missing payload schema",
+            "manifest missing result schema"
+          ],
+          "manifest_has_description": true,
+          "manifest_has_payload_schema": false,
+          "manifest_has_result_schema": false
+        },
+        {
+          "name": "snapshot-themes",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch",
+            "manifest missing payload schema",
+            "manifest missing result schema"
+          ],
+          "manifest_has_description": true,
+          "manifest_has_payload_schema": false,
+          "manifest_has_result_schema": false
+        },
+        {
+          "name": "snapshot-ladder",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch",
+            "manifest missing payload schema",
+            "manifest missing result schema"
+          ],
+          "manifest_has_description": true,
+          "manifest_has_payload_schema": false,
+          "manifest_has_result_schema": false
+        },
+        {
+          "name": "snapshot-hotmoney",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch",
+            "manifest missing payload schema",
+            "manifest missing result schema"
+          ],
+          "manifest_has_description": true,
+          "manifest_has_payload_schema": false,
+          "manifest_has_result_schema": false
+        },
+        {
+          "name": "snapshot-sectors",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch",
+            "manifest missing payload schema",
+            "manifest missing result schema"
+          ],
+          "manifest_has_description": true,
+          "manifest_has_payload_schema": false,
+          "manifest_has_result_schema": false
+        },
+        {
+          "name": "snapshot-news",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch",
+            "manifest missing payload schema",
+            "manifest missing result schema"
+          ],
+          "manifest_has_description": true,
+          "manifest_has_payload_schema": false,
+          "manifest_has_result_schema": false
+        },
+        {
+          "name": "snapshot-summary",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch",
+            "manifest missing payload schema",
+            "manifest missing result schema"
+          ],
+          "manifest_has_description": true,
+          "manifest_has_payload_schema": false,
+          "manifest_has_result_schema": false
+        },
+        {
+          "name": "calendar-week",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch",
+            "manifest missing payload schema",
+            "manifest missing result schema"
+          ],
+          "manifest_has_description": true,
+          "manifest_has_payload_schema": false,
+          "manifest_has_result_schema": false
+        },
+        {
+          "name": "calendar-trading",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch",
+            "manifest missing payload schema",
+            "manifest missing result schema"
+          ],
+          "manifest_has_description": true,
+          "manifest_has_payload_schema": false,
+          "manifest_has_result_schema": false
+        },
+        {
+          "name": "calendar-unlock",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch",
+            "manifest missing payload schema",
+            "manifest missing result schema"
+          ],
+          "manifest_has_description": true,
+          "manifest_has_payload_schema": false,
+          "manifest_has_result_schema": false
+        },
+        {
+          "name": "calendar-earnings",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch",
+            "manifest missing payload schema",
+            "manifest missing result schema"
+          ],
+          "manifest_has_description": true,
+          "manifest_has_payload_schema": false,
+          "manifest_has_result_schema": false
+        },
+        {
+          "name": "calendar-delivery",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch",
+            "manifest missing payload schema",
+            "manifest missing result schema"
+          ],
+          "manifest_has_description": true,
+          "manifest_has_payload_schema": false,
+          "manifest_has_result_schema": false
+        },
+        {
+          "name": "margin-full",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch",
+            "manifest missing payload schema",
+            "manifest missing result schema"
+          ],
+          "manifest_has_description": true,
+          "manifest_has_payload_schema": false,
+          "manifest_has_result_schema": false
+        },
+        {
+          "name": "margin-overview",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch",
+            "manifest missing payload schema",
+            "manifest missing result schema"
+          ],
+          "manifest_has_description": true,
+          "manifest_has_payload_schema": false,
+          "manifest_has_result_schema": false
+        },
+        {
+          "name": "margin-top",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch",
+            "manifest missing payload schema",
+            "manifest missing result schema"
+          ],
+          "manifest_has_description": true,
+          "manifest_has_payload_schema": false,
+          "manifest_has_result_schema": false
+        }
+      ]
+    },
+    {
+      "name": "information-retrieval",
+      "path": "/root/hermes-agent/aegis-alpha-skillpack/skills/aegis-alpha/information-retrieval",
+      "description": "Public research intake facade for search, URL extraction, document parsing, and local research history.",
+      "visibility": "public",
+      "facade": "",
+      "skill_status": "implemented",
+      "command_count": 5,
+      "dispatch_lines": 126,
+      "contract_lines": 44,
+      "scenario_lines": 6,
+      "risks": [],
+      "commands": [
+        {
+          "name": "research-search",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch"
+          ],
+          "manifest_has_description": true,
+          "manifest_has_payload_schema": true,
+          "manifest_has_result_schema": true
+        },
+        {
+          "name": "fetch-content",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch"
+          ],
+          "manifest_has_description": true,
+          "manifest_has_payload_schema": true,
+          "manifest_has_result_schema": true
+        },
+        {
+          "name": "parse-document",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch"
+          ],
+          "manifest_has_description": true,
+          "manifest_has_payload_schema": true,
+          "manifest_has_result_schema": true
+        },
+        {
+          "name": "research-history",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch"
+          ],
+          "manifest_has_description": true,
+          "manifest_has_payload_schema": true,
+          "manifest_has_result_schema": true
+        },
+        {
+          "name": "set-research-preference",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch"
+          ],
+          "manifest_has_description": true,
+          "manifest_has_payload_schema": true,
+          "manifest_has_result_schema": true
+        }
+      ]
+    },
+    {
+      "name": "jin10-feed",
+      "path": "/root/hermes-agent/aegis-alpha-skillpack/skills/aegis-alpha/jin10-feed",
+      "description": "Jin10 important news snapshot + daemon monitor (Playwright-based).",
+      "visibility": "internal",
+      "facade": "market-intel",
+      "skill_status": "implemented",
+      "command_count": 4,
+      "dispatch_lines": 150,
+      "contract_lines": 0,
+      "scenario_lines": 0,
+      "risks": [
+        "has_not_implemented_return",
+        "manifest_missing_payload_schema",
+        "manifest_missing_result_schema",
+        "thin_contract"
+      ],
+      "commands": [
+        {
+          "name": "jin10-snapshot",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch",
+            "manifest missing payload schema",
+            "manifest missing result schema",
+            "manifest missing description"
+          ],
+          "manifest_has_description": false,
+          "manifest_has_payload_schema": false,
+          "manifest_has_result_schema": false
+        },
+        {
+          "name": "jin10-daemon-start",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch",
+            "manifest missing payload schema",
+            "manifest missing result schema",
+            "manifest missing description"
+          ],
+          "manifest_has_description": false,
+          "manifest_has_payload_schema": false,
+          "manifest_has_result_schema": false
+        },
+        {
+          "name": "jin10-daemon-stop",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch",
+            "manifest missing payload schema",
+            "manifest missing result schema",
+            "manifest missing description"
+          ],
+          "manifest_has_description": false,
+          "manifest_has_payload_schema": false,
+          "manifest_has_result_schema": false
+        },
+        {
+          "name": "jin10-daemon-status",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch",
+            "manifest missing payload schema",
+            "manifest missing result schema",
+            "manifest missing description"
+          ],
+          "manifest_has_description": false,
+          "manifest_has_payload_schema": false,
+          "manifest_has_result_schema": false
+        }
+      ]
+    },
+    {
+      "name": "macro-regime",
+      "path": "/root/hermes-agent/aegis-alpha-skillpack/skills/aegis-alpha/macro-regime",
+      "description": "Analyze macro regime, liquidity, cross-asset risk mode, A-share capital flow, concept heat, and sector rotation with fail-closed investment safety.",
+      "visibility": "public",
+      "facade": "",
+      "skill_status": "implemented",
+      "command_count": 8,
+      "dispatch_lines": 1706,
+      "contract_lines": 62,
+      "scenario_lines": 33,
+      "risks": [
+        "empty_dict_return"
+      ],
+      "commands": [
+        {
+          "name": "capital-flow-analysis",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch"
+          ],
+          "manifest_has_description": true,
+          "manifest_has_payload_schema": true,
+          "manifest_has_result_schema": true
+        },
+        {
+          "name": "concept-heat",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch"
+          ],
+          "manifest_has_description": true,
+          "manifest_has_payload_schema": true,
+          "manifest_has_result_schema": true
+        },
+        {
+          "name": "domestic-macro",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch"
+          ],
+          "manifest_has_description": true,
+          "manifest_has_payload_schema": true,
+          "manifest_has_result_schema": true
+        },
+        {
+          "name": "global-macro-analysis",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch"
+          ],
+          "manifest_has_description": true,
+          "manifest_has_payload_schema": true,
+          "manifest_has_result_schema": true
+        },
+        {
+          "name": "macro-alert-check",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch"
+          ],
+          "manifest_has_description": true,
+          "manifest_has_payload_schema": true,
+          "manifest_has_result_schema": true
+        },
+        {
+          "name": "macro-regime-query",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch"
+          ],
+          "manifest_has_description": true,
+          "manifest_has_payload_schema": true,
+          "manifest_has_result_schema": true
+        },
+        {
+          "name": "market-review",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch"
+          ],
+          "manifest_has_description": true,
+          "manifest_has_payload_schema": true,
+          "manifest_has_result_schema": true
+        },
+        {
+          "name": "sector-rotation",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch"
+          ],
+          "manifest_has_description": true,
+          "manifest_has_payload_schema": true,
+          "manifest_has_result_schema": true
+        }
+      ]
+    },
+    {
+      "name": "market-data",
+      "path": "/root/hermes-agent/aegis-alpha-skillpack/skills/aegis-alpha/market-data",
+      "description": "Consolidated structured market data from nightly prewarm.",
+      "visibility": "public",
+      "facade": "",
+      "skill_status": "implemented",
+      "command_count": 7,
+      "dispatch_lines": 171,
+      "contract_lines": 75,
+      "scenario_lines": 7,
+      "risks": [],
+      "commands": [
+        {
+          "name": "snapshot-full",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch"
+          ],
+          "manifest_has_description": true,
+          "manifest_has_payload_schema": true,
+          "manifest_has_result_schema": true
+        },
+        {
+          "name": "margin-full",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch"
+          ],
+          "manifest_has_description": true,
+          "manifest_has_payload_schema": true,
+          "manifest_has_result_schema": true
+        },
+        {
+          "name": "calendar-week",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch"
+          ],
+          "manifest_has_description": true,
+          "manifest_has_payload_schema": true,
+          "manifest_has_result_schema": true
+        },
+        {
+          "name": "macro-pmi",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch"
+          ],
+          "manifest_has_description": true,
+          "manifest_has_payload_schema": true,
+          "manifest_has_result_schema": true
+        },
+        {
+          "name": "macro-cpi",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch"
+          ],
+          "manifest_has_description": true,
+          "manifest_has_payload_schema": true,
+          "manifest_has_result_schema": true
+        },
+        {
+          "name": "macro-ppi",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch"
+          ],
+          "manifest_has_description": true,
+          "manifest_has_payload_schema": true,
+          "manifest_has_result_schema": true
+        },
+        {
+          "name": "index-daily",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch"
+          ],
+          "manifest_has_description": true,
+          "manifest_has_payload_schema": true,
+          "manifest_has_result_schema": true
+        }
+      ]
+    },
+    {
+      "name": "market-intel",
+      "path": "/root/hermes-agent/aegis-alpha-skillpack/skills/aegis-alpha/market-intel",
+      "description": "Collect market intelligence from news, events, policy, research reports, sentiment, hot-money context, and black-swan risk with fail-closed investment safety.",
+      "visibility": "public",
+      "facade": "",
+      "skill_status": "implemented",
+      "command_count": 10,
+      "dispatch_lines": 809,
+      "contract_lines": 73,
+      "scenario_lines": 53,
+      "risks": [
+        "empty_dict_return"
+      ],
+      "commands": [
+        {
+          "name": "black-swan-monitor",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch"
+          ],
+          "manifest_has_description": true,
+          "manifest_has_payload_schema": true,
+          "manifest_has_result_schema": true
+        },
+        {
+          "name": "daily-news-scan",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch"
+          ],
+          "manifest_has_description": true,
+          "manifest_has_payload_schema": true,
+          "manifest_has_result_schema": true
+        },
+        {
+          "name": "event-calendar-scan",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch"
+          ],
+          "manifest_has_description": true,
+          "manifest_has_payload_schema": true,
+          "manifest_has_result_schema": true
+        },
+        {
+          "name": "forum-sentiment",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch"
+          ],
+          "manifest_has_description": true,
+          "manifest_has_payload_schema": true,
+          "manifest_has_result_schema": true
+        },
+        {
+          "name": "kol-tracker",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch"
+          ],
+          "manifest_has_description": true,
+          "manifest_has_payload_schema": true,
+          "manifest_has_result_schema": true
+        },
+        {
+          "name": "market-sentiment-index",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch"
+          ],
+          "manifest_has_description": true,
+          "manifest_has_payload_schema": true,
+          "manifest_has_result_schema": true
+        },
+        {
+          "name": "global-sentiment-scan",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch"
+          ],
+          "manifest_has_description": true,
+          "manifest_has_payload_schema": true,
+          "manifest_has_result_schema": true
+        },
+        {
+          "name": "global-event-scan",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch"
+          ],
+          "manifest_has_description": true,
+          "manifest_has_payload_schema": true,
+          "manifest_has_result_schema": true
+        },
+        {
+          "name": "policy-analysis",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch"
+          ],
+          "manifest_has_description": true,
+          "manifest_has_payload_schema": true,
+          "manifest_has_result_schema": true
+        },
+        {
+          "name": "research-reports",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch"
+          ],
+          "manifest_has_description": true,
+          "manifest_has_payload_schema": true,
+          "manifest_has_result_schema": true
+        }
+      ]
+    },
+    {
+      "name": "mineru-extract",
+      "path": "/root/hermes-agent/aegis-alpha-skillpack/skills/aegis-alpha/mineru-extract",
+      "description": "信息搜集解析兜底层：用 MinerU 官方 API 解析 URL、PDF、Office 或图片为 Markdown。",
+      "visibility": "internal",
+      "facade": "information-retrieval",
+      "skill_status": "implemented",
+      "command_count": 2,
+      "dispatch_lines": 154,
+      "contract_lines": 8,
+      "scenario_lines": 9,
+      "risks": [
+        "manifest_missing_payload_schema",
+        "manifest_missing_result_schema"
+      ],
+      "commands": [
+        {
+          "name": "parse-documents",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch",
+            "manifest missing payload schema",
+            "manifest missing result schema",
+            "manifest missing description"
+          ],
+          "manifest_has_description": false,
+          "manifest_has_payload_schema": false,
+          "manifest_has_result_schema": false
+        },
+        {
+          "name": "extract-url",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch",
+            "manifest missing payload schema",
+            "manifest missing result schema",
+            "manifest missing description"
+          ],
+          "manifest_has_description": false,
+          "manifest_has_payload_schema": false,
+          "manifest_has_result_schema": false
+        }
+      ]
+    },
+    {
+      "name": "pipeline",
+      "path": "/root/hermes-agent/aegis-alpha-skillpack/skills/aegis-alpha/pipeline",
+      "description": "Public investment workflow pipeline facade for listing templates, dry-runs, and auditable execution.",
+      "visibility": "public",
+      "facade": "",
+      "skill_status": "implemented",
+      "command_count": 6,
+      "dispatch_lines": 154,
+      "contract_lines": 47,
+      "scenario_lines": 5,
+      "risks": [],
+      "commands": [
+        {
+          "name": "pipeline-list",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch"
+          ],
+          "manifest_has_description": true,
+          "manifest_has_payload_schema": true,
+          "manifest_has_result_schema": true
+        },
+        {
+          "name": "pipeline-dry-run",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch"
+          ],
+          "manifest_has_description": true,
+          "manifest_has_payload_schema": true,
+          "manifest_has_result_schema": true
+        },
+        {
+          "name": "pipeline-run",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch"
+          ],
+          "manifest_has_description": true,
+          "manifest_has_payload_schema": true,
+          "manifest_has_result_schema": true
+        },
+        {
+          "name": "pipeline-run-nightly",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch"
+          ],
+          "manifest_has_description": true,
+          "manifest_has_payload_schema": true,
+          "manifest_has_result_schema": true
+        },
+        {
+          "name": "pipeline-run-morning",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch"
+          ],
+          "manifest_has_description": true,
+          "manifest_has_payload_schema": true,
+          "manifest_has_result_schema": true
+        },
+        {
+          "name": "pipeline-run-weekly",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch"
+          ],
+          "manifest_has_description": true,
+          "manifest_has_payload_schema": true,
+          "manifest_has_result_schema": true
+        }
+      ]
+    },
+    {
+      "name": "pipeline-orchestrator",
+      "path": "/root/hermes-agent/aegis-alpha-skillpack/skills/aegis-alpha/pipeline-orchestrator",
+      "description": "Execute pipeline-runner templates with optional step skipping and result persistence.",
+      "visibility": "internal",
+      "facade": "pipeline",
+      "skill_status": "implemented",
+      "command_count": 2,
+      "dispatch_lines": 425,
+      "contract_lines": 13,
+      "scenario_lines": 9,
+      "risks": [
+        "manifest_missing_payload_schema",
+        "manifest_missing_result_schema"
+      ],
+      "commands": [
+        {
+          "name": "pipeline-run",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch",
+            "manifest missing payload schema",
+            "manifest missing result schema",
+            "manifest missing description"
+          ],
+          "manifest_has_description": false,
+          "manifest_has_payload_schema": false,
+          "manifest_has_result_schema": false
+        },
+        {
+          "name": "pipeline-dry-run",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch",
+            "manifest missing payload schema",
+            "manifest missing result schema",
+            "manifest missing description"
+          ],
+          "manifest_has_description": false,
+          "manifest_has_payload_schema": false,
+          "manifest_has_result_schema": false
+        }
+      ]
+    },
+    {
+      "name": "pipeline-runner",
+      "path": "/root/hermes-agent/aegis-alpha-skillpack/skills/aegis-alpha/pipeline-runner",
+      "description": "Pipeline templates for scheduled investment workflows.",
+      "visibility": "internal",
+      "facade": "pipeline",
+      "skill_status": "implemented",
+      "command_count": 6,
+      "dispatch_lines": 74,
+      "contract_lines": 23,
+      "scenario_lines": 13,
+      "risks": [
+        "manifest_missing_payload_schema",
+        "manifest_missing_result_schema"
+      ],
+      "commands": [
+        {
+          "name": "pipeline-list",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch",
+            "manifest missing payload schema",
+            "manifest missing result schema",
+            "manifest missing description"
+          ],
+          "manifest_has_description": false,
+          "manifest_has_payload_schema": false,
+          "manifest_has_result_schema": false
+        },
+        {
+          "name": "pipeline-run",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch",
+            "manifest missing payload schema",
+            "manifest missing result schema",
+            "manifest missing description"
+          ],
+          "manifest_has_description": false,
+          "manifest_has_payload_schema": false,
+          "manifest_has_result_schema": false
+        },
+        {
+          "name": "pipeline-run-nightly",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch",
+            "manifest missing payload schema",
+            "manifest missing result schema",
+            "manifest missing description"
+          ],
+          "manifest_has_description": false,
+          "manifest_has_payload_schema": false,
+          "manifest_has_result_schema": false
+        },
+        {
+          "name": "pipeline-run-morning",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch",
+            "manifest missing payload schema",
+            "manifest missing result schema",
+            "manifest missing description"
+          ],
+          "manifest_has_description": false,
+          "manifest_has_payload_schema": false,
+          "manifest_has_result_schema": false
+        },
+        {
+          "name": "pipeline-run-market-review",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch",
+            "manifest missing payload schema",
+            "manifest missing result schema",
+            "manifest missing description"
+          ],
+          "manifest_has_description": false,
+          "manifest_has_payload_schema": false,
+          "manifest_has_result_schema": false
+        },
+        {
+          "name": "pipeline-run-weekly",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch",
+            "manifest missing payload schema",
+            "manifest missing result schema",
+            "manifest missing description"
+          ],
+          "manifest_has_description": false,
+          "manifest_has_payload_schema": false,
+          "manifest_has_result_schema": false
+        }
+      ]
+    },
+    {
+      "name": "portfolio-management",
+      "path": "/root/hermes-agent/aegis-alpha-skillpack/skills/aegis-alpha/portfolio-management",
+      "description": "Portfolio state management and trade record operations.",
+      "visibility": "internal",
+      "facade": "portfolio-ops",
+      "skill_status": "implemented",
+      "command_count": 6,
+      "dispatch_lines": 455,
+      "contract_lines": 73,
+      "scenario_lines": 25,
+      "risks": [],
+      "commands": [
+        {
+          "name": "portfolio-add",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch"
+          ],
+          "manifest_has_description": true,
+          "manifest_has_payload_schema": true,
+          "manifest_has_result_schema": true
+        },
+        {
+          "name": "portfolio-advice",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch"
+          ],
+          "manifest_has_description": true,
+          "manifest_has_payload_schema": true,
+          "manifest_has_result_schema": true
+        },
+        {
+          "name": "portfolio-remove",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch"
+          ],
+          "manifest_has_description": true,
+          "manifest_has_payload_schema": true,
+          "manifest_has_result_schema": true
+        },
+        {
+          "name": "portfolio-report",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch"
+          ],
+          "manifest_has_description": true,
+          "manifest_has_payload_schema": true,
+          "manifest_has_result_schema": true
+        },
+        {
+          "name": "portfolio-view",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch"
+          ],
+          "manifest_has_description": true,
+          "manifest_has_payload_schema": true,
+          "manifest_has_result_schema": true
+        },
+        {
+          "name": "record-trade",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch"
+          ],
+          "manifest_has_description": true,
+          "manifest_has_payload_schema": true,
+          "manifest_has_result_schema": true
+        }
+      ]
+    },
+    {
+      "name": "portfolio-ops",
+      "path": "/root/hermes-agent/aegis-alpha-skillpack/skills/aegis-alpha/portfolio-ops",
+      "description": "Public portfolio operations facade for holdings, trade records, risk checks, and position sizing.",
+      "visibility": "public",
+      "facade": "",
+      "skill_status": "implemented",
+      "command_count": 8,
+      "dispatch_lines": 122,
+      "contract_lines": 62,
+      "scenario_lines": 7,
+      "risks": [],
+      "commands": [
+        {
+          "name": "portfolio-add",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch"
+          ],
+          "manifest_has_description": true,
+          "manifest_has_payload_schema": true,
+          "manifest_has_result_schema": true
+        },
+        {
+          "name": "portfolio-remove",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch"
+          ],
+          "manifest_has_description": true,
+          "manifest_has_payload_schema": true,
+          "manifest_has_result_schema": true
+        },
+        {
+          "name": "portfolio-view",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch"
+          ],
+          "manifest_has_description": true,
+          "manifest_has_payload_schema": true,
+          "manifest_has_result_schema": true
+        },
+        {
+          "name": "portfolio-report",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch"
+          ],
+          "manifest_has_description": true,
+          "manifest_has_payload_schema": true,
+          "manifest_has_result_schema": true
+        },
+        {
+          "name": "record-trade",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch"
+          ],
+          "manifest_has_description": true,
+          "manifest_has_payload_schema": true,
+          "manifest_has_result_schema": true
+        },
+        {
+          "name": "portfolio-risk-check",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch"
+          ],
+          "manifest_has_description": true,
+          "manifest_has_payload_schema": true,
+          "manifest_has_result_schema": true
+        },
+        {
+          "name": "position-sizing-advisor",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch"
+          ],
+          "manifest_has_description": true,
+          "manifest_has_payload_schema": true,
+          "manifest_has_result_schema": true
+        },
+        {
+          "name": "position-management",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch"
+          ],
+          "manifest_has_description": true,
+          "manifest_has_payload_schema": true,
+          "manifest_has_result_schema": true
+        }
+      ]
+    },
+    {
+      "name": "position-ops",
+      "path": "/root/hermes-agent/aegis-alpha-skillpack/skills/aegis-alpha/position-ops",
+      "description": "Position sizing and risk operations.",
+      "visibility": "internal",
+      "facade": "portfolio-ops",
+      "skill_status": "implemented",
+      "command_count": 3,
+      "dispatch_lines": 322,
+      "contract_lines": 48,
+      "scenario_lines": 13,
+      "risks": [],
+      "commands": [
+        {
+          "name": "portfolio-risk-check",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch"
+          ],
+          "manifest_has_description": true,
+          "manifest_has_payload_schema": true,
+          "manifest_has_result_schema": true
+        },
+        {
+          "name": "position-management-v2",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch"
+          ],
+          "manifest_has_description": true,
+          "manifest_has_payload_schema": true,
+          "manifest_has_result_schema": true
+        },
+        {
+          "name": "position-sizing-advisor",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch"
+          ],
+          "manifest_has_description": true,
+          "manifest_has_payload_schema": true,
+          "manifest_has_result_schema": true
+        }
+      ]
+    },
+    {
+      "name": "quality-gate",
+      "path": "/root/hermes-agent/aegis-alpha-skillpack/skills/aegis-alpha/quality-gate",
+      "description": "Nightly quality checks and backtest loops.",
+      "visibility": "public",
+      "facade": "",
+      "skill_status": "implemented",
+      "command_count": 2,
+      "dispatch_lines": 369,
+      "contract_lines": 43,
+      "scenario_lines": 9,
+      "risks": [],
+      "commands": [
+        {
+          "name": "nightly-quality-gate",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch"
+          ],
+          "manifest_has_description": true,
+          "manifest_has_payload_schema": true,
+          "manifest_has_result_schema": true
+        },
+        {
+          "name": "backtest-loop",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch"
+          ],
+          "manifest_has_description": true,
+          "manifest_has_payload_schema": true,
+          "manifest_has_result_schema": true
+        }
+      ]
+    },
+    {
+      "name": "quant-validation",
+      "path": "/root/hermes-agent/aegis-alpha-skillpack/skills/aegis-alpha/quant-validation",
+      "description": "Research-only offline backtesting, strategy comparison, bounded parameter grid search, and nightly validation for investment hypotheses.",
+      "visibility": "public",
+      "facade": "",
+      "skill_status": "implemented",
+      "command_count": 7,
+      "dispatch_lines": 683,
+      "contract_lines": 100,
+      "scenario_lines": 25,
+      "risks": [],
+      "commands": [
+        {
+          "name": "agent-validation-backtest",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch"
+          ],
+          "manifest_has_description": true,
+          "manifest_has_payload_schema": true,
+          "manifest_has_result_schema": true
+        },
+        {
+          "name": "strategy-backtest",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch"
+          ],
+          "manifest_has_description": true,
+          "manifest_has_payload_schema": true,
+          "manifest_has_result_schema": true
+        },
+        {
+          "name": "batch-backtest",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch"
+          ],
+          "manifest_has_description": true,
+          "manifest_has_payload_schema": true,
+          "manifest_has_result_schema": true
+        },
+        {
+          "name": "strategy-compare",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch"
+          ],
+          "manifest_has_description": true,
+          "manifest_has_payload_schema": true,
+          "manifest_has_result_schema": true
+        },
+        {
+          "name": "grid-search-advisor",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch"
+          ],
+          "manifest_has_description": true,
+          "manifest_has_payload_schema": true,
+          "manifest_has_result_schema": true
+        },
+        {
+          "name": "parameter-optimization-biweekly",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch"
+          ],
+          "manifest_has_description": true,
+          "manifest_has_payload_schema": true,
+          "manifest_has_result_schema": true
+        },
+        {
+          "name": "nightly-eval-12m",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch"
+          ],
+          "manifest_has_description": true,
+          "manifest_has_payload_schema": true,
+          "manifest_has_result_schema": true
+        }
+      ]
+    },
+    {
+      "name": "qveris-official",
+      "path": "/root/hermes-agent/aegis-alpha-skillpack/skills/aegis-alpha/qveris-official",
+      "description": "(multiline description)",
+      "visibility": "internal",
+      "facade": "information-retrieval",
+      "skill_status": "no_commands",
+      "command_count": 0,
+      "dispatch_lines": 1,
+      "contract_lines": 3,
+      "scenario_lines": 4,
+      "risks": [
+        "placeholder_dispatch",
+        "thin_contract"
+      ],
+      "commands": []
+    },
+    {
+      "name": "report-evolution",
+      "path": "/root/hermes-agent/aegis-alpha-skillpack/skills/aegis-alpha/report-evolution",
+      "description": "Capture evidence and align outcomes for report evolution (Phase 1).",
+      "visibility": "public",
+      "facade": "",
+      "skill_status": "implemented",
+      "command_count": 2,
+      "dispatch_lines": 134,
+      "contract_lines": 81,
+      "scenario_lines": 33,
+      "risks": [],
+      "commands": [
+        {
+          "name": "capture-report-evidence",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch"
+          ],
+          "manifest_has_description": true,
+          "manifest_has_payload_schema": true,
+          "manifest_has_result_schema": true
+        },
+        {
+          "name": "align-report-outcome",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch"
+          ],
+          "manifest_has_description": true,
+          "manifest_has_payload_schema": true,
+          "manifest_has_result_schema": true
+        }
+      ]
+    },
+    {
+      "name": "research-tools",
+      "path": "/root/hermes-agent/aegis-alpha-skillpack/skills/aegis-alpha/research-tools",
+      "description": "Shared research and utility tooling.",
+      "visibility": "internal",
+      "facade": "information-retrieval",
+      "skill_status": "implemented",
+      "command_count": 5,
+      "dispatch_lines": 225,
+      "contract_lines": 47,
+      "scenario_lines": 37,
+      "risks": [],
+      "commands": [
+        {
+          "name": "analysis-history",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch"
+          ],
+          "manifest_has_description": true,
+          "manifest_has_payload_schema": true,
+          "manifest_has_result_schema": true
+        },
+        {
+          "name": "help",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch"
+          ],
+          "manifest_has_description": true,
+          "manifest_has_payload_schema": true,
+          "manifest_has_result_schema": true
+        },
+        {
+          "name": "search-and-extract",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch"
+          ],
+          "manifest_has_description": true,
+          "manifest_has_payload_schema": true,
+          "manifest_has_result_schema": true
+        },
+        {
+          "name": "set-preference",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch"
+          ],
+          "manifest_has_description": true,
+          "manifest_has_payload_schema": true,
+          "manifest_has_result_schema": true
+        },
+        {
+          "name": "web-content-fetch",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch"
+          ],
+          "manifest_has_description": true,
+          "manifest_has_payload_schema": true,
+          "manifest_has_result_schema": true
+        }
+      ]
+    },
+    {
+      "name": "search-layer",
+      "path": "/root/hermes-agent/aegis-alpha-skillpack/skills/aegis-alpha/search-layer",
+      "description": "Research-only information retrieval layer: multi-source web search, result ranking, explicit URL reference extraction, and thread fetching.",
+      "visibility": "internal",
+      "facade": "information-retrieval",
+      "skill_status": "implemented",
+      "command_count": 3,
+      "dispatch_lines": 217,
+      "contract_lines": 54,
+      "scenario_lines": 13,
+      "risks": [],
+      "commands": [
+        {
+          "name": "search",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch"
+          ],
+          "manifest_has_description": true,
+          "manifest_has_payload_schema": true,
+          "manifest_has_result_schema": true
+        },
+        {
+          "name": "extract-refs",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch"
+          ],
+          "manifest_has_description": true,
+          "manifest_has_payload_schema": true,
+          "manifest_has_result_schema": true
+        },
+        {
+          "name": "fetch-thread",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch"
+          ],
+          "manifest_has_description": true,
+          "manifest_has_payload_schema": true,
+          "manifest_has_result_schema": true
+        }
+      ]
+    },
+    {
+      "name": "theme-cycle",
+      "path": "/root/hermes-agent/aegis-alpha-skillpack/skills/aegis-alpha/theme-cycle",
+      "description": "Discover themes, track lifecycle state, analyze event impact, gate Themesurfer risk, and produce paper-only rotation reviews with fail-closed investment safety.",
+      "visibility": "public",
+      "facade": "",
+      "skill_status": "implemented",
+      "command_count": 11,
+      "dispatch_lines": 1241,
+      "contract_lines": 67,
+      "scenario_lines": 41,
+      "risks": [
+        "empty_dict_return",
+        "empty_positions_possible"
+      ],
+      "commands": [
+        {
+          "name": "discover-themes",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch"
+          ],
+          "manifest_has_description": true,
+          "manifest_has_payload_schema": true,
+          "manifest_has_result_schema": true
+        },
+        {
+          "name": "event-analysis",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch"
+          ],
+          "manifest_has_description": true,
+          "manifest_has_payload_schema": true,
+          "manifest_has_result_schema": true
+        },
+        {
+          "name": "global-medium-long-strategy",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch"
+          ],
+          "manifest_has_description": true,
+          "manifest_has_payload_schema": true,
+          "manifest_has_result_schema": true
+        },
+        {
+          "name": "macro-analysis",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch"
+          ],
+          "manifest_has_description": true,
+          "manifest_has_payload_schema": true,
+          "manifest_has_result_schema": true
+        },
+        {
+          "name": "rebalance-check",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch"
+          ],
+          "manifest_has_description": true,
+          "manifest_has_payload_schema": true,
+          "manifest_has_result_schema": true
+        },
+        {
+          "name": "sector-cycle-panorama",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch"
+          ],
+          "manifest_has_description": true,
+          "manifest_has_payload_schema": true,
+          "manifest_has_result_schema": true
+        },
+        {
+          "name": "theme-tracker",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch"
+          ],
+          "manifest_has_description": true,
+          "manifest_has_payload_schema": true,
+          "manifest_has_result_schema": true
+        },
+        {
+          "name": "mainline-update",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch"
+          ],
+          "manifest_has_description": true,
+          "manifest_has_payload_schema": true,
+          "manifest_has_result_schema": true
+        },
+        {
+          "name": "themesurfer-check",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch"
+          ],
+          "manifest_has_description": true,
+          "manifest_has_payload_schema": true,
+          "manifest_has_result_schema": true
+        },
+        {
+          "name": "themesurfer-signal",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch"
+          ],
+          "manifest_has_description": true,
+          "manifest_has_payload_schema": true,
+          "manifest_has_result_schema": true
+        },
+        {
+          "name": "themesurfer-weekly-stats",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch"
+          ],
+          "manifest_has_description": true,
+          "manifest_has_payload_schema": true,
+          "manifest_has_result_schema": true
+        }
+      ]
+    },
+    {
+      "name": "themesurfer-signal",
+      "path": "/root/hermes-agent/aegis-alpha-skillpack/skills/aegis-alpha/themesurfer-signal",
+      "description": "Market filter signal (MA20) for A-share short-term trading gate.",
+      "visibility": "internal",
+      "facade": "theme-cycle",
+      "skill_status": "implemented",
+      "command_count": 1,
+      "dispatch_lines": 150,
+      "contract_lines": 0,
+      "scenario_lines": 0,
+      "risks": [
+        "manifest_missing_payload_schema",
+        "manifest_missing_result_schema",
+        "thin_contract"
+      ],
+      "commands": [
+        {
+          "name": "signal",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch",
+            "manifest missing payload schema",
+            "manifest missing result schema",
+            "manifest missing description"
+          ],
+          "manifest_has_description": false,
+          "manifest_has_payload_schema": false,
+          "manifest_has_result_schema": false
+        }
+      ]
+    },
+    {
+      "name": "trade-planning",
+      "path": "/root/hermes-agent/aegis-alpha-skillpack/skills/aegis-alpha/trade-planning",
+      "description": "Trade setup planning and strategy generation.",
+      "visibility": "public",
+      "facade": "",
+      "skill_status": "implemented",
+      "command_count": 7,
+      "dispatch_lines": 455,
+      "contract_lines": 62,
+      "scenario_lines": 29,
+      "risks": [],
+      "commands": [
+        {
+          "name": "full-investment-plan",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch"
+          ],
+          "manifest_has_description": true,
+          "manifest_has_payload_schema": true,
+          "manifest_has_result_schema": true
+        },
+        {
+          "name": "short-term-analysis",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch"
+          ],
+          "manifest_has_description": true,
+          "manifest_has_payload_schema": true,
+          "manifest_has_result_schema": true
+        },
+        {
+          "name": "stock-technical-scan",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch"
+          ],
+          "manifest_has_description": true,
+          "manifest_has_payload_schema": true,
+          "manifest_has_result_schema": true
+        },
+        {
+          "name": "strategy-advisor",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch"
+          ],
+          "manifest_has_description": true,
+          "manifest_has_payload_schema": true,
+          "manifest_has_result_schema": true
+        },
+        {
+          "name": "theme-identification",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch"
+          ],
+          "manifest_has_description": true,
+          "manifest_has_payload_schema": true,
+          "manifest_has_result_schema": true
+        },
+        {
+          "name": "theme-targets",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch"
+          ],
+          "manifest_has_description": true,
+          "manifest_has_payload_schema": true,
+          "manifest_has_result_schema": true
+        },
+        {
+          "name": "trading-strategy-v2",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch"
+          ],
+          "manifest_has_description": true,
+          "manifest_has_payload_schema": true,
+          "manifest_has_result_schema": true
+        }
+      ]
+    },
+    {
+      "name": "tushare",
+      "path": "/root/hermes-agent/aegis-alpha-skillpack/skills/aegis-alpha/tushare",
+      "description": "tushare是一个财经数据接口包，拥有丰富的数据内容，如股票、基金、期货、数字货币等行情数据，公司财务、基金经理等基本面数据。该模块通过标准化API方式统一了数据资产的对外服务方式，以帮助有需要的技术用户更实时、简洁、轻量的使用相关数据。",
+      "visibility": "internal",
+      "facade": "market-data",
+      "skill_status": "implemented",
+      "command_count": 22,
+      "dispatch_lines": 359,
+      "contract_lines": 3,
+      "scenario_lines": 4,
+      "risks": [
+        "manifest_missing_payload_schema",
+        "manifest_missing_result_schema",
+        "thin_contract"
+      ],
+      "commands": [
+        {
+          "name": "news",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch",
+            "manifest missing payload schema",
+            "manifest missing result schema",
+            "manifest missing description"
+          ],
+          "manifest_has_description": false,
+          "manifest_has_payload_schema": false,
+          "manifest_has_result_schema": false
+        },
+        {
+          "name": "major-news",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch",
+            "manifest missing payload schema",
+            "manifest missing result schema",
+            "manifest missing description"
+          ],
+          "manifest_has_description": false,
+          "manifest_has_payload_schema": false,
+          "manifest_has_result_schema": false
+        },
+        {
+          "name": "policy",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch",
+            "manifest missing payload schema",
+            "manifest missing result schema",
+            "manifest missing description"
+          ],
+          "manifest_has_description": false,
+          "manifest_has_payload_schema": false,
+          "manifest_has_result_schema": false
+        },
+        {
+          "name": "research-report",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch",
+            "manifest missing payload schema",
+            "manifest missing result schema",
+            "manifest missing description"
+          ],
+          "manifest_has_description": false,
+          "manifest_has_payload_schema": false,
+          "manifest_has_result_schema": false
+        },
+        {
+          "name": "eco-cal",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch",
+            "manifest missing payload schema",
+            "manifest missing result schema",
+            "manifest missing description"
+          ],
+          "manifest_has_description": false,
+          "manifest_has_payload_schema": false,
+          "manifest_has_result_schema": false
+        },
+        {
+          "name": "macro-cn-m2",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch",
+            "manifest missing payload schema",
+            "manifest missing result schema",
+            "manifest missing description"
+          ],
+          "manifest_has_description": false,
+          "manifest_has_payload_schema": false,
+          "manifest_has_result_schema": false
+        },
+        {
+          "name": "macro-cn-sf",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch",
+            "manifest missing payload schema",
+            "manifest missing result schema",
+            "manifest missing description"
+          ],
+          "manifest_has_description": false,
+          "manifest_has_payload_schema": false,
+          "manifest_has_result_schema": false
+        },
+        {
+          "name": "macro-cn-gdp",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch",
+            "manifest missing payload schema",
+            "manifest missing result schema",
+            "manifest missing description"
+          ],
+          "manifest_has_description": false,
+          "manifest_has_payload_schema": false,
+          "manifest_has_result_schema": false
+        },
+        {
+          "name": "macro-cn-shibor",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch",
+            "manifest missing payload schema",
+            "manifest missing result schema",
+            "manifest missing description"
+          ],
+          "manifest_has_description": false,
+          "manifest_has_payload_schema": false,
+          "manifest_has_result_schema": false
+        },
+        {
+          "name": "macro-cn-lpr",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch",
+            "manifest missing payload schema",
+            "manifest missing result schema",
+            "manifest missing description"
+          ],
+          "manifest_has_description": false,
+          "manifest_has_payload_schema": false,
+          "manifest_has_result_schema": false
+        },
+        {
+          "name": "daily-basic",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch",
+            "manifest missing payload schema",
+            "manifest missing result schema",
+            "manifest missing description"
+          ],
+          "manifest_has_description": false,
+          "manifest_has_payload_schema": false,
+          "manifest_has_result_schema": false
+        },
+        {
+          "name": "stock-list",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch",
+            "manifest missing payload schema",
+            "manifest missing result schema",
+            "manifest missing description"
+          ],
+          "manifest_has_description": false,
+          "manifest_has_payload_schema": false,
+          "manifest_has_result_schema": false
+        },
+        {
+          "name": "stk-limit",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch",
+            "manifest missing payload schema",
+            "manifest missing result schema",
+            "manifest missing description"
+          ],
+          "manifest_has_description": false,
+          "manifest_has_payload_schema": false,
+          "manifest_has_result_schema": false
+        },
+        {
+          "name": "top-list",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch",
+            "manifest missing payload schema",
+            "manifest missing result schema",
+            "manifest missing description"
+          ],
+          "manifest_has_description": false,
+          "manifest_has_payload_schema": false,
+          "manifest_has_result_schema": false
+        },
+        {
+          "name": "top-inst",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch",
+            "manifest missing payload schema",
+            "manifest missing result schema",
+            "manifest missing description"
+          ],
+          "manifest_has_description": false,
+          "manifest_has_payload_schema": false,
+          "manifest_has_result_schema": false
+        },
+        {
+          "name": "margin",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch",
+            "manifest missing payload schema",
+            "manifest missing result schema",
+            "manifest missing description"
+          ],
+          "manifest_has_description": false,
+          "manifest_has_payload_schema": false,
+          "manifest_has_result_schema": false
+        },
+        {
+          "name": "share-float",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch",
+            "manifest missing payload schema",
+            "manifest missing result schema",
+            "manifest missing description"
+          ],
+          "manifest_has_description": false,
+          "manifest_has_payload_schema": false,
+          "manifest_has_result_schema": false
+        },
+        {
+          "name": "income",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch",
+            "manifest missing payload schema",
+            "manifest missing result schema",
+            "manifest missing description"
+          ],
+          "manifest_has_description": false,
+          "manifest_has_payload_schema": false,
+          "manifest_has_result_schema": false
+        },
+        {
+          "name": "balancesheet",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch",
+            "manifest missing payload schema",
+            "manifest missing result schema",
+            "manifest missing description"
+          ],
+          "manifest_has_description": false,
+          "manifest_has_payload_schema": false,
+          "manifest_has_result_schema": false
+        },
+        {
+          "name": "cashflow",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch",
+            "manifest missing payload schema",
+            "manifest missing result schema",
+            "manifest missing description"
+          ],
+          "manifest_has_description": false,
+          "manifest_has_payload_schema": false,
+          "manifest_has_result_schema": false
+        },
+        {
+          "name": "fina-indicator",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch",
+            "manifest missing payload schema",
+            "manifest missing result schema",
+            "manifest missing description"
+          ],
+          "manifest_has_description": false,
+          "manifest_has_payload_schema": false,
+          "manifest_has_result_schema": false
+        },
+        {
+          "name": "sw-daily",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch",
+            "manifest missing payload schema",
+            "manifest missing result schema",
+            "manifest missing description"
+          ],
+          "manifest_has_description": false,
+          "manifest_has_payload_schema": false,
+          "manifest_has_result_schema": false
+        }
+      ]
+    },
+    {
+      "name": "weekly-stock-pool",
+      "path": "/root/hermes-agent/aegis-alpha-skillpack/skills/aegis-alpha/weekly-stock-pool",
+      "description": "Weekly stock pool consolidation and candidate summary.",
+      "visibility": "internal",
+      "facade": "equity-screening",
+      "skill_status": "implemented",
+      "command_count": 1,
+      "dispatch_lines": 296,
+      "contract_lines": 44,
+      "scenario_lines": 5,
+      "risks": [],
+      "commands": [
+        {
+          "name": "weekly-stock-pool",
+          "status": "implemented",
+          "reasons": [
+            "command has explicit dispatch branch"
+          ],
+          "manifest_has_description": true,
+          "manifest_has_payload_schema": true,
+          "manifest_has_result_schema": true
+        }
+      ]
+    }
+  ]
+}

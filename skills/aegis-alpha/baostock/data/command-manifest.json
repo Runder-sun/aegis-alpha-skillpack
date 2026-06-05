@@ -1,0 +1,14 @@
+{
+  "package": "baostock",
+  "description": "BaoStock data access (A-share history + fundamental data).",
+  "commands": [
+    {"name": "a-stock-daily", "legacy_functions": ["baostock_a_stock_daily"]},
+    {"name": "index-daily", "legacy_functions": ["baostock_index_daily"]},
+    {"name": "stock-weekly"},
+    {"name": "fundamental-data"},
+    {"name": "balance-sheet"},
+    {"name": "cash-flow"},
+    {"name": "dupont-data"},
+    {"name": "dividend-data"}
+  ]
+}

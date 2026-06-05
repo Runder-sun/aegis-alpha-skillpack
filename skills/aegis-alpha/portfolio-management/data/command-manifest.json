@@ -1,0 +1,103 @@
+{
+  "package": "portfolio-management",
+  "description": "Portfolio state management and trade record operations.",
+  "commands": [
+    {
+      "name": "portfolio-add",
+      "description": "Create or merge a local portfolio position in workspace memory.",
+      "status": "implemented",
+      "legacy_functions": ["portfolio_add"],
+      "payload_schema": {
+        "type": "object",
+        "required": ["code", "quantity"],
+        "properties": {
+          "code": {"type": "string", "description": "Security code or symbol."},
+          "name": {"type": "string"},
+          "quantity": {"type": "number", "exclusiveMinimum": 0},
+          "price": {"type": "number", "minimum": 0},
+          "buy_price": {"type": "number", "minimum": 0},
+          "date": {"type": "string"},
+          "notes": {"type": "string"},
+          "merge": {"type": "boolean", "default": true}
+        }
+      },
+      "result_schema": {"$ref": "#/$defs/portfolio_command_result"}
+    },
+    {
+      "name": "portfolio-advice",
+      "description": "Return conservative portfolio hygiene advice without producing trade recommendations.",
+      "status": "implemented",
+      "legacy_functions": ["portfolio_advice"],
+      "payload_schema": {"type": "object", "properties": {}},
+      "result_schema": {"$ref": "#/$defs/portfolio_command_result"}
+    },
+    {
+      "name": "portfolio-remove",
+      "description": "Remove a local portfolio position and record the removal event.",
+      "status": "implemented",
+      "legacy_functions": ["portfolio_remove"],
+      "payload_schema": {
+        "type": "object",
+        "required": ["code"],
+        "properties": {
+          "code": {"type": "string"},
+          "reason": {"type": "string"},
+          "price": {"type": "number", "minimum": 0}
+        }
+      },
+      "result_schema": {"$ref": "#/$defs/portfolio_command_result"}
+    },
+    {
+      "name": "portfolio-report",
+      "description": "Summarize known portfolio positions, cost basis, and market value when current prices are present.",
+      "status": "implemented",
+      "legacy_functions": ["portfolio_report"],
+      "payload_schema": {"type": "object", "properties": {}},
+      "result_schema": {"$ref": "#/$defs/portfolio_command_result"}
+    },
+    {
+      "name": "portfolio-view",
+      "description": "Load local portfolio positions. Missing state fails closed and must not be interpreted as empty holdings.",
+      "status": "implemented",
+      "legacy_functions": ["portfolio_view"],
+      "payload_schema": {"type": "object", "properties": {}},
+      "result_schema": {"$ref": "#/$defs/portfolio_command_result"}
+    },
+    {
+      "name": "record-trade",
+      "description": "Record a buy or sell trade and update local position quantities.",
+      "status": "implemented",
+      "legacy_functions": ["record_trade"],
+      "payload_schema": {
+        "type": "object",
+        "required": ["code", "side", "quantity", "price"],
+        "properties": {
+          "code": {"type": "string"},
+          "name": {"type": "string"},
+          "side": {"type": "string", "enum": ["buy", "sell"]},
+          "quantity": {"type": "number", "exclusiveMinimum": 0},
+          "price": {"type": "number", "minimum": 0},
+          "allow_negative": {"type": "boolean", "default": false},
+          "notes": {"type": "string"}
+        }
+      },
+      "result_schema": {"$ref": "#/$defs/portfolio_command_result"}
+    }
+  ],
+  "$defs": {
+    "portfolio_command_result": {
+      "type": "object",
+      "required": ["ok", "decision_allowed", "result", "warnings", "errors"],
+      "properties": {
+        "ok": {"type": "boolean"},
+        "decision_allowed": {"type": "boolean", "const": false},
+        "max_action_level": {"type": "string"},
+        "sources": {"type": "array", "items": {"type": "string"}},
+        "artifacts": {"type": "array", "items": {"type": "string"}},
+        "warnings": {"type": "array", "items": {"type": "string"}},
+        "errors": {"type": "array", "items": {"type": "string"}},
+        "result": {"type": "object"}
+      }
+    }
+  }
+}

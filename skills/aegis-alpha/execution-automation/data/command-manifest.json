@@ -1,0 +1,556 @@
+{
+  "package": "execution-automation",
+  "description": "Fail-closed prewarm, market monitoring, and explicit-confirmation report push automation.",
+  "safety_policy": {
+    "decision_allowed": false,
+    "requires_human_confirmation": true,
+    "max_action_level": "automation_only",
+    "fail_closed": true,
+    "external_send_requires_confirm": true
+  },
+  "commands": [
+    {
+      "name": "nightly-prewarm",
+      "description": "Run the prewarm collector and persist a validated nightly prewarm artifact.",
+      "status": "implemented",
+      "legacy_functions": [
+        "nightly_prewarm"
+      ],
+      "payload_schema": {
+        "$ref": "#/$defs/prewarm_payload"
+      },
+      "result_schema": {
+        "$ref": "#/$defs/automation_result"
+      },
+      "example": {
+        "dry_run": true
+      },
+      "upstream_dependencies": [
+        "scripts/nightly_prewarm.py",
+        "workspace skills"
+      ],
+      "freshness_policy": "Returns artifact path and critical gaps; missing artifact fails closed.",
+      "error_behavior": [
+        "prewarm_artifact_missing",
+        "prewarm_stale",
+        "external_send_requires_confirm",
+        "report_text_required"
+      ]
+    },
+    {
+      "name": "morning-prewarm",
+      "description": "Run the shared prewarm collector for the morning pipeline and tag the phase as morning.",
+      "status": "implemented",
+      "legacy_functions": [
+        "morning_prewarm"
+      ],
+      "payload_schema": {
+        "$ref": "#/$defs/prewarm_payload"
+      },
+      "result_schema": {
+        "$ref": "#/$defs/automation_result"
+      },
+      "example": {
+        "dry_run": true
+      },
+      "upstream_dependencies": [
+        "scripts/nightly_prewarm.py",
+        "workspace skills"
+      ],
+      "freshness_policy": "Morning pipeline depends on the generated prewarm artifact; missing artifact fails closed.",
+      "error_behavior": [
+        "prewarm_artifact_missing",
+        "prewarm_stale",
+        "external_send_requires_confirm",
+        "report_text_required"
+      ]
+    },
+    {
+      "name": "midday-prewarm",
+      "description": "Run the shared prewarm collector for market-review or midday workflows.",
+      "status": "implemented",
+      "legacy_functions": [
+        "midday_prewarm"
+      ],
+      "payload_schema": {
+        "$ref": "#/$defs/prewarm_payload"
+      },
+      "result_schema": {
+        "$ref": "#/$defs/automation_result"
+      },
+      "example": {
+        "dry_run": true
+      },
+      "upstream_dependencies": [
+        "scripts/nightly_prewarm.py",
+        "workspace skills"
+      ],
+      "freshness_policy": "Market-review pipeline depends on the generated prewarm artifact; missing artifact fails closed.",
+      "error_behavior": [
+        "prewarm_artifact_missing",
+        "prewarm_stale",
+        "external_send_requires_confirm",
+        "report_text_required"
+      ]
+    },
+    {
+      "name": "evening-prewarm",
+      "description": "Run the shared prewarm collector for evening monitoring workflows.",
+      "status": "implemented",
+      "legacy_functions": [
+        "evening_prewarm"
+      ],
+      "payload_schema": {
+        "$ref": "#/$defs/prewarm_payload"
+      },
+      "result_schema": {
+        "$ref": "#/$defs/automation_result"
+      },
+      "example": {
+        "dry_run": true
+      },
+      "upstream_dependencies": [
+        "scripts/nightly_prewarm.py",
+        "workspace skills"
+      ],
+      "freshness_policy": "Critical gaps are explicit; no missing feed is treated as neutral.",
+      "error_behavior": [
+        "prewarm_artifact_missing",
+        "prewarm_stale",
+        "external_send_requires_confirm",
+        "report_text_required"
+      ]
+    },
+    {
+      "name": "weekly-prewarm",
+      "description": "Run the shared prewarm collector for weekly reporting workflows.",
+      "status": "implemented",
+      "legacy_functions": [
+        "weekly_prewarm"
+      ],
+      "payload_schema": {
+        "$ref": "#/$defs/prewarm_payload"
+      },
+      "result_schema": {
+        "$ref": "#/$defs/automation_result"
+      },
+      "example": {
+        "dry_run": true
+      },
+      "upstream_dependencies": [
+        "scripts/nightly_prewarm.py",
+        "workspace skills"
+      ],
+      "freshness_policy": "Weekly workflows reuse the latest validated artifact and expose critical data gaps.",
+      "error_behavior": [
+        "prewarm_artifact_missing",
+        "prewarm_stale",
+        "external_send_requires_confirm",
+        "report_text_required"
+      ]
+    },
+    {
+      "name": "prewarm-status",
+      "description": "Inspect the latest prewarm artifact, age, keys, and critical data gaps.",
+      "status": "implemented",
+      "legacy_functions": [
+        "prewarm_status"
+      ],
+      "payload_schema": {
+        "$ref": "#/$defs/status_payload"
+      },
+      "result_schema": {
+        "$ref": "#/$defs/automation_result"
+      },
+      "example": {
+        "max_age_minutes": 720
+      },
+      "upstream_dependencies": [
+        "memory/prewarm/nightly-prewarm-*.json"
+      ],
+      "freshness_policy": "Fails closed when the artifact is missing, invalid, or older than max_age_minutes.",
+      "error_behavior": [
+        "prewarm_artifact_missing",
+        "prewarm_stale",
+        "external_send_requires_confirm",
+        "report_text_required"
+      ]
+    },
+    {
+      "name": "market-heartbeat",
+      "description": "Read latest prewarm market evidence and return heartbeat status plus risk alerts.",
+      "status": "implemented",
+      "legacy_functions": [
+        "market_heartbeat"
+      ],
+      "payload_schema": {
+        "$ref": "#/$defs/monitor_payload"
+      },
+      "result_schema": {
+        "$ref": "#/$defs/automation_result"
+      },
+      "example": {
+        "max_age_minutes": 360
+      },
+      "upstream_dependencies": [
+        "memory/prewarm/nightly-prewarm-*.json"
+      ],
+      "freshness_policy": "Stale or missing prewarm evidence fails closed; no live trading action is emitted.",
+      "error_behavior": [
+        "prewarm_artifact_missing",
+        "prewarm_stale",
+        "external_send_requires_confirm",
+        "report_text_required"
+      ]
+    },
+    {
+      "name": "realtime-market-scan",
+      "description": "Return structured market scan alerts from latest prewarm evidence.",
+      "status": "implemented",
+      "legacy_functions": [
+        "realtime_market_scan"
+      ],
+      "payload_schema": {
+        "$ref": "#/$defs/monitor_payload"
+      },
+      "result_schema": {
+        "$ref": "#/$defs/automation_result"
+      },
+      "example": {
+        "max_age_minutes": 360
+      },
+      "upstream_dependencies": [
+        "memory/prewarm/nightly-prewarm-*.json"
+      ],
+      "freshness_policy": "Stale or missing evidence fails closed.",
+      "error_behavior": [
+        "prewarm_artifact_missing",
+        "prewarm_stale",
+        "external_send_requires_confirm",
+        "report_text_required"
+      ]
+    },
+    {
+      "name": "realtime-alerts-summary",
+      "description": "Summarize alert count and alert types from the latest market scan.",
+      "status": "implemented",
+      "legacy_functions": [
+        "realtime_alerts_summary"
+      ],
+      "payload_schema": {
+        "$ref": "#/$defs/monitor_payload"
+      },
+      "result_schema": {
+        "$ref": "#/$defs/automation_result"
+      },
+      "example": {
+        "max_age_minutes": 360
+      },
+      "upstream_dependencies": [
+        "memory/prewarm/nightly-prewarm-*.json"
+      ],
+      "freshness_policy": "Uses the same freshness gate as realtime-market-scan.",
+      "error_behavior": [
+        "prewarm_artifact_missing",
+        "prewarm_stale",
+        "external_send_requires_confirm",
+        "report_text_required"
+      ]
+    },
+    {
+      "name": "realtime-monitor-control",
+      "description": "Record desired monitor state in workspace memory; does not start trading or order execution.",
+      "status": "implemented",
+      "legacy_functions": [
+        "realtime_monitor_control"
+      ],
+      "payload_schema": {
+        "$ref": "#/$defs/monitor_control_payload"
+      },
+      "result_schema": {
+        "$ref": "#/$defs/automation_result"
+      },
+      "example": {
+        "action": "status"
+      },
+      "upstream_dependencies": [
+        "memory/automation/realtime-monitor-state.json"
+      ],
+      "freshness_policy": "State marker is current at command runtime.",
+      "error_behavior": [
+        "prewarm_artifact_missing",
+        "prewarm_stale",
+        "external_send_requires_confirm",
+        "report_text_required"
+      ]
+    },
+    {
+      "name": "nightly-push",
+      "description": "Push a nightly report only when report text/path is supplied and confirm_send=true.",
+      "status": "implemented",
+      "legacy_functions": [
+        "nightly_push"
+      ],
+      "payload_schema": {
+        "$ref": "#/$defs/push_payload"
+      },
+      "result_schema": {
+        "$ref": "#/$defs/automation_result"
+      },
+      "example": {
+        "report_path": "memory/reports/nightly-report.md",
+        "dry_run": true
+      },
+      "upstream_dependencies": [
+        "memory/reports/*.md",
+        "Feishu env vars when not dry_run"
+      ],
+      "freshness_policy": "External send fails closed without explicit confirmation and valid report content.",
+      "error_behavior": [
+        "prewarm_artifact_missing",
+        "prewarm_stale",
+        "external_send_requires_confirm",
+        "report_text_required"
+      ]
+    },
+    {
+      "name": "morning-push",
+      "description": "Push a morning report only with explicit send confirmation.",
+      "status": "implemented",
+      "legacy_functions": [
+        "morning_push"
+      ],
+      "payload_schema": {
+        "$ref": "#/$defs/push_payload"
+      },
+      "result_schema": {
+        "$ref": "#/$defs/automation_result"
+      },
+      "example": {
+        "text": "盘前计划",
+        "dry_run": true
+      },
+      "upstream_dependencies": [
+        "report text or memory/reports/*.md",
+        "Feishu env vars when not dry_run"
+      ],
+      "freshness_policy": "External send fails closed without explicit confirmation.",
+      "error_behavior": [
+        "prewarm_artifact_missing",
+        "prewarm_stale",
+        "external_send_requires_confirm",
+        "report_text_required"
+      ]
+    },
+    {
+      "name": "intraday-push",
+      "description": "Push an intraday or market-review report only with explicit send confirmation.",
+      "status": "implemented",
+      "legacy_functions": [
+        "intraday_push"
+      ],
+      "payload_schema": {
+        "$ref": "#/$defs/push_payload"
+      },
+      "result_schema": {
+        "$ref": "#/$defs/automation_result"
+      },
+      "example": {
+        "text": "盘后复盘",
+        "dry_run": true
+      },
+      "upstream_dependencies": [
+        "report text or memory/reports/*.md",
+        "Feishu env vars when not dry_run"
+      ],
+      "freshness_policy": "External send fails closed without explicit confirmation.",
+      "error_behavior": [
+        "prewarm_artifact_missing",
+        "prewarm_stale",
+        "external_send_requires_confirm",
+        "report_text_required"
+      ]
+    },
+    {
+      "name": "weekly-push",
+      "description": "Push a weekly report only with explicit send confirmation.",
+      "status": "implemented",
+      "legacy_functions": [
+        "weekly_push"
+      ],
+      "payload_schema": {
+        "$ref": "#/$defs/push_payload"
+      },
+      "result_schema": {
+        "$ref": "#/$defs/automation_result"
+      },
+      "example": {
+        "text": "周报",
+        "dry_run": true
+      },
+      "upstream_dependencies": [
+        "report text or memory/reports/*.md",
+        "Feishu env vars when not dry_run"
+      ],
+      "freshness_policy": "External send fails closed without explicit confirmation.",
+      "error_behavior": [
+        "prewarm_artifact_missing",
+        "prewarm_stale",
+        "external_send_requires_confirm",
+        "report_text_required"
+      ]
+    }
+  ],
+  "$defs": {
+    "prewarm_payload": {
+      "type": "object",
+      "properties": {
+        "dry_run": {
+          "type": "boolean",
+          "default": false
+        },
+        "timeout_sec": {
+          "type": "integer",
+          "minimum": 30,
+          "maximum": 900
+        }
+      }
+    },
+    "status_payload": {
+      "type": "object",
+      "properties": {
+        "max_age_minutes": {
+          "type": "number",
+          "minimum": 1,
+          "default": 720
+        }
+      }
+    },
+    "monitor_payload": {
+      "type": "object",
+      "properties": {
+        "max_age_minutes": {
+          "type": "number",
+          "minimum": 1,
+          "default": 360
+        }
+      }
+    },
+    "monitor_control_payload": {
+      "type": "object",
+      "properties": {
+        "action": {
+          "type": "string",
+          "enum": [
+            "start",
+            "stop",
+            "status"
+          ],
+          "default": "status"
+        },
+        "max_age_minutes": {
+          "type": "number",
+          "minimum": 1,
+          "default": 360
+        }
+      }
+    },
+    "push_payload": {
+      "type": "object",
+      "properties": {
+        "report_path": {
+          "type": "string"
+        },
+        "text": {
+          "type": "string"
+        },
+        "report_title": {
+          "type": "string"
+        },
+        "dry_run": {
+          "type": "boolean",
+          "default": false
+        },
+        "confirm_send": {
+          "type": "boolean",
+          "default": false
+        }
+      }
+    },
+    "automation_result": {
+      "type": "object",
+      "required": [
+        "as_of",
+        "decision_allowed",
+        "errors",
+        "freshness",
+        "max_action_level",
+        "missing_critical_inputs",
+        "ok",
+        "requires_human_confirmation",
+        "result",
+        "source",
+        "warnings"
+      ],
+      "properties": {
+        "ok": {
+          "type": "boolean"
+        },
+        "decision_allowed": {
+          "type": "boolean",
+          "const": false
+        },
+        "requires_human_confirmation": {
+          "type": "boolean",
+          "const": true
+        },
+        "max_action_level": {
+          "type": "string",
+          "const": "automation_only"
+        },
+        "as_of": {
+          "type": "string"
+        },
+        "freshness": {
+          "type": "object"
+        },
+        "source": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "sources": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "artifacts": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "warnings": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "errors": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "missing_critical_inputs": {
+          "type": "array"
+        },
+        "result": {
+          "type": "object"
+        }
+      }
+    }
+  }
+}

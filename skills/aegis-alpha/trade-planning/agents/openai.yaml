@@ -1,0 +1,3 @@
+display_name: Trade Planning
+short_description: Trade setup planning and strategy generation.
+default_prompt: Use `trade-planning` commands to complete this task.

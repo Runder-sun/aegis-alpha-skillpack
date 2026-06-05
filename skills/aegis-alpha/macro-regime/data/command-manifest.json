@@ -1,0 +1,310 @@
+{
+  "package": "macro-regime",
+  "description": "Macro regime, liquidity, risk, capital-flow, concept heat, and sector rotation analysis.",
+  "commands": [
+    {
+      "name": "capital-flow-analysis",
+      "description": "Summarize A-share hot-money and sector capital flow from the latest prewarm snapshot.",
+      "status": "implemented",
+      "legacy_functions": [
+        "capital_flow_analysis"
+      ],
+      "payload_schema": {
+        "$ref": "#/$defs/macro_payload"
+      },
+      "result_schema": {
+        "$ref": "#/$defs/macro_result"
+      },
+      "upstream_dependencies": [
+        "memory/prewarm/nightly-prewarm-*.json",
+        "macro cache",
+        "market-intel outputs when present"
+      ],
+      "freshness_policy": "Macro freshness is inherited from the latest artifact/cache timestamps; stale or missing critical fields are surfaced.",
+      "error_behavior": [
+        "macro_regime_inputs_missing",
+        "macro_snapshot_missing",
+        "concept_inputs_missing",
+        "global_macro_inputs_missing"
+      ],
+      "example": {}
+    },
+    {
+      "name": "concept-heat",
+      "description": "Rank hot themes or strong sectors using capital flow, limit-up count, and breadth signals.",
+      "status": "implemented",
+      "legacy_functions": [
+        "concept_heat"
+      ],
+      "payload_schema": {
+        "$ref": "#/$defs/macro_payload"
+      },
+      "result_schema": {
+        "$ref": "#/$defs/macro_result"
+      },
+      "upstream_dependencies": [
+        "memory/prewarm/nightly-prewarm-*.json",
+        "macro cache",
+        "market-intel outputs when present"
+      ],
+      "freshness_policy": "Macro freshness is inherited from the latest artifact/cache timestamps; stale or missing critical fields are surfaced.",
+      "error_behavior": [
+        "macro_regime_inputs_missing",
+        "macro_snapshot_missing",
+        "concept_inputs_missing",
+        "global_macro_inputs_missing"
+      ],
+      "example": {}
+    },
+    {
+      "name": "domestic-macro",
+      "description": "Build a China macro snapshot for PMI, CPI, PPI, liquidity, credit, and growth.",
+      "status": "implemented",
+      "legacy_functions": [
+        "domestic_macro"
+      ],
+      "payload_schema": {
+        "$ref": "#/$defs/macro_payload"
+      },
+      "result_schema": {
+        "$ref": "#/$defs/macro_result"
+      },
+      "upstream_dependencies": [
+        "memory/prewarm/nightly-prewarm-*.json",
+        "macro cache",
+        "market-intel outputs when present"
+      ],
+      "freshness_policy": "Macro freshness is inherited from the latest artifact/cache timestamps; stale or missing critical fields are surfaced.",
+      "error_behavior": [
+        "macro_regime_inputs_missing",
+        "macro_snapshot_missing",
+        "concept_inputs_missing",
+        "global_macro_inputs_missing"
+      ],
+      "example": {}
+    },
+    {
+      "name": "global-macro-analysis",
+      "description": "Build a cross-asset global macro snapshot with risk mode, macro cycle, risk budget, and global events.",
+      "status": "implemented",
+      "legacy_functions": [
+        "global_macro_analysis"
+      ],
+      "payload_schema": {
+        "$ref": "#/$defs/macro_payload"
+      },
+      "result_schema": {
+        "$ref": "#/$defs/macro_result"
+      },
+      "upstream_dependencies": [
+        "memory/prewarm/nightly-prewarm-*.json",
+        "macro cache",
+        "market-intel outputs when present"
+      ],
+      "freshness_policy": "Macro freshness is inherited from the latest artifact/cache timestamps; stale or missing critical fields are surfaced.",
+      "error_behavior": [
+        "macro_regime_inputs_missing",
+        "macro_snapshot_missing",
+        "concept_inputs_missing",
+        "global_macro_inputs_missing"
+      ],
+      "example": {}
+    },
+    {
+      "name": "macro-alert-check",
+      "description": "Detect market-regime risk alerts from sentiment, limit-down, fried-board, and promotion-rate inputs.",
+      "status": "implemented",
+      "legacy_functions": [
+        "macro_alert_check"
+      ],
+      "payload_schema": {
+        "$ref": "#/$defs/macro_payload"
+      },
+      "result_schema": {
+        "$ref": "#/$defs/macro_result"
+      },
+      "upstream_dependencies": [
+        "memory/prewarm/nightly-prewarm-*.json",
+        "macro cache",
+        "market-intel outputs when present"
+      ],
+      "freshness_policy": "Macro freshness is inherited from the latest artifact/cache timestamps; stale or missing critical fields are surfaced.",
+      "error_behavior": [
+        "macro_regime_inputs_missing",
+        "macro_snapshot_missing",
+        "concept_inputs_missing",
+        "global_macro_inputs_missing"
+      ],
+      "example": {}
+    },
+    {
+      "name": "macro-regime-query",
+      "description": "Return a compact regime bundle with risk mode, risk budget reference, capital flow, sector rotation, and concept heat.",
+      "status": "implemented",
+      "legacy_functions": [
+        "macro_regime_query"
+      ],
+      "payload_schema": {
+        "$ref": "#/$defs/macro_payload"
+      },
+      "result_schema": {
+        "$ref": "#/$defs/macro_result"
+      },
+      "upstream_dependencies": [
+        "memory/prewarm/nightly-prewarm-*.json",
+        "macro cache",
+        "market-intel outputs when present"
+      ],
+      "freshness_policy": "Macro freshness is inherited from the latest artifact/cache timestamps; stale or missing critical fields are surfaced.",
+      "error_behavior": [
+        "macro_regime_inputs_missing",
+        "macro_snapshot_missing",
+        "concept_inputs_missing",
+        "global_macro_inputs_missing"
+      ],
+      "example": {}
+    },
+    {
+      "name": "market-review",
+      "description": "Combine snapshot market summary with domestic macro context.",
+      "status": "implemented",
+      "legacy_functions": [
+        "market_review"
+      ],
+      "payload_schema": {
+        "$ref": "#/$defs/macro_payload"
+      },
+      "result_schema": {
+        "$ref": "#/$defs/macro_result"
+      },
+      "upstream_dependencies": [
+        "memory/prewarm/nightly-prewarm-*.json",
+        "macro cache",
+        "market-intel outputs when present"
+      ],
+      "freshness_policy": "Macro freshness is inherited from the latest artifact/cache timestamps; stale or missing critical fields are surfaced.",
+      "error_behavior": [
+        "macro_regime_inputs_missing",
+        "macro_snapshot_missing",
+        "concept_inputs_missing",
+        "global_macro_inputs_missing"
+      ],
+      "example": {}
+    },
+    {
+      "name": "sector-rotation",
+      "description": "Return current strong and weak sector rotation data from the latest prewarm snapshot.",
+      "status": "implemented",
+      "legacy_functions": [
+        "sector_rotation"
+      ],
+      "payload_schema": {
+        "$ref": "#/$defs/macro_payload"
+      },
+      "result_schema": {
+        "$ref": "#/$defs/macro_result"
+      },
+      "upstream_dependencies": [
+        "memory/prewarm/nightly-prewarm-*.json",
+        "macro cache",
+        "market-intel outputs when present"
+      ],
+      "freshness_policy": "Macro freshness is inherited from the latest artifact/cache timestamps; stale or missing critical fields are surfaced.",
+      "error_behavior": [
+        "macro_regime_inputs_missing",
+        "macro_snapshot_missing",
+        "concept_inputs_missing",
+        "global_macro_inputs_missing"
+      ],
+      "example": {}
+    }
+  ],
+  "$defs": {
+    "macro_payload": {
+      "type": "object",
+      "properties": {
+        "as_of": {
+          "type": "string"
+        },
+        "market": {
+          "type": "object"
+        },
+        "notes": {
+          "type": "string"
+        }
+      }
+    },
+    "macro_result": {
+      "type": "object",
+      "required": [
+        "decision_allowed",
+        "errors",
+        "ok",
+        "result",
+        "warnings"
+      ],
+      "properties": {
+        "ok": {
+          "type": "boolean"
+        },
+        "decision_allowed": {
+          "type": "boolean",
+          "const": false
+        },
+        "max_action_level": {
+          "type": "string",
+          "const": "research_only"
+        },
+        "sources": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "warnings": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "errors": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "result": {
+          "type": "object"
+        },
+        "requires_human_confirmation": {
+          "type": "boolean",
+          "const": true
+        },
+        "as_of": {
+          "type": "string"
+        },
+        "freshness": {
+          "type": "object"
+        },
+        "source": {
+          "type": [
+            "array",
+            "string"
+          ],
+          "items": {
+            "type": "string"
+          }
+        },
+        "artifacts": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "missing_critical_inputs": {
+          "type": "array"
+        }
+      }
+    }
+  }
+}

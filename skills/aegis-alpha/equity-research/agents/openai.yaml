@@ -1,0 +1,3 @@
+display_name: Equity Research
+short_description: Fundamental and narrative deep-dive research.
+default_prompt: Use `equity-research` commands to complete this task.

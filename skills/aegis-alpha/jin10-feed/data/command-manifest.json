@@ -1,0 +1,10 @@
+{
+  "package": "jin10-feed",
+  "description": "Jin10 important news snapshot + daemon monitor.",
+  "commands": [
+    {"name": "jin10-snapshot"},
+    {"name": "jin10-daemon-start"},
+    {"name": "jin10-daemon-stop"},
+    {"name": "jin10-daemon-status"}
+  ]
+}
