@@ -12,7 +12,7 @@ This aggregate wrapper exposes the shared canonical skillpack installed at
 
 ## Public Surface
 
-Prefer the individual public wrappers when the request clearly matches one area:
+Prefer the individual native public skills when the request clearly matches one area:
 
 - `aegis-alpha-information-retrieval`
 - `aegis-alpha-market-data`
@@ -31,7 +31,7 @@ Prefer the individual public wrappers when the request clearly matches one area:
 - `aegis-alpha-execution-automation`
 
 Use this aggregate wrapper for cross-skill investment workflows or when the
-right public wrapper is unclear. Internal skills are adapters only. Do not route
+right public skill is unclear. Internal skills are adapters only. Do not route
 user work directly to them unless performing maintenance.
 
 ## Safety Rules

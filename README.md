@@ -33,18 +33,24 @@ Low-level providers and compatibility shims remain internal.
 
 ## Install
 
-Codex and Claude Code install a wrapper skillset, not a second full copy per
-skill:
+Codex and Claude Code install a native public skillset, not a second full copy
+per skill:
 
 - `.aegis-alpha-core` contains the shared canonical source.
 - `aegis-alpha` is the aggregate cross-skill wrapper.
-- `aegis-alpha-<public-skill>` exposes each public skill individually.
+- `aegis-alpha-<public-skill>` exposes each public skill as a native skill
+  directory with its own `SKILL.md` and bundled `scripts/`, `data/`, and
+  `references/` resources.
 
 This keeps one maintained skillpack core while preserving direct invocation of
 individual public skills such as `aegis-alpha-market-data` or
 `aegis-alpha-equity-research`.
 
-Install Codex wrappers into `$CODEX_HOME/skills` or `~/.codex/skills`:
+By default, public skill resources are symlinked to `.aegis-alpha-core` so the
+agent sees a native layout without duplicating the package. Use
+`--link-mode copy` only when symlinks are unavailable.
+
+Install Codex native skills into `$CODEX_HOME/skills` or `~/.codex/skills`:
 
 ```bash
 python3 adapters/codex/install.py
@@ -62,7 +68,7 @@ Install OpenClaw package:
 python3 adapters/openclaw/install.py
 ```
 
-Install Claude Code `SKILL.md` wrappers into the current project's
+Install Claude Code native skills into the current project's
 `.claude/skills` directory:
 
 ```bash
