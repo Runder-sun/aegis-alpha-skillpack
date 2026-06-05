@@ -8,6 +8,15 @@ Multi-agent, research-only investment skillpack for Codex, Hermes,
 OpenClaw, Claude Code, and other agent runtimes that can load local skill
 instructions and dispatch scripts.
 
+## Conductor Runtime
+
+The aggregate `aegis-alpha` skill acts as the conductor for first-run bootstrap,
+provider selection, and optional automation setup. Use
+`scripts/bootstrap_runtime.py` to create the runtime profile,
+`scripts/provider_resolver.py` to choose agent-native/API/cache/manual data
+providers, and `references/automation-playbook.md` when configuring recurring
+work through the current agent's own automation capability.
+
 ## Default Public Surface
 
 Prefer these high-level skills when asking an agent to work on investment

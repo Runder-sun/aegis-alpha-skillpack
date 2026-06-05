@@ -69,10 +69,11 @@ def copy_shared_core(skills_root: Path) -> Path:
     return target
 
 
-def install_aggregate_skill(adapter_dir: Path, skills_root: Path) -> Path:
+def install_aggregate_skill(adapter_dir: Path, skills_root: Path, link_mode: str = "symlink") -> Path:
     target = skills_root / "aegis-alpha"
     target.mkdir(parents=True, exist_ok=False)
     shutil.copy2(adapter_dir / "SKILL.md", target / "SKILL.md")
+    _materialize_resources(target, skills_root / CORE_DIR_NAME, "", link_mode, shim_scripts=False)
     return target
 
 
@@ -180,7 +181,7 @@ runpy.run_path(str(CORE_DISPATCH), run_name="__main__")
     dispatch.chmod(0o755)
 
 
-def _materialize_resources(target: Path, core_skill: Path, skill: str, link_mode: str) -> None:
+def _materialize_resources(target: Path, core_skill: Path, skill: str, link_mode: str, shim_scripts: bool = True) -> None:
     for name in RESOURCE_DIRS:
         src = core_skill / name
         if not src.exists():
@@ -188,7 +189,7 @@ def _materialize_resources(target: Path, core_skill: Path, skill: str, link_mode
         dst = target / name
         if link_mode == "symlink":
             _relative_symlink(src, dst)
-        elif name == "scripts":
+        elif name == "scripts" and shim_scripts:
             _write_dispatch_shim(target, skill)
         else:
             shutil.copytree(src, dst)
@@ -214,7 +215,7 @@ def install_native_skillset(adapter_dir: Path, skills_root: Path, force: bool, l
     public_targets = [skills_root / f"aegis-alpha-{skill}" for skill in load_public_skills()]
     targets = [skills_root / CORE_DIR_NAME, skills_root / "aegis-alpha", *public_targets]
     ensure_targets_available(targets, force)
-    installed = [copy_shared_core(skills_root), install_aggregate_skill(adapter_dir, skills_root)]
+    installed = [copy_shared_core(skills_root), install_aggregate_skill(adapter_dir, skills_root, link_mode)]
     installed.extend(write_native_public_skills(skills_root, link_mode))
     return installed
 

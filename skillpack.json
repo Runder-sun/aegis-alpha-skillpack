@@ -52,7 +52,15 @@
   "environment": {
     "workspace": "AEGIS_ALPHA_WORKSPACE",
     "default_workspace": "~/.aegis-alpha/workspace",
-    "repo": "AEGIS_ALPHA_REPO"
+    "repo": "AEGIS_ALPHA_REPO",
+    "runtime_profile": "~/.aegis-alpha/workspace/config/runtime-profile.json"
+  },
+  "conductor": {
+    "bootstrap": "skills/aegis-alpha/scripts/bootstrap_runtime.py",
+    "provider_resolver": "skills/aegis-alpha/scripts/provider_resolver.py",
+    "automation_playbook": "skills/aegis-alpha/references/automation-playbook.md",
+    "automation_jobs": "skills/aegis-alpha/data/automation-jobs.json",
+    "provider_capabilities": "skills/aegis-alpha/data/provider-capabilities.json"
   },
   "safety_policy": {
     "decision_allowed": false,

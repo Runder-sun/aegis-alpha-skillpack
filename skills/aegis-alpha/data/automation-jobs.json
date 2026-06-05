@@ -1,0 +1,40 @@
+{
+  "schema_version": 1,
+  "jobs": [
+    {
+      "name": "morning-briefing",
+      "default_schedule": "weekday 08:45 local",
+      "heartbeat_mode": "daily-prewarm",
+      "prompt": "Run the Aegis Alpha morning workflow using the current runtime profile. Do not send external messages without explicit confirmation.",
+      "workflow": ["morning-prewarm", "market-review", "morning-briefing"]
+    },
+    {
+      "name": "market-heartbeat",
+      "default_schedule": "market hours every 15 minutes",
+      "heartbeat_mode": "market-heartbeat",
+      "prompt": "Run Aegis Alpha market heartbeat and summarize material alerts only. Do not produce executable trading instructions.",
+      "workflow": ["market-heartbeat", "realtime-alerts-summary"]
+    },
+    {
+      "name": "midday-review",
+      "default_schedule": "weekday 12:35 local",
+      "heartbeat_mode": "market-heartbeat",
+      "prompt": "Run Aegis Alpha midday market review using prewarm/cache or agent-native sources allowed by the runtime profile.",
+      "workflow": ["midday-prewarm", "market-review", "realtime-market-scan"]
+    },
+    {
+      "name": "nightly-review",
+      "default_schedule": "weekday 21:30 local",
+      "heartbeat_mode": "daily-prewarm",
+      "prompt": "Run Aegis Alpha nightly review, update advice lifecycle, and prepare a research-only report.",
+      "workflow": ["nightly-prewarm", "nightly-strategy", "nightly-quality-gate"]
+    },
+    {
+      "name": "weekly-review",
+      "default_schedule": "friday 20:30 local",
+      "heartbeat_mode": "full",
+      "prompt": "Run Aegis Alpha weekly review for macro, themes, portfolio risk, advice tracking, and report evolution.",
+      "workflow": ["weekly-prewarm", "weekly-asset-report", "align-report-outcome"]
+    }
+  ]
+}

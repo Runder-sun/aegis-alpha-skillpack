@@ -31,6 +31,24 @@ The default agent-facing surface is limited to 15 public skills:
 
 Low-level providers and compatibility shims remain internal.
 
+## Conductor Runtime
+
+The aggregate `aegis-alpha` skill is the conductor. It owns first-run bootstrap,
+provider selection, and automation guidance:
+
+- `scripts/bootstrap_runtime.py` creates `runtime-profile.json` under
+  `AEGIS_ALPHA_WORKSPACE`.
+- `scripts/provider_resolver.py` selects `agent_native`, `skill_api`,
+  `cache_or_prewarm`, or `manual_payload` providers by runtime profile.
+- `references/automation-playbook.md` tells the current agent how to configure
+  recurring work with its own automation capability when available.
+- `data/automation-jobs.json` defines standard morning, heartbeat, nightly, and
+  weekly workflow jobs.
+
+Heartbeat configuration is capability-gated. The skill does not assume it can
+programmatically wake Codex or Claude Code unless the current agent exposes a
+native automation mechanism.
+
 ## Install
 
 Codex and Claude Code install a native public skillset, not a second full copy
@@ -84,6 +102,8 @@ Existing Aegis Alpha targets are not overwritten unless `--force` is provided.
 Run the full local acceptance set:
 
 ```bash
+python3 skills/aegis-alpha/scripts/bootstrap_runtime.py --dry-run
+python3 skills/aegis-alpha/scripts/provider_resolver.py --capability research_search --profile /dev/null
 python3 tools/audit_capabilities.py --output-dir audit
 python3 tools/check_public_contracts.py --output-dir audit
 python3 tools/check_pipeline_integrity.py --output-dir audit

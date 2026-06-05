@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Aegis Alpha Runtime Profile",
+  "type": "object",
+  "required": ["schema_version", "package", "agent", "mode", "workspace", "data_source_mode", "automation", "providers", "safety"],
+  "properties": {
+    "schema_version": {"type": "integer"},
+    "package": {"const": "aegis-alpha"},
+    "agent": {"type": "string"},
+    "mode": {
+      "enum": ["offline-research", "agent-native", "api-assisted", "manual-portfolio", "report-review", "full-institutional"]
+    },
+    "capability_level": {"type": "string"},
+    "workspace": {"type": "string"},
+    "data_source_mode": {
+      "enum": ["manual_payload", "agent_native", "skill_api", "cache_or_prewarm"]
+    },
+    "automation": {"type": "object"},
+    "providers": {"type": "object"},
+    "safety": {
+      "type": "object",
+      "required": ["decision_allowed", "requires_human_confirmation", "live_trading_allowed"],
+      "properties": {
+        "decision_allowed": {"const": false},
+        "requires_human_confirmation": {"const": true},
+        "external_push_requires_confirmation": {"type": "boolean"},
+        "live_trading_allowed": {"const": false}
+      }
+    },
+    "next_actions": {"type": "array", "items": {"type": "string"}}
+  }
+}

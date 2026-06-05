@@ -1,0 +1,42 @@
+{
+  "codex": {
+    "research_search": ["agent_native", "cache_or_prewarm", "skill_api", "manual_payload"],
+    "web_extract": ["agent_native", "skill_api", "manual_payload"],
+    "document_parse": ["agent_native", "skill_api", "manual_payload"],
+    "market_news": ["agent_native", "cache_or_prewarm", "skill_api", "manual_payload"],
+    "structured_market_data": ["cache_or_prewarm", "skill_api", "manual_payload"],
+    "external_push": ["skill_api"]
+  },
+  "claude-code": {
+    "research_search": ["agent_native", "skill_api", "cache_or_prewarm", "manual_payload"],
+    "web_extract": ["agent_native", "skill_api", "manual_payload"],
+    "document_parse": ["agent_native", "skill_api", "manual_payload"],
+    "market_news": ["agent_native", "skill_api", "cache_or_prewarm", "manual_payload"],
+    "structured_market_data": ["cache_or_prewarm", "skill_api", "manual_payload"],
+    "external_push": ["skill_api"]
+  },
+  "hermes": {
+    "research_search": ["skill_api", "cache_or_prewarm", "manual_payload"],
+    "web_extract": ["skill_api", "manual_payload"],
+    "document_parse": ["skill_api", "manual_payload"],
+    "market_news": ["skill_api", "cache_or_prewarm", "manual_payload"],
+    "structured_market_data": ["cache_or_prewarm", "skill_api", "manual_payload"],
+    "external_push": ["skill_api"]
+  },
+  "openclaw": {
+    "research_search": ["skill_api", "cache_or_prewarm", "manual_payload"],
+    "web_extract": ["skill_api", "manual_payload"],
+    "document_parse": ["skill_api", "manual_payload"],
+    "market_news": ["skill_api", "cache_or_prewarm", "manual_payload"],
+    "structured_market_data": ["cache_or_prewarm", "skill_api", "manual_payload"],
+    "external_push": ["skill_api"]
+  },
+  "unknown": {
+    "research_search": ["manual_payload"],
+    "web_extract": ["manual_payload"],
+    "document_parse": ["manual_payload"],
+    "market_news": ["manual_payload"],
+    "structured_market_data": ["manual_payload"],
+    "external_push": ["skill_api"]
+  }
+}

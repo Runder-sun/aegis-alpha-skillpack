@@ -7,8 +7,27 @@ metadata:
 
 # Aegis Alpha
 
-This aggregate wrapper exposes the shared canonical skillpack installed at
-`../.aegis-alpha-core`.
+This conductor skill exposes the shared canonical skillpack installed at
+`../.aegis-alpha-core` and coordinates first-run bootstrap, provider selection,
+automation configuration, and cross-skill investment workflows.
+
+## First Run
+
+If `AEGIS_ALPHA_WORKSPACE/config/runtime-profile.json` is missing or the user
+asks to initialize/configure Aegis Alpha, run:
+
+```bash
+python3 scripts/bootstrap_runtime.py --agent codex --mode <mode> --data-source <source> --heartbeat <mode>
+```
+
+Ask the user which runtime mode they want before selecting arguments:
+
+- `offline-research`
+- `agent-native`
+- `api-assisted`
+- `manual-portfolio`
+- `report-review`
+- `full-institutional`
 
 ## Public Surface
 
@@ -33,6 +52,26 @@ Prefer the individual native public skills when the request clearly matches one 
 Use this aggregate wrapper for cross-skill investment workflows or when the
 right public skill is unclear. Internal skills are adapters only. Do not route
 user work directly to them unless performing maintenance.
+
+## Provider Selection
+
+Before network-dependent research, resolve the data provider:
+
+```bash
+python3 scripts/provider_resolver.py --capability <capability>
+```
+
+Use agent-native web/search when the runtime profile and current Codex tools
+allow it. Use skill APIs or cache/prewarm only when configured. Missing critical
+evidence must fail closed.
+
+## Automation
+
+When configuring heartbeat or recurring workflows, read
+`references/automation-playbook.md` and `data/automation-jobs.json`. Configure
+Codex-native automation only if the current Codex runtime exposes automation
+tools. Otherwise use manual mode or an OS scheduler fallback; do not claim that
+Codex wakeups are configured unless they actually are.
 
 ## Safety Rules
 
