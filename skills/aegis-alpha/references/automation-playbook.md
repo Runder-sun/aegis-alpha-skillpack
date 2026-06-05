@@ -11,7 +11,7 @@ agent runtime.
 
 ## User Choices
 
-Ask for a mode before enabling automation:
+Ask for a heartbeat mode before enabling automation:
 
 - `none`: no recurring work.
 - `manual`: user asks the agent to run workflows on demand.
@@ -21,6 +21,14 @@ Ask for a mode before enabling automation:
 
 External sends remain disabled unless the user explicitly chooses
 `external-push=confirm-only`. Live trading is never enabled.
+
+## Profile Context
+
+Automation is independent from the product preset and data provider priority.
+For example, `full-institutional` can still run in `manual` heartbeat mode, and
+`quick-research` can be paired with `daily-prewarm` if the user wants scheduled
+data preparation only. Do not make `agent_native`, `skill_api`, or
+`full-institutional` mutually exclusive choices.
 
 ## Job Definitions
 

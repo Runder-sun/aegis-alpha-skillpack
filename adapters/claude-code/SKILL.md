@@ -17,17 +17,37 @@ If `AEGIS_ALPHA_WORKSPACE/config/runtime-profile.json` is missing or the user
 asks to initialize/configure Aegis Alpha, run:
 
 ```bash
-python3 scripts/bootstrap_runtime.py --agent claude-code --mode <mode> --data-source <source> --heartbeat <mode>
+python3 scripts/bootstrap_runtime.py --agent claude-code --preset <preset> --data-providers <provider_priority> --portfolio-source <portfolio_source> --heartbeat <heartbeat_mode>
 ```
 
-Ask the user which runtime mode they want before selecting arguments:
+Ask the user for the intended product experience first:
 
-- `offline-research`
-- `agent-native`
-- `api-assisted`
-- `manual-portfolio`
-- `report-review`
-- `full-institutional`
+- `quick-research`: one-off research and evidence collection.
+- `daily-desk`: morning/nightly market desk workflow.
+- `portfolio-desk`: holdings, trade ledger, risk review, and advice tracking.
+- `report-review`: evidence capture, report review, and outcome alignment.
+- `full-institutional`: the full research, market, portfolio, validation, and reporting loop.
+
+Then configure the orthogonal capability axes:
+
+- `data-providers`: comma-separated priority such as
+  `agent_native,skill_api,cache_or_prewarm,manual_payload`. Agent-native web
+  and skill APIs are compatible; they are not mutually exclusive.
+- `portfolio-source`: `none`, `manual-ledger`, `imported-file`, or
+  `read-only-api`.
+- `heartbeat`: `none`, `manual`, `daily-prewarm`, `market-heartbeat`, or
+  `full`.
+
+Portfolio source describes where holdings and trade records come from:
+`none` means no known portfolio state, `manual-ledger` means a local
+user-maintained ledger, `imported-file` means a CSV/JSON-style position file,
+and `read-only-api` means a read-only portfolio API. It never enables order
+execution.
+
+Presets are defaults, not feature gates. After any preset, all public skills
+remain available. If the user asks for work outside the selected preset, route
+to the relevant public skill, resolve providers, ask for missing inputs when
+needed, and fail closed if critical evidence is unavailable.
 
 ## Public Surface
 
@@ -60,9 +80,10 @@ Before network-dependent research, resolve the data provider:
 python3 scripts/provider_resolver.py --capability <capability>
 ```
 
-Use agent-native web/search when the runtime profile and current Claude Code
-tools allow it. Use skill APIs or cache/prewarm only when configured. Missing
-critical evidence must fail closed.
+Use the runtime profile's `data_provider_priority` together with the current
+Claude Code capability map. Agent-native web/search, skill APIs, prewarm/cache,
+and manual payloads can be combined in priority order. Missing critical
+evidence must fail closed.
 
 ## Automation
 

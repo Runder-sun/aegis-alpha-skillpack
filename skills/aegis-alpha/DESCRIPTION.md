@@ -17,6 +17,18 @@ provider selection, and optional automation setup. Use
 providers, and `references/automation-playbook.md` when configuring recurring
 work through the current agent's own automation capability.
 
+The runtime profile uses product presets plus independent capability axes. A
+user chooses a workflow preset such as `quick-research`, `daily-desk`,
+`portfolio-desk`, `report-review`, or `full-institutional`, then chooses data
+provider priority, portfolio source, and heartbeat mode separately. Provider
+choices are composable: agent-native acquisition, skill APIs, prewarm/cache, and
+manual payloads can all be enabled in priority order.
+
+Presets are default operating profiles, not feature gates. All public skills
+remain available after any preset. Requests outside the selected preset should
+still be routed to the relevant public skill, with provider resolution,
+missing-input prompts, and fail-closed safety applied as usual.
+
 ## Default Public Surface
 
 Prefer these high-level skills when asking an agent to work on investment

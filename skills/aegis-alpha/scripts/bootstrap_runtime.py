@@ -10,7 +10,7 @@ from pathlib import Path
 from typing import Any
 
 
-MODES = (
+LEGACY_MODES = (
     "offline-research",
     "agent-native",
     "api-assisted",
@@ -18,8 +18,82 @@ MODES = (
     "report-review",
     "full-institutional",
 )
-DATA_SOURCE_MODES = ("auto", "manual_payload", "agent_native", "skill_api", "cache_or_prewarm")
-HEARTBEAT_MODES = ("none", "manual", "daily-prewarm", "market-heartbeat", "full")
+PRESETS = {
+    "quick-research": {
+        "workflow_scope": "core-research",
+        "provider_priority": ["agent_native", "skill_api", "cache_or_prewarm", "manual_payload"],
+        "portfolio_source": "none",
+        "heartbeat": "none",
+    },
+    "daily-desk": {
+        "workflow_scope": "market-desk",
+        "provider_priority": ["skill_api", "cache_or_prewarm", "agent_native", "manual_payload"],
+        "portfolio_source": "none",
+        "heartbeat": "daily-prewarm",
+    },
+    "portfolio-desk": {
+        "workflow_scope": "portfolio-review",
+        "provider_priority": ["skill_api", "cache_or_prewarm", "agent_native", "manual_payload"],
+        "portfolio_source": "manual-ledger",
+        "heartbeat": "manual",
+    },
+    "report-review": {
+        "workflow_scope": "report-review",
+        "provider_priority": ["cache_or_prewarm", "agent_native", "skill_api", "manual_payload"],
+        "portfolio_source": "manual-ledger",
+        "heartbeat": "none",
+    },
+    "full-institutional": {
+        "workflow_scope": "full-institutional",
+        "provider_priority": ["skill_api", "cache_or_prewarm", "agent_native", "manual_payload"],
+        "portfolio_source": "manual-ledger",
+        "heartbeat": "market-heartbeat",
+    },
+}
+LEGACY_MODE_MAP = {
+    "offline-research": {
+        "preset": "quick-research",
+        "workflow_scope": "core-research",
+        "provider_priority": ["manual_payload"],
+        "portfolio_source": "none",
+    },
+    "agent-native": {
+        "preset": "quick-research",
+        "workflow_scope": "core-research",
+        "provider_priority": ["agent_native", "manual_payload"],
+        "portfolio_source": "none",
+    },
+    "api-assisted": {
+        "preset": "daily-desk",
+        "workflow_scope": "market-desk",
+        "provider_priority": ["skill_api", "cache_or_prewarm", "agent_native", "manual_payload"],
+        "portfolio_source": "none",
+    },
+    "manual-portfolio": {
+        "preset": "portfolio-desk",
+        "workflow_scope": "portfolio-review",
+        "provider_priority": ["manual_payload", "cache_or_prewarm"],
+        "portfolio_source": "manual-ledger",
+    },
+    "report-review": {
+        "preset": "report-review",
+        "workflow_scope": "report-review",
+        "provider_priority": ["cache_or_prewarm", "agent_native", "manual_payload"],
+        "portfolio_source": "manual-ledger",
+    },
+    "full-institutional": {
+        "preset": "full-institutional",
+        "workflow_scope": "full-institutional",
+        "provider_priority": ["skill_api", "cache_or_prewarm", "agent_native", "manual_payload"],
+        "portfolio_source": "manual-ledger",
+    },
+}
+WORKFLOW_SCOPES = ("auto", "core-research", "market-desk", "portfolio-review", "report-review", "full-institutional")
+PORTFOLIO_SOURCES = ("auto", "none", "manual-ledger", "imported-file", "read-only-api")
+PORTFOLIO_MODES = PORTFOLIO_SOURCES
+DATA_PROVIDERS = ("manual_payload", "agent_native", "skill_api", "cache_or_prewarm")
+DATA_SOURCE_MODES = ("auto",) + DATA_PROVIDERS
+HEARTBEAT_MODES = ("auto", "none", "manual", "daily-prewarm", "market-heartbeat", "full")
 AGENTS = ("auto", "codex", "claude-code", "hermes", "openclaw", "unknown")
 API_ENV_GROUPS = {
     "research_search": ("TAVILY_API_KEYS", "QVERIS_API_KEY"),
@@ -110,44 +184,107 @@ def _latest_prewarm(workspace: Path) -> dict[str, Any]:
     }
 
 
-def _default_data_source_mode(mode: str, requested: str) -> str:
-    if requested != "auto":
-        return requested
-    if mode in {"offline-research", "manual-portfolio", "report-review"}:
-        return "manual_payload"
-    if mode == "agent-native":
-        return "agent_native"
-    if mode in {"api-assisted", "full-institutional"}:
-        return "skill_api"
-    return "manual_payload"
+def _dedupe(items: list[str]) -> list[str]:
+    result: list[str] = []
+    for item in items:
+        if item not in result:
+            result.append(item)
+    return result
 
 
-def _capability_level(mode: str, data_source_mode: str, api: dict[str, Any], prewarm: dict[str, Any]) -> str:
+def _parse_provider_priority(raw: str) -> list[str] | None:
+    if raw == "auto":
+        return None
+    providers = [item.strip() for item in raw.split(",") if item.strip()]
+    invalid = [item for item in providers if item not in DATA_PROVIDERS]
+    if invalid:
+        raise SystemExit(f"Invalid --data-providers value(s): {', '.join(invalid)}")
+    return _dedupe(providers)
+
+
+def _legacy_config(mode: str | None) -> dict[str, Any] | None:
+    if not mode:
+        return None
+    return LEGACY_MODE_MAP.get(mode)
+
+
+def _resolved_preset(args: argparse.Namespace) -> str:
+    legacy = _legacy_config(args.mode)
+    if args.preset != "auto":
+        return args.preset
+    if legacy:
+        return str(legacy["preset"])
+    return "quick-research"
+
+
+def _preset_defaults(args: argparse.Namespace) -> dict[str, Any]:
+    preset = _resolved_preset(args)
+    defaults = dict(PRESETS[preset])
+    legacy = _legacy_config(args.mode)
+    if legacy and args.preset == "auto":
+        defaults.update(legacy)
+    defaults["preset"] = preset
+    return defaults
+
+
+def _provider_priority(args: argparse.Namespace, defaults: dict[str, Any]) -> list[str]:
+    explicit = _parse_provider_priority(args.data_providers)
+    if explicit is not None:
+        return explicit
+    if args.data_source != "auto":
+        fallback = [] if args.data_source == "manual_payload" else ["manual_payload"]
+        return _dedupe([args.data_source] + fallback)
+    return list(defaults["provider_priority"])
+
+
+def _resolve_auto_fields(args: argparse.Namespace) -> dict[str, Any]:
+    defaults = _preset_defaults(args)
+    provider_priority = _provider_priority(args, defaults)
+    workflow_scope = args.workflow_scope if args.workflow_scope != "auto" else str(defaults["workflow_scope"])
+    requested_portfolio_source = args.portfolio_source if args.portfolio_source != "auto" else args.portfolio_mode
+    portfolio_source = requested_portfolio_source if requested_portfolio_source != "auto" else str(defaults["portfolio_source"])
+    heartbeat = args.heartbeat if args.heartbeat != "auto" else str(defaults["heartbeat"])
+    return {
+        "preset": str(defaults["preset"]),
+        "workflow_scope": workflow_scope,
+        "portfolio_source": portfolio_source,
+        "heartbeat": heartbeat,
+        "provider_priority": provider_priority,
+        "data_source_mode": provider_priority[0] if provider_priority else "manual_payload",
+    }
+
+
+def _capability_level(workflow_scope: str, provider_priority: list[str], heartbeat: str, api: dict[str, Any], prewarm: dict[str, Any]) -> str:
     any_api = any(group.get("configured") for group in api.values())
     has_prewarm = bool(prewarm.get("available"))
-    if mode == "full-institutional" and any_api and has_prewarm:
-        return "full"
-    if data_source_mode == "agent_native":
-        return "agent-native"
-    if data_source_mode == "skill_api" and any_api:
-        return "api-assisted"
+    has_agent_native = "agent_native" in provider_priority
+    if workflow_scope == "full-institutional" and (any_api or has_agent_native) and (has_prewarm or "cache_or_prewarm" not in provider_priority):
+        return "institutional-ready" if heartbeat not in {"none", "manual"} else "institutional-manual"
+    if "skill_api" in provider_priority and any_api and has_agent_native:
+        return "hybrid-agent-api"
+    if "skill_api" in provider_priority and any_api:
+        return "api-ready"
+    if has_agent_native:
+        return "agent-native-ready"
     if has_prewarm:
         return "cache-ready"
     return "offline"
 
 
-def _next_actions(mode: str, data_source_mode: str, heartbeat: str, api: dict[str, Any], prewarm: dict[str, Any]) -> list[str]:
+def _next_actions(workflow_scope: str, provider_priority: list[str], heartbeat: str, portfolio_source: str, api: dict[str, Any], prewarm: dict[str, Any]) -> list[str]:
     actions: list[str] = []
-    if data_source_mode == "skill_api" and not any(group.get("configured") for group in api.values()):
-        actions.append("Configure at least one skill API key in the runtime environment or workspace .env.")
-    if data_source_mode in {"skill_api", "cache_or_prewarm"} and not prewarm.get("available"):
+    if "skill_api" in provider_priority and not any(group.get("configured") for group in api.values()):
+        actions.append("Configure at least one skill API key if API-backed data should be used; otherwise keep agent_native/manual_payload ahead of skill_api.")
+    if "cache_or_prewarm" in provider_priority and not prewarm.get("available"):
         actions.append("Run execution-automation morning-prewarm or nightly-prewarm before market-data workflows.")
     if heartbeat != "none":
         actions.append("Read references/automation-playbook.md and let the current agent configure supported automations.")
-    if mode == "full-institutional" and heartbeat in {"none", "manual"}:
-        actions.append("Full institutional mode normally expects daily prewarm or market heartbeat automation.")
+    if workflow_scope == "full-institutional" and heartbeat in {"none", "manual"}:
+        actions.append("Full institutional workflow scope can run manually, but daily prewarm or market heartbeat automation is recommended.")
+    if workflow_scope in {"portfolio-review", "full-institutional"} and portfolio_source == "none":
+        actions.append("Select manual-ledger, imported-file, or read-only-api portfolio source before portfolio review workflows.")
     if not actions:
-        actions.append("Runtime profile is ready for the selected mode.")
+        actions.append("Runtime profile is ready for the selected preset and capability configuration.")
     return actions
 
 
@@ -165,23 +302,43 @@ def _ensure_workspace(workspace: Path) -> None:
 def build_profile(args: argparse.Namespace) -> dict[str, Any]:
     workspace = _workspace(args.workspace)
     agent = _detect_agent(args.agent)
-    data_source_mode = _default_data_source_mode(args.mode, args.data_source)
+    resolved = _resolve_auto_fields(args)
     api = _api_capabilities()
     prewarm = _latest_prewarm(workspace)
     provider_capabilities = _load_json(_skillpack_root() / "data" / "provider-capabilities.json", {})
     automation_jobs = _load_json(_skillpack_root() / "data" / "automation-jobs.json", {})
     return {
-        "schema_version": 1,
+        "schema_version": 2,
         "package": "aegis-alpha",
         "created_at": _now(),
         "updated_at": _now(),
         "agent": agent,
-        "mode": args.mode,
-        "capability_level": _capability_level(args.mode, data_source_mode, api, prewarm),
+        "preset": resolved["preset"],
+        "mode": resolved["preset"],
+        "legacy_mode": args.mode,
+        "preset_policy": {
+            "type": "default_orchestration",
+            "feature_gate": False,
+            "all_public_skills_available": True,
+            "out_of_preset_requests": "allowed_with_provider_resolution_and_fail_closed_safety",
+        },
+        "workflow_scope": resolved["workflow_scope"],
+        "portfolio_source": resolved["portfolio_source"],
+        "portfolio_mode": resolved["portfolio_source"],
+        "capability_level": _capability_level(
+            resolved["workflow_scope"],
+            resolved["provider_priority"],
+            resolved["heartbeat"],
+            api,
+            prewarm,
+        ),
         "workspace": str(workspace),
-        "data_source_mode": data_source_mode,
+        "data_source_mode": resolved["data_source_mode"],
+        "data_source_modes": resolved["provider_priority"],
+        "data_provider_priority": resolved["provider_priority"],
         "automation": {
-            "heartbeat_mode": args.heartbeat,
+            "heartbeat_mode": resolved["heartbeat"],
+            "requested_heartbeat_mode": args.heartbeat,
             "external_push": args.external_push,
             "configured_by_agent": False,
             "job_count": len(automation_jobs.get("jobs", [])) if isinstance(automation_jobs, dict) else 0,
@@ -197,16 +354,28 @@ def build_profile(args: argparse.Namespace) -> dict[str, Any]:
             "external_push_requires_confirmation": args.external_push != "disabled",
             "live_trading_allowed": False,
         },
-        "next_actions": _next_actions(args.mode, data_source_mode, args.heartbeat, api, prewarm),
+        "next_actions": _next_actions(
+            resolved["workflow_scope"],
+            resolved["provider_priority"],
+            resolved["heartbeat"],
+            resolved["portfolio_source"],
+            api,
+            prewarm,
+        ),
     }
 
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Bootstrap Aegis Alpha runtime profile.")
     parser.add_argument("--agent", choices=AGENTS, default="auto")
-    parser.add_argument("--mode", choices=MODES, default="offline-research")
+    parser.add_argument("--preset", choices=("auto",) + tuple(PRESETS.keys()), default="auto")
+    parser.add_argument("--mode", choices=LEGACY_MODES, default=None, help="Deprecated compatibility alias; use --preset plus explicit capability axes.")
+    parser.add_argument("--workflow-scope", choices=WORKFLOW_SCOPES, default="auto")
+    parser.add_argument("--portfolio-source", choices=PORTFOLIO_SOURCES, default="auto")
+    parser.add_argument("--portfolio-mode", choices=PORTFOLIO_MODES, default="auto", help="Deprecated alias for --portfolio-source.")
     parser.add_argument("--data-source", choices=DATA_SOURCE_MODES, default="auto")
-    parser.add_argument("--heartbeat", choices=HEARTBEAT_MODES, default="none")
+    parser.add_argument("--data-providers", default="auto", help="Comma-separated provider priority, e.g. agent_native,skill_api,cache_or_prewarm,manual_payload.")
+    parser.add_argument("--heartbeat", choices=HEARTBEAT_MODES, default="auto")
     parser.add_argument("--external-push", choices=("disabled", "confirm-only"), default="disabled")
     parser.add_argument("--workspace")
     parser.add_argument("--dry-run", action="store_true")

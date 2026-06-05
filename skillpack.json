@@ -55,6 +55,16 @@
     "repo": "AEGIS_ALPHA_REPO",
     "runtime_profile": "~/.aegis-alpha/workspace/config/runtime-profile.json"
   },
+  "runtime_configuration": {
+    "presets": ["quick-research", "daily-desk", "portfolio-desk", "report-review", "full-institutional"],
+    "workflow_scopes": ["core-research", "market-desk", "portfolio-review", "report-review", "full-institutional"],
+    "data_providers": ["agent_native", "skill_api", "cache_or_prewarm", "manual_payload"],
+    "portfolio_sources": ["none", "manual-ledger", "imported-file", "read-only-api"],
+    "portfolio_modes": ["none", "manual-ledger", "imported-file", "read-only-api"],
+    "heartbeat_modes": ["none", "manual", "daily-prewarm", "market-heartbeat", "full"],
+    "provider_policy": "Data providers are composable and ordered by runtime profile priority; agent-native and skill APIs are not mutually exclusive.",
+    "preset_policy": "Presets are default operating profiles, not feature gates; all public skills remain available after any preset."
+  },
   "conductor": {
     "bootstrap": "skills/aegis-alpha/scripts/bootstrap_runtime.py",
     "provider_resolver": "skills/aegis-alpha/scripts/provider_resolver.py",

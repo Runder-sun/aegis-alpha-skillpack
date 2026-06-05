@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 from pathlib import Path
 from typing import Any
 
@@ -24,6 +25,9 @@ def _skillpack_root() -> Path:
 def _workspace(raw: str | None) -> Path:
     if raw:
         return Path(raw).expanduser()
+    env = os.environ.get("AEGIS_ALPHA_WORKSPACE")
+    if env:
+        return Path(env).expanduser()
     return Path.home() / ".aegis-alpha" / "workspace"
 
 
@@ -42,13 +46,16 @@ def _profile(workspace: Path, explicit: str | None) -> dict[str, Any]:
 
 def _provider_available(provider: str, profile: dict[str, Any]) -> tuple[bool, str]:
     data_source_mode = profile.get("data_source_mode") or "manual_payload"
+    provider_priority = profile.get("data_provider_priority") or profile.get("data_source_modes") or []
+    if not isinstance(provider_priority, list):
+        provider_priority = []
     api = (((profile.get("providers") or {}).get("api")) or {})
     prewarm = (((profile.get("providers") or {}).get("prewarm")) or {})
     if provider == "manual_payload":
         return True, "manual payload is always allowed"
     if provider == "agent_native":
-        if data_source_mode in {"agent_native", "auto"} or profile.get("mode") == "agent-native":
-            return True, "selected runtime mode allows agent-native acquisition"
+        if "agent_native" in provider_priority or data_source_mode in {"agent_native", "auto"} or profile.get("legacy_mode") == "agent-native":
+            return True, "runtime profile allows agent-native acquisition"
         return False, "runtime profile did not enable agent-native acquisition"
     if provider == "skill_api":
         configured = any(isinstance(group, dict) and group.get("configured") for group in api.values())
@@ -59,6 +66,19 @@ def _provider_available(provider: str, profile: dict[str, Any]) -> tuple[bool, s
     return False, "unknown provider"
 
 
+def _ordered_providers(capability: str, profile: dict[str, Any], capability_order: list[Any]) -> list[str]:
+    base_order = [str(item) for item in capability_order]
+    if capability == "external_push":
+        return base_order
+    profile_priority = profile.get("data_provider_priority") or profile.get("data_source_modes")
+    if not isinstance(profile_priority, list) or not profile_priority:
+        return base_order
+    ordered = [str(item) for item in profile_priority if str(item) in base_order]
+    if "manual_payload" in base_order and "manual_payload" not in ordered:
+        ordered.append("manual_payload")
+    return ordered or base_order
+
+
 def resolve(capability: str, profile: dict[str, Any], capabilities: dict[str, Any]) -> dict[str, Any]:
     agent = profile.get("agent") or "unknown"
     configured = capabilities.get(agent) if isinstance(capabilities, dict) else None
@@ -67,16 +87,19 @@ def resolve(capability: str, profile: dict[str, Any], capabilities: dict[str, An
     provider_order = configured.get(capability) if isinstance(configured, dict) else None
     if not isinstance(provider_order, list):
         provider_order = ["manual_payload"]
+    provider_order = _ordered_providers(capability, profile, provider_order)
     providers = []
     for provider in provider_order:
         ok, reason = _provider_available(str(provider), profile)
         providers.append({"provider": provider, "available": ok, "reason": reason})
-    if not any(item["available"] for item in providers):
-        providers.append({"provider": "manual_payload", "available": True, "reason": "fallback to manual payload"})
+    if capability != "external_push" and not any(item["available"] for item in providers):
+        providers.append({"provider": "manual_payload", "available": True, "reason": "request manual payload; no configured provider is available"})
+    selected = next((item["provider"] for item in providers if item["available"]), None)
     return {
         "agent": agent,
         "capability": capability,
-        "selected": next(item["provider"] for item in providers if item["available"]),
+        "selected": selected,
+        "available": selected is not None,
         "providers": providers,
         "decision_allowed": False,
     }

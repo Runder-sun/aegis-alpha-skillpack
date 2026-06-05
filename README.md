@@ -45,6 +45,33 @@ provider selection, and automation guidance:
 - `data/automation-jobs.json` defines standard morning, heartbeat, nightly, and
   weekly workflow jobs.
 
+First-run configuration is split into orthogonal axes:
+
+- product preset: `quick-research`, `daily-desk`, `portfolio-desk`,
+  `report-review`, or `full-institutional`.
+- data provider priority: any ordered combination of `agent_native`,
+  `skill_api`, `cache_or_prewarm`, and `manual_payload`.
+- portfolio source: `none`, `manual-ledger`, `imported-file`, or
+  `read-only-api`.
+- heartbeat mode: `none`, `manual`, `daily-prewarm`, `market-heartbeat`, or
+  `full`.
+
+Portfolio source only describes where holdings and trade records come from:
+`none` means no known portfolio state, `manual-ledger` means a local
+user-maintained ledger, `imported-file` means a CSV/JSON-style position file,
+and `read-only-api` means a read-only portfolio API. It never enables order
+execution.
+
+Agent-native acquisition and skill APIs are compatible. For example, a Codex
+installation can use `full-institutional` with
+`agent_native,skill_api,cache_or_prewarm,manual_payload` provider priority.
+
+Presets are default operating profiles, not feature gates. All 15 public skills
+remain available after any preset is selected. If a user asks for work outside
+the selected preset, the conductor should route to the relevant public skill,
+resolve providers from the runtime profile, ask for missing inputs when needed,
+and fail closed when critical evidence is unavailable.
+
 Heartbeat configuration is capability-gated. The skill does not assume it can
 programmatically wake Codex or Claude Code unless the current agent exposes a
 native automation mechanism.
