@@ -45,6 +45,11 @@ and `read-only-api` means a read-only portfolio API. It never enables order
 execution.
 
 Workspace cache/prewarm is not a provider; it is an evidence artifact policy.
+Prewarm is not a separate user-facing public skill to configure directly. It is
+an execution-automation command used after installation and market-data setup to
+seed or refresh auditable cache artifacts. The initialization skill should ask
+whether to run or skip/defer initial cache seeding; heartbeat automation owns
+recurring prewarm schedules.
 Manual input is not a provider; it only controls whether Claude Code may ask the
 user for explicit files, holdings, or facts when configured acquisition
 channels cannot prove a critical input.

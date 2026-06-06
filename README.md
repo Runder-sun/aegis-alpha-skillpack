@@ -126,6 +126,12 @@ Heartbeat configuration is capability-gated. The skill does not assume it can
 programmatically wake Codex or Claude Code unless the current agent exposes a
 native automation mechanism.
 
+Prewarm is not a separate public skill that users configure directly. It is an
+execution-automation command run after installation and market-data setup to
+seed or refresh auditable cache artifacts. Initialization should ask whether to
+run, skip, or defer the initial cache seeding step; recurring prewarm belongs to
+heartbeat or scheduler configuration.
+
 ## Install
 
 Codex and Claude Code install a native public skillset, not a second full copy

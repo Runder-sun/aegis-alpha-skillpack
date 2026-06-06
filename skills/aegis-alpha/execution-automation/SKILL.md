@@ -32,6 +32,11 @@ and `max_action_level=automation_only`.
 
 `scripts/nightly_prewarm.py`
 
+Prewarm is not a separate public skill for users to configure directly. It is
+an execution-automation command used by initialization, scheduled desk
+workflows, and pipelines to seed or refresh auditable evidence artifacts after
+the skillpack is installed and market-data credentials are configured.
+
 The command writes `memory/prewarm/nightly-prewarm-*.json` and records a marker
 under `memory/automation/<command>-last.json`.
 

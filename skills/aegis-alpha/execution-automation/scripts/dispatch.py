@@ -255,9 +255,29 @@ def _prewarm_gaps(payload: dict[str, Any]) -> list[str]:
     news = payload.get("news_sentiment") if isinstance(payload.get("news_sentiment"), dict) else dict()
     if not (isinstance(market_data.get("hhxg_snapshot"), dict) or isinstance(payload.get("hhxg_snapshot"), dict)):
         gaps.append("hhxg_snapshot_missing")
-    if not (market_data.get("baostock_index_daily") or payload.get("baostock_index_daily")):
+    if not (
+        market_data.get("baostock_index_daily")
+        or payload.get("baostock_index_daily")
+        or market_data.get("tushare_index_daily")
+        or payload.get("tushare_index_daily")
+    ):
         gaps.append("index_daily_missing")
-    if not (news.get("hhxg_news") or payload.get("hhxg_news")):
+    if not (
+        news.get("hhxg_news")
+        or payload.get("hhxg_news")
+        or news.get("tushare_news")
+        or payload.get("tushare_news")
+        or news.get("tushare_major_news")
+        or payload.get("tushare_major_news")
+        or news.get("tushare_policy")
+        or payload.get("tushare_policy")
+        or news.get("tushare_research_report")
+        or payload.get("tushare_research_report")
+        or news.get("tushare_eco_cal")
+        or payload.get("tushare_eco_cal")
+        or news.get("jin10_important_news")
+        or payload.get("jin10_important_news")
+    ):
         gaps.append("market_news_missing")
     if not (market_data.get("akshare_macro_pmi") or market_data.get("akshare_macro_pmi_yearly") or payload.get("akshare_macro_pmi") or payload.get("akshare_macro_pmi_yearly")):
         gaps.append("macro_pmi_missing")

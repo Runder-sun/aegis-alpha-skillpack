@@ -27,7 +27,7 @@
       },
       "upstream_dependencies": [
         "scripts/nightly_prewarm.py",
-        "workspace skills"
+        "installed Aegis Alpha core or compatible workspace skills"
       ],
       "freshness_policy": "Returns artifact path and critical gaps; missing artifact fails closed.",
       "error_behavior": [
@@ -55,7 +55,7 @@
       },
       "upstream_dependencies": [
         "scripts/nightly_prewarm.py",
-        "workspace skills"
+        "installed Aegis Alpha core or compatible workspace skills"
       ],
       "freshness_policy": "Morning pipeline depends on the generated prewarm artifact; missing artifact fails closed.",
       "error_behavior": [
@@ -83,7 +83,7 @@
       },
       "upstream_dependencies": [
         "scripts/nightly_prewarm.py",
-        "workspace skills"
+        "installed Aegis Alpha core or compatible workspace skills"
       ],
       "freshness_policy": "Market-review pipeline depends on the generated prewarm artifact; missing artifact fails closed.",
       "error_behavior": [
@@ -111,7 +111,7 @@
       },
       "upstream_dependencies": [
         "scripts/nightly_prewarm.py",
-        "workspace skills"
+        "installed Aegis Alpha core or compatible workspace skills"
       ],
       "freshness_policy": "Critical gaps are explicit; no missing feed is treated as neutral.",
       "error_behavior": [
@@ -139,7 +139,7 @@
       },
       "upstream_dependencies": [
         "scripts/nightly_prewarm.py",
-        "workspace skills"
+        "installed Aegis Alpha core or compatible workspace skills"
       ],
       "freshness_policy": "Weekly workflows reuse the latest validated artifact and expose critical data gaps.",
       "error_behavior": [

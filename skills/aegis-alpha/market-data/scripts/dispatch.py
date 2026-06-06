@@ -129,7 +129,12 @@ def _build_result(command: str, prewarm: dict) -> object:
             raise PrewarmUnavailableError("macro_ppi_missing")
         return result
     if command == "index-daily":
-        result = market_data.get("baostock_index_daily") or prewarm.get("baostock_index_daily")
+        result = (
+            market_data.get("baostock_index_daily")
+            or prewarm.get("baostock_index_daily")
+            or market_data.get("tushare_index_daily")
+            or prewarm.get("tushare_index_daily")
+        )
         if not result:
             raise PrewarmUnavailableError("index_daily_missing")
         return result

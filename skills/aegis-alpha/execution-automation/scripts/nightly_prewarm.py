@@ -116,6 +116,51 @@ def _load_jin10_attr_map(ws_path: Path) -> dict:
     return {}
 
 
+def _split_path_env(value: str | None) -> list[Path]:
+    if not value:
+        return []
+    return [Path(item).expanduser() for item in value.split(os.pathsep) if item.strip()]
+
+
+def _skill_roots(ws_path: Path) -> list[Path]:
+    """Resolve canonical skill roots across workspace and native installs."""
+    here = Path(__file__).resolve()
+    roots: list[Path] = []
+    roots.extend(_split_path_env(os.environ.get("AEGIS_ALPHA_SKILLS_DIR")))
+    roots.extend(_split_path_env(os.environ.get("AEGIS_ALPHA_CORE_DIR")))
+    roots.append(ws_path / "skills")
+    if len(here.parents) >= 3:
+        roots.append(here.parents[2])
+    codex_home = Path(os.environ.get("CODEX_HOME") or Path.home() / ".codex").expanduser()
+    claude_home = Path(os.environ.get("CLAUDE_CODE_SKILLS_HOME") or Path.cwd() / ".claude" / "skills").expanduser()
+    roots.extend([
+        codex_home / "skills" / ".aegis-alpha-core",
+        Path.home() / ".codex" / "skills" / ".aegis-alpha-core",
+        claude_home / ".aegis-alpha-core",
+    ])
+
+    deduped: list[Path] = []
+    seen: set[str] = set()
+    for root in roots:
+        try:
+            resolved = root.expanduser().resolve()
+        except Exception:
+            resolved = root.expanduser()
+        key = str(resolved)
+        if key not in seen:
+            seen.add(key)
+            deduped.append(resolved)
+    return deduped
+
+
+def _dispatch_path(skill: str, roots: list[Path]) -> Path | None:
+    for root in roots:
+        dispatch = root / skill / "scripts" / "dispatch.py"
+        if dispatch.exists():
+            return dispatch
+    return None
+
+
 def _tushare_query(api_name: str, fields: str, params: dict) -> list[dict]:
     token = os.environ.get("TUSHARE_TOKEN") or ""
     if not token:
@@ -159,13 +204,16 @@ def _tushare_query(api_name: str, fields: str, params: dict) -> list[dict]:
 def main() -> int:
     workspace = os.environ.get("AEGIS_ALPHA_WORKSPACE") or os.path.expanduser("~/.aegis-alpha/workspace")
     ws_path = Path(workspace)
-    skills_dir = ws_path / "skills"
+    skill_roots = _skill_roots(ws_path)
 
     results: dict[str, object] = {}
+    results["prewarm_runtime"] = {
+        "skill_roots_checked": [str(root) for root in skill_roots],
+    }
 
     # hhxg market snapshot/margin/calendar
-    hhxg_dispatch = skills_dir / "hhxg-market" / "scripts" / "dispatch.py"
-    if hhxg_dispatch.exists():
+    hhxg_dispatch = _dispatch_path("hhxg-market", skill_roots)
+    if hhxg_dispatch:
         for command, key in {
             "snapshot-full": "hhxg_snapshot",
             "margin-full": "hhxg_margin",
@@ -181,10 +229,12 @@ def main() -> int:
                     results[key] = payload
             else:
                 results[key] = parsed
+    else:
+        results["hhxg_market_error"] = "dispatch_not_found"
 
     # market-intel daily news scan
-    market_intel_dispatch = skills_dir / "market-intel" / "scripts" / "dispatch.py"
-    if market_intel_dispatch.exists():
+    market_intel_dispatch = _dispatch_path("market-intel", skill_roots)
+    if market_intel_dispatch:
         res = _run(["python3", str(market_intel_dispatch), "--command", "daily-news-scan", "--payload", "{}"])
         parsed = _json_from_output(res["output"]) if res["ok"] else res
         if isinstance(parsed, dict) and isinstance(parsed.get("result"), dict):
@@ -196,12 +246,16 @@ def main() -> int:
                 results["hhxg_news"] = a_share if a_share is not None else []
         else:
             results["hhxg_news"] = parsed
+    else:
+        results["market_intel_error"] = "dispatch_not_found"
 
     # themesurfer signal
-    ts_dir = skills_dir / "themesurfer-signal" / "scripts" / "dispatch.py"
-    if ts_dir.exists():
-        res = _run(["python3", str(ts_dir), "--command", "signal", "--payload", "{}"])
+    themesurfer_dispatch = _dispatch_path("themesurfer-signal", skill_roots)
+    if themesurfer_dispatch:
+        res = _run(["python3", str(themesurfer_dispatch), "--command", "signal", "--payload", "{}"])
         results["themesurfer_signal"] = _json_from_output(res["output"]) if res["ok"] else res
+    else:
+        results["themesurfer_signal_error"] = "dispatch_not_found"
 
     # macro from Jin10 (fast + avoids stale local series)
     try:
@@ -346,6 +400,11 @@ def main() -> int:
             "start_date": start_3d,
             "end_date": end_7d,
         })
+        index_daily = _tushare_query("index_daily", "ts_code,trade_date,close,open,high,low,pre_close,change,pct_chg,vol,amount", {
+            "ts_code": "000001.SH",
+            "start_date": (today - timedelta(days=45)).strftime("%Y%m%d"),
+            "end_date": end_today,
+        })
 
         if news:
             results["tushare_news"] = news
@@ -357,13 +416,15 @@ def main() -> int:
             results["tushare_research_report"] = research
         if eco_cal:
             results["tushare_eco_cal"] = eco_cal
+        if index_daily:
+            results["tushare_index_daily"] = index_daily[-30:]
     except Exception as exc:
         results["tushare_error"] = f"tushare_fetch_failed: {exc}"
 
     # jin10 important news snapshot (playwright-based)
     try:
-        jin10_skill = skills_dir / "jin10-feed" / "scripts" / "dispatch.py"
-        if jin10_skill.exists():
+        jin10_skill = _dispatch_path("jin10-feed", skill_roots)
+        if jin10_skill:
             res = _run(["python3", str(jin10_skill), "--command", "jin10-snapshot", "--payload", "{}"])
             parsed = _json_from_output(res["output"]) if res["ok"] else res
             # normalize result
@@ -382,6 +443,8 @@ def main() -> int:
                     results["jin10_snapshot_raw"] = payload
             else:
                 results["jin10_snapshot_raw"] = parsed
+        else:
+            results["jin10_error"] = "dispatch_not_found"
     except Exception as exc:
         results["jin10_error"] = f"jin10_snapshot_failed: {exc}"
 
@@ -455,6 +518,7 @@ def main() -> int:
         "tushare_cn_gdp": results.get("tushare_cn_gdp"),
         "tushare_shibor": results.get("tushare_shibor"),
         "tushare_lpr": results.get("tushare_lpr"),
+        "tushare_index_daily": results.get("tushare_index_daily"),
         "baostock_index_daily": results.get("baostock_index_daily"),
     }
     results["news_sentiment"] = {

@@ -79,7 +79,7 @@ MARKET_DATA_REQUIRED_ENV = {
 
 OPTIONAL_API_GROUPS = ["market_intel", "research_search", "document_parse", "external_push"]
 TERMINAL_SKIP_DECISIONS = {"skip", "disabled", "none"}
-TERMINAL_PREWARM_DECISIONS = {"skip"}
+TERMINAL_PREWARM_DECISIONS = {"skip", "accept-partial"}
 TERMINAL_HEARTBEAT_DECISIONS = {"manual", "none", "skip"}
 TERMINAL_PORTFOLIO_DECISIONS = {"none", "manual-ledger", "imported-file", "read-only-api", "skip"}
 
@@ -189,7 +189,77 @@ def _api_group_configured(api: dict[str, Any], group: str) -> bool:
     return bool(isinstance(status, dict) and status.get("configured"))
 
 
-def _completion_state(profile: dict[str, Any] | None, choices: dict[str, Any] | None = None) -> dict[str, Any]:
+def _latest_prewarm_artifact(workspace: Path) -> Path | None:
+    prewarm_dir = workspace / "memory" / "prewarm"
+    if not prewarm_dir.exists():
+        return None
+    try:
+        files = sorted(prewarm_dir.glob("nightly-prewarm-*.json"), key=lambda path: path.stat().st_mtime, reverse=True)
+    except Exception:
+        return None
+    return files[0] if files else None
+
+
+def _effective_prewarm(profile: dict[str, Any], workspace: Path | None) -> dict[str, Any]:
+    prewarm = profile.get("providers", {}).get("prewarm", {}) if isinstance(profile.get("providers"), dict) else {}
+    effective = dict(prewarm) if isinstance(prewarm, dict) else {}
+    if workspace is None:
+        return effective
+    latest = _latest_prewarm_artifact(workspace)
+    if latest:
+        effective["available"] = True
+        effective["artifact"] = str(latest)
+    return effective
+
+
+def _prewarm_critical_gaps(prewarm: dict[str, Any]) -> list[str]:
+    artifact = prewarm.get("artifact") if isinstance(prewarm, dict) else None
+    if not artifact:
+        return []
+    path = Path(str(artifact)).expanduser()
+    payload = _load_json(path, {})
+    if not isinstance(payload, dict):
+        return ["prewarm_artifact_invalid_json"]
+    gaps: list[str] = []
+    market_data = payload.get("market_data") if isinstance(payload.get("market_data"), dict) else {}
+    news = payload.get("news_sentiment") if isinstance(payload.get("news_sentiment"), dict) else {}
+    if not (isinstance(market_data.get("hhxg_snapshot"), dict) or isinstance(payload.get("hhxg_snapshot"), dict)):
+        gaps.append("hhxg_snapshot_missing")
+    if not (
+        market_data.get("baostock_index_daily")
+        or payload.get("baostock_index_daily")
+        or market_data.get("tushare_index_daily")
+        or payload.get("tushare_index_daily")
+    ):
+        gaps.append("index_daily_missing")
+    if not (
+        news.get("hhxg_news")
+        or payload.get("hhxg_news")
+        or news.get("tushare_news")
+        or payload.get("tushare_news")
+        or news.get("tushare_major_news")
+        or payload.get("tushare_major_news")
+        or news.get("tushare_policy")
+        or payload.get("tushare_policy")
+        or news.get("tushare_research_report")
+        or payload.get("tushare_research_report")
+        or news.get("tushare_eco_cal")
+        or payload.get("tushare_eco_cal")
+        or news.get("jin10_important_news")
+        or payload.get("jin10_important_news")
+    ):
+        gaps.append("market_news_missing")
+    if not (
+        market_data.get("akshare_macro_pmi")
+        or market_data.get("akshare_macro_pmi_yearly")
+        or payload.get("akshare_macro_pmi")
+        or payload.get("akshare_macro_pmi_yearly")
+    ):
+        gaps.append("macro_pmi_missing")
+    return gaps
+
+
+def _completion_state(profile: dict[str, Any] | None, choices: dict[str, Any] | None = None, workspace: Path | None = None) -> dict[str, Any]:
     choices = choices or {"choices": {}}
     if not isinstance(profile, dict):
         return {
@@ -202,7 +272,7 @@ def _completion_state(profile: dict[str, Any] | None, choices: dict[str, Any] | 
         }
     api = profile.get("providers", {}).get("api", {}) if isinstance(profile.get("providers"), dict) else {}
     market_data = api.get("market_data", {}) if isinstance(api, dict) else {}
-    prewarm = profile.get("providers", {}).get("prewarm", {}) if isinstance(profile.get("providers"), dict) else {}
+    prewarm = _effective_prewarm(profile, workspace)
     automation = profile.get("automation", {}) if isinstance(profile.get("automation"), dict) else {}
     cache_policy = str(profile.get("cache_policy") or "none")
     heartbeat = str(automation.get("heartbeat_mode") or "none")
@@ -211,9 +281,16 @@ def _completion_state(profile: dict[str, Any] | None, choices: dict[str, Any] | 
     heartbeat_requested = heartbeat not in {"none", "manual"}
     market_data_ready = bool(market_data.get("configured"))
     prewarm_decision = _choice_decision(choices, "prewarm")
+    prewarm_available = bool(prewarm.get("available"))
+    prewarm_critical_gaps = _prewarm_critical_gaps(prewarm) if prewarm_available else []
+    prewarm_partial = bool(prewarm_critical_gaps)
     heartbeat_decision = _choice_decision(choices, "heartbeat")
     portfolio_decision = _choice_decision(choices, "portfolio")
-    prewarm_ready = (not prewarm_required) or bool(prewarm.get("available")) or prewarm_decision in TERMINAL_PREWARM_DECISIONS
+    prewarm_ready = (
+        (not prewarm_required)
+        or (prewarm_available and not prewarm_partial)
+        or prewarm_decision in TERMINAL_PREWARM_DECISIONS
+    )
     heartbeat_configured = (not heartbeat_requested) or bool(automation.get("configured_by_agent")) or heartbeat_decision in TERMINAL_HEARTBEAT_DECISIONS
     portfolio_ready = portfolio_source == "none" or portfolio_decision in TERMINAL_PORTFOLIO_DECISIONS
     optional_api_status = {
@@ -242,6 +319,10 @@ def _completion_state(profile: dict[str, Any] | None, choices: dict[str, Any] | 
         "market_data_ready": market_data_ready,
         "prewarm_required": prewarm_required,
         "prewarm_ready": prewarm_ready,
+        "prewarm_available": prewarm_available,
+        "prewarm_partial": prewarm_partial,
+        "prewarm_critical_gaps": prewarm_critical_gaps,
+        "prewarm_artifact": prewarm.get("artifact") if isinstance(prewarm, dict) else "",
         "prewarm_decision": prewarm_decision,
         "heartbeat_requested": heartbeat_requested,
         "heartbeat_configured": heartbeat_configured,
@@ -254,8 +335,8 @@ def _completion_state(profile: dict[str, Any] | None, choices: dict[str, Any] | 
     }
 
 
-def _wizard_steps(profile: dict[str, Any] | None, choices: dict[str, Any], guide: dict[str, Any]) -> list[dict[str, Any]]:
-    state = _completion_state(profile, choices)
+def _wizard_steps(profile: dict[str, Any] | None, choices: dict[str, Any], guide: dict[str, Any], workspace: Path | None = None) -> list[dict[str, Any]]:
+    state = _completion_state(profile, choices, workspace)
     api = profile.get("providers", {}).get("api", {}) if isinstance(profile, dict) and isinstance(profile.get("providers"), dict) else {}
     api_groups = guide.get("api_groups", {}) if isinstance(guide.get("api_groups"), dict) else {}
 
@@ -299,10 +380,15 @@ def _wizard_steps(profile: dict[str, Any] | None, choices: dict[str, Any], guide
         },
         {
             "id": "prewarm",
-            "label": "Run, skip, or defer prewarm/cache artifact setup",
+            "label": "Seed an initial prewarm/cache artifact now, or explicitly defer/skip initial seeding",
             "status": "done" if state["prewarm_ready"] else "pending",
             "required": state.get("prewarm_required", False),
             "decision": state.get("prewarm_decision", ""),
+            "available": state.get("prewarm_available", False),
+            "partial": state.get("prewarm_partial", False),
+            "critical_gaps": state.get("prewarm_critical_gaps", []),
+            "artifact": state.get("prewarm_artifact", ""),
+            "note": "Recurring prewarm schedules are configured in the heartbeat step. This step is only about the initial cache artifact required by prewarm-required profiles.",
         },
         {
             "id": "heartbeat",
@@ -335,8 +421,8 @@ def _init_guide(command: str, payload: dict[str, Any]) -> dict[str, Any]:
     profile = _load_json(profile_path, None)
     choices = _load_choices(workspace)
     guide = _load_json(_package_root() / "data" / "capability-guide.json", {})
-    state = _completion_state(profile if isinstance(profile, dict) else None, choices)
-    steps = _wizard_steps(profile if isinstance(profile, dict) else None, choices, guide if isinstance(guide, dict) else {})
+    state = _completion_state(profile if isinstance(profile, dict) else None, choices, workspace)
+    steps = _wizard_steps(profile if isinstance(profile, dict) else None, choices, guide if isinstance(guide, dict) else {}, workspace)
     current = next((step for step in steps if step.get("status") != "done"), None)
     output = _base_output(command, payload)
     output["source"] = [str(profile_path), str(_choices_path(workspace)), str(_package_root() / "data" / "capability-guide.json")]
@@ -403,7 +489,8 @@ def _init_status(command: str, payload: dict[str, Any]) -> dict[str, Any]:
     profile_path = workspace / "config" / "runtime-profile.json"
     output = _base_output(command, payload)
     profile = _load_json(profile_path, None)
-    state = _completion_state(profile)
+    choices = _load_choices(workspace)
+    state = _completion_state(profile, choices, workspace=workspace)
     output["source"] = [str(profile_path)]
     output["sources"] = [str(profile_path)]
     output["result"] = {

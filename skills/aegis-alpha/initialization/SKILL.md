@@ -32,12 +32,14 @@ Do not tell the user "initialization is complete" merely because
 `runtime-profile.json` exists. Full initialization is complete only after the
 runtime profile exists, the global `market_data` baseline is ready, and every
 operational choice required by the selected preset has either been explicitly
-configured or explicitly declined by the user. For `prewarm-required`, a
-prewarm artifact must exist or the user must explicitly choose to defer/skip
-prewarm. For `market-heartbeat`, `daily-prewarm`, or `full` heartbeat, the
-agent must configure a real supported automation or the user must explicitly
-choose manual/no heartbeat. Otherwise report the state as "runtime profile
-written, initialization incomplete" and list the pending choices.
+configured or explicitly declined by the user. For `prewarm-required`, an
+initial prewarm/cache artifact must exist or the user must explicitly choose to
+defer/skip initial cache seeding. Recurring prewarm schedules are not configured
+in the prewarm step; they are configured in the heartbeat/automation step. For
+`market-heartbeat`, `daily-prewarm`, or `full` heartbeat, the agent must
+configure a real supported automation or the user must explicitly choose
+manual/no heartbeat. Otherwise report the state as "runtime profile written,
+initialization incomplete" and list the pending choices.
 
 ## Required Conversation
 
@@ -99,10 +101,14 @@ asking for a key. Use `capability-guide.json` `setup_urls` when present.
 
 5. Explain operational choices separately from the preset:
 
-- Prewarm/cache jobs prepare auditable evidence artifacts; choosing a preset
-  does not mean prewarm has run.
-- Heartbeat/recurring workflows require native automation support or an OS
-  scheduler fallback; choosing `market-heartbeat` does not configure wakeups.
+- The prewarm step seeds an initial auditable cache artifact for
+  `prewarm-required`; choosing a preset does not mean this artifact exists.
+  Prewarm is not a separate public skill that the user configures directly; it
+  is an execution-automation command invoked by the initialization wizard or by
+  later scheduled workflows after installation and provider setup.
+- Heartbeat/recurring workflows schedule future prewarm and heartbeat jobs, and
+  require native automation support or an OS scheduler fallback; choosing
+  `market-heartbeat` does not configure wakeups.
 - Portfolio setup requires a source before portfolio review can rely on
   holdings.
 - External push is disabled unless the user explicitly enables it and provides
@@ -118,8 +124,9 @@ ledger creation, or external push. Ask those items separately.
 - Optional API groups (`market_intel`, `research_search`, `document_parse`,
   `external_push`) must be configured, explicitly skipped, or explicitly
   disabled. If deferred, initialization remains incomplete.
-- Prewarm must be run, or explicitly skipped/deferred. If deferred,
-  initialization remains incomplete.
+- Initial prewarm/cache seeding must be run, or explicitly skipped/deferred. If
+  deferred, initialization remains incomplete. Recurring prewarm belongs to the
+  heartbeat/automation step.
 - Heartbeat must be configured as a real supported automation, or explicitly
   set to `manual`/`none`/`skip`. If deferred, initialization remains incomplete.
 - Portfolio source must be confirmed as `none`, `manual-ledger`,

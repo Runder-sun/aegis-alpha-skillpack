@@ -36,7 +36,7 @@ investment action is approved.
 
 | Command | Purpose | Critical inputs | Failure behavior |
 |---|---|---|---|
-| `nightly-prewarm` | Run shared prewarm collector | `scripts/nightly_prewarm.py` and workspace skills | Fails closed if collector fails or no artifact is written |
+| `nightly-prewarm` | Run shared prewarm collector | `scripts/nightly_prewarm.py` and installed Aegis Alpha core or compatible workspace skills | Fails closed if collector fails or no artifact is written |
 | `morning-prewarm` | Morning pipeline prewarm wrapper | same as nightly prewarm | Fails closed if artifact missing or invalid |
 | `midday-prewarm` | Market-review prewarm wrapper | same as nightly prewarm | Fails closed if artifact missing or invalid |
 | `evening-prewarm` | Evening workflow prewarm wrapper | same as nightly prewarm | Critical gaps are explicit |
