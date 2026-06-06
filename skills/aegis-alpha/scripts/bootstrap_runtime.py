@@ -4,6 +4,8 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import shutil
+import subprocess
 import time
 from datetime import datetime, timezone
 from pathlib import Path
@@ -187,6 +189,33 @@ def _load_json(path: Path, fallback: Any) -> Any:
         return fallback
 
 
+def _load_workspace_env(workspace: Path) -> None:
+    env_path = workspace / ".env"
+    if not env_path.exists():
+        return
+    for line in env_path.read_text(encoding="utf-8", errors="ignore").splitlines():
+        if not line.strip() or line.lstrip().startswith("#") or "=" not in line:
+            continue
+        key, value = line.split("=", 1)
+        os.environ.setdefault(key.strip(), value.strip())
+
+
+def _longbridge_cli_configured() -> bool:
+    if not shutil.which("longbridge"):
+        return False
+    try:
+        result = subprocess.run(
+            ["longbridge", "auth", "status"],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+            timeout=10,
+        )
+    except Exception:
+        return False
+    return result.returncode == 0 and "valid" in (result.stdout + result.stderr).lower()
+
+
 def _api_capabilities() -> dict[str, Any]:
     groups: dict[str, Any] = {}
     for group, names in API_ENV_GROUPS.items():
@@ -199,8 +228,9 @@ def _api_capabilities() -> dict[str, Any]:
     a_share_present = all(os.environ.get(name) for name in MARKET_DATA_REQUIRED_ENV["a_share"])
     overseas_primary_present = all(os.environ.get(name) for name in MARKET_DATA_REQUIRED_ENV["overseas_primary"])
     overseas_fallback_present = all(os.environ.get(name) for name in MARKET_DATA_REQUIRED_ENV["overseas_fallback"])
+    overseas_cli_present = _longbridge_cli_configured()
     groups["market_data"].update({
-        "configured": a_share_present and (overseas_primary_present or overseas_fallback_present),
+        "configured": a_share_present and (overseas_primary_present or overseas_cli_present or overseas_fallback_present),
         "required": True,
         "required_env": {
             "a_share": list(MARKET_DATA_REQUIRED_ENV["a_share"]),
@@ -211,11 +241,12 @@ def _api_capabilities() -> dict[str, Any]:
             name for name in MARKET_DATA_REQUIRED_ENV["a_share"] if not os.environ.get(name)
         ] + (
             []
-            if overseas_primary_present or overseas_fallback_present
+            if overseas_primary_present or overseas_cli_present or overseas_fallback_present
             else list(MARKET_DATA_REQUIRED_ENV["overseas_primary"])
         ),
         "fallback_configured": overseas_fallback_present,
         "preferred_overseas_configured": overseas_primary_present,
+        "longbridge_cli_configured": overseas_cli_present,
     })
     return groups
 
@@ -450,7 +481,7 @@ def _api_readiness(guide: dict[str, Any], preset: str, provider_priority: list[s
         "user_explanation": [
             "Aegis Alpha requires a configured market_data baseline before full initialization.",
             "For A-share and China data, follow the $tushare convention: TUSHARE_TOKEN.",
-            "For overseas market data, prefer the $longbridge / LongPort convention: LONGPORT_APP_KEY, LONGPORT_APP_SECRET, LONGPORT_ACCESS_TOKEN. FINNHUB_API_KEY is a fallback only.",
+            "For overseas market data, prefer the $longbridge / LongPort convention: LONGPORT_APP_KEY, LONGPORT_APP_SECRET, LONGPORT_ACCESS_TOKEN, or an authenticated LongBridge CLI session. FINNHUB_API_KEY is a fallback only.",
             "Other API groups are capability-specific accelerators and evidence feeds.",
         ],
     }
@@ -469,6 +500,7 @@ def _ensure_workspace(workspace: Path) -> None:
 
 def build_profile(args: argparse.Namespace) -> dict[str, Any]:
     workspace = _workspace(args.workspace)
+    _load_workspace_env(workspace)
     agent = _detect_agent(args.agent)
     resolved = _resolve_auto_fields(args)
     api = _api_capabilities()

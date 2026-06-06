@@ -52,8 +52,10 @@ setup choice means. Then ask the user what to configure.
   initialized. For A-share and China market data, follow the existing
   `$tushare` convention and configure `TUSHARE_TOKEN`. For overseas market
   data, prefer the existing `$longbridge` / LongPort convention and configure
-  `LONGPORT_APP_KEY`, `LONGPORT_APP_SECRET`, and `LONGPORT_ACCESS_TOKEN`.
-  `FINNHUB_API_KEY` is only a fallback when LongBridge/LongPort is unavailable.
+  `LONGPORT_APP_KEY`, `LONGPORT_APP_SECRET`, and `LONGPORT_ACCESS_TOKEN`, or
+  install and authenticate the LongBridge CLI so `longbridge auth status`
+  reports a valid session. `FINNHUB_API_KEY` is only a fallback when
+  LongBridge/LongPort is unavailable.
   Without this baseline, stay in setup guidance or fail closed.
 
 4. Explain optional capability unlocks before asking for other API keys:

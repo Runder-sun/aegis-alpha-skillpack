@@ -100,7 +100,7 @@ API groups are capability-specific:
 |---|---|---|---|
 | `research_search` | `TAVILY_API_KEYS`, `QVERIS_API_KEY` | source discovery and search expansion | current agent lacks usable web/search tools or the user requests API-backed search |
 | `document_parse` | `MINERU_API_KEY` | complex PDF/report parsing | agent-native file reading cannot parse the document reliably |
-| `market_data` | `TUSHARE_TOKEN`, `LONGPORT_APP_KEY`, `LONGPORT_APP_SECRET`, `LONGPORT_ACCESS_TOKEN`; fallback `FINNHUB_API_KEY` | A-share data via `$tushare`, overseas data via `$longbridge` / LongPort, quotes, historical bars, fundamentals, screening and quant inputs | always required before full initialization |
+| `market_data` | `TUSHARE_TOKEN`; overseas via `LONGPORT_APP_KEY`, `LONGPORT_APP_SECRET`, `LONGPORT_ACCESS_TOKEN` or an authenticated LongBridge CLI; fallback `FINNHUB_API_KEY` | A-share data via `$tushare`, overseas data via `$longbridge` / LongPort, quotes, historical bars, fundamentals, screening and quant inputs | always required before full initialization |
 | `market_intel` | `JIN10_API_KEY`, `TAVILY_API_KEYS`, `QVERIS_API_KEY` | news, macro events, theme catalysts | the task needs provider-backed market intelligence |
 | `external_push` | `FEISHU_APP_ID`, `FEISHU_APP_SECRET`, `FEISHU_RECEIVE_ID`, `FEISHU_CHAT_ID` | confirmed Feishu delivery | the user explicitly enables confirmed external push |
 
@@ -108,9 +108,11 @@ The full skillpack can install without API keys, but it is not fully
 initialized until the global `market_data` baseline is configured. For A-share
 and China market data, use the existing `$tushare` convention:
 `TUSHARE_TOKEN`. For overseas market data, prefer the existing `$longbridge` /
-LongPort convention: `LONGPORT_APP_KEY`, `LONGPORT_APP_SECRET`, and
-`LONGPORT_ACCESS_TOKEN`; `FINNHUB_API_KEY` is only a fallback. Other API groups
-remain capability-specific accelerators or optional integrations.
+LongPort convention: either `LONGPORT_APP_KEY`, `LONGPORT_APP_SECRET`, and
+`LONGPORT_ACCESS_TOKEN`, or an installed and authenticated LongBridge CLI
+session verified by `longbridge auth status`; `FINNHUB_API_KEY` is only a
+fallback. Other API groups remain capability-specific accelerators or optional
+integrations.
 
 Presets are default operating profiles, not feature gates. All 16 public skills
 remain available after any preset is selected. If a user asks for work outside

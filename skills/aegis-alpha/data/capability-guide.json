@@ -53,6 +53,7 @@
       "label": "Global required market data baseline",
       "env": ["TUSHARE_TOKEN", "LONGPORT_APP_KEY", "LONGPORT_APP_SECRET", "LONGPORT_ACCESS_TOKEN"],
       "fallback_env": ["FINNHUB_API_KEY"],
+      "cli": ["longbridge auth status"],
       "unlocks": ["A-share market data via $tushare", "overseas market data via $longbridge / LongPort", "quotes", "daily bars", "historical series", "fundamentals", "screening data", "quant inputs"],
       "required_when": "Always required before Aegis Alpha is considered fully initialized.",
       "without_api": "Initialization must treat market data as missing. Do not run market-sensitive workflows as fully configured; only provide setup guidance or fail closed."
@@ -75,8 +76,9 @@
       "label": "Structured market data",
       "env": ["TUSHARE_TOKEN", "LONGPORT_APP_KEY", "LONGPORT_APP_SECRET", "LONGPORT_ACCESS_TOKEN"],
       "fallback_env": ["FINNHUB_API_KEY"],
+      "cli": ["longbridge auth status"],
       "unlocks": ["A-share market data via $tushare", "overseas market data via $longbridge / LongPort", "quotes", "daily bars", "historical series", "fundamentals", "screening data", "quant inputs"],
-      "required_when": "Always required as the global market-data baseline. A-share/China data should follow the $tushare skill token convention (`TUSHARE_TOKEN`); overseas market data should prefer the $longbridge / LongPort credential convention (`LONGPORT_APP_KEY`, `LONGPORT_APP_SECRET`, `LONGPORT_ACCESS_TOKEN`). `FINNHUB_API_KEY` is only a fallback.",
+      "required_when": "Always required as the global market-data baseline. A-share/China data should follow the $tushare skill token convention (`TUSHARE_TOKEN`); overseas market data should prefer the $longbridge / LongPort convention, either via `LONGPORT_APP_KEY`, `LONGPORT_APP_SECRET`, and `LONGPORT_ACCESS_TOKEN`, or via an authenticated LongBridge CLI session verified by `longbridge auth status`. `FINNHUB_API_KEY` is only a fallback.",
       "without_api": "Do not fabricate structured data. Initialization is incomplete until market_data is configured; market-sensitive workflows must fail closed or stay in setup guidance mode."
     },
     "market_intel": {

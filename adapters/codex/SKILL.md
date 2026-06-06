@@ -46,11 +46,12 @@ Before asking the user to configure API keys, read
 `../.aegis-alpha-core/data/capability-guide.json` or the generated
 `profile.onboarding` block. Explain that `market_data` is globally required:
 `TUSHARE_TOKEN` for A-share/China data via `$tushare`, and LongBridge/LongPort
-credentials for overseas data via `$longbridge` (`LONGPORT_APP_KEY`,
-`LONGPORT_APP_SECRET`, `LONGPORT_ACCESS_TOKEN`), with `FINNHUB_API_KEY` only as
-fallback. Then explain which other API groups are recommended or optional for
-the selected preset. Do not ask the user to choose raw API names before
-explaining the investment capabilities they unlock.
+for overseas data via `$longbridge`: either `LONGPORT_APP_KEY`,
+`LONGPORT_APP_SECRET`, and `LONGPORT_ACCESS_TOKEN`, or an installed and
+authenticated LongBridge CLI session verified by `longbridge auth status`.
+`FINNHUB_API_KEY` is only a fallback. Then explain which other API groups are
+recommended or optional for the selected preset. Do not ask the user to choose
+raw API names before explaining the investment capabilities they unlock.
 
 ## Public Surface
 

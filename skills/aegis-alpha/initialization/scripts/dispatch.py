@@ -4,6 +4,7 @@ import argparse
 import json
 import os
 import subprocess
+import shutil
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -137,6 +138,17 @@ def _load_json(path: Path, fallback: Any) -> Any:
         return fallback
 
 
+def _load_workspace_env(workspace: Path) -> None:
+    env_path = workspace / ".env"
+    if not env_path.exists():
+        return
+    for line in env_path.read_text(encoding="utf-8", errors="ignore").splitlines():
+        if not line.strip() or line.lstrip().startswith("#") or "=" not in line:
+            continue
+        key, value = line.split("=", 1)
+        os.environ.setdefault(key.strip(), value.strip())
+
+
 def _init_status(command: str, payload: dict[str, Any]) -> dict[str, Any]:
     workspace = _workspace(payload.get("workspace"))
     profile_path = workspace / "config" / "runtime-profile.json"
@@ -181,25 +193,44 @@ def _all_present(names: list[str]) -> bool:
     return all(os.environ.get(name) for name in names)
 
 
+def _longbridge_cli_configured() -> bool:
+    if not shutil.which("longbridge"):
+        return False
+    try:
+        result = subprocess.run(
+            ["longbridge", "auth", "status"],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+            timeout=10,
+        )
+    except Exception:
+        return False
+    return result.returncode == 0 and "valid" in (result.stdout + result.stderr).lower()
+
+
 def _market_data_status() -> dict[str, Any]:
     a_share_configured = _all_present(MARKET_DATA_REQUIRED_ENV["a_share"])
     overseas_primary_configured = _all_present(MARKET_DATA_REQUIRED_ENV["overseas_primary"])
     overseas_fallback_configured = _all_present(MARKET_DATA_REQUIRED_ENV["overseas_fallback"])
+    overseas_cli_configured = _longbridge_cli_configured()
     missing = [
         name for name in MARKET_DATA_REQUIRED_ENV["a_share"] if not os.environ.get(name)
     ]
-    if not (overseas_primary_configured or overseas_fallback_configured):
+    if not (overseas_primary_configured or overseas_cli_configured or overseas_fallback_configured):
         missing.extend(MARKET_DATA_REQUIRED_ENV["overseas_primary"])
     return {
-        "configured": a_share_configured and (overseas_primary_configured or overseas_fallback_configured),
+        "configured": a_share_configured and (overseas_primary_configured or overseas_cli_configured or overseas_fallback_configured),
         "required": True,
         "required_env": MARKET_DATA_REQUIRED_ENV,
         "missing_required_env": missing,
         "preferred_overseas_configured": overseas_primary_configured,
+        "longbridge_cli_configured": overseas_cli_configured,
         "fallback_configured": overseas_fallback_configured,
         "routing": {
             "a_share": "$tushare via TUSHARE_TOKEN",
             "overseas_primary": "$longbridge / LongPort via LONGPORT_APP_KEY, LONGPORT_APP_SECRET, LONGPORT_ACCESS_TOKEN",
+            "overseas_cli": "$longbridge CLI authenticated with `longbridge auth login`",
             "overseas_fallback": "FINNHUB_API_KEY only when LongBridge/LongPort is unavailable",
         },
     }
@@ -209,6 +240,7 @@ def _init_plan(command: str, payload: dict[str, Any]) -> dict[str, Any]:
     preset = str(payload.get("preset") or "auto")
     if preset != "auto" and preset not in PRESETS:
         return _fail(command, payload, [f"invalid_preset:{preset}"])
+    _load_workspace_env(_workspace(payload.get("workspace")))
     guide = _load_json(_package_root() / "data" / "capability-guide.json", {})
     selected = None if preset == "auto" else PRESETS[preset]
     output = _base_output(command, payload)
@@ -256,6 +288,8 @@ def _init_plan(command: str, payload: dict[str, Any]) -> dict[str, Any]:
 def _bootstrap_profile(command: str, payload: dict[str, Any]) -> dict[str, Any]:
     if payload.get("user_confirmed") is not True:
         return _fail(command, payload, ["user_confirmation_missing"])
+    workspace = _workspace(payload.get("workspace"))
+    _load_workspace_env(workspace)
     market_data_status = _market_data_status()
     if not market_data_status["configured"]:
         missing = market_data_status["missing_required_env"]
@@ -289,7 +323,9 @@ def _bootstrap_profile(command: str, payload: dict[str, Any]) -> dict[str, Any]:
     if payload.get("workspace"):
         cmd.extend(["--workspace", str(payload["workspace"])])
 
-    result = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+    env = dict(os.environ)
+    env["AEGIS_ALPHA_WORKSPACE"] = str(workspace)
+    result = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, env=env)
     if result.returncode != 0:
         return _fail(command, payload, [result.stderr.strip() or result.stdout.strip() or "bootstrap_failed"])
     try:
