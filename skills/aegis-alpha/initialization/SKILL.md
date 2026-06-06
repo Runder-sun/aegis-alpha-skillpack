@@ -134,6 +134,58 @@ ledger creation, or external push. Ask those items separately.
 - Only say initialization is complete when `init-guide` or `init-status`
   returns `initialized=true`.
 
+## Mandatory Step Confirmation
+
+The `heartbeat` and `portfolio` steps are high-risk because they can create
+recurring work or cause portfolio analysis to rely on missing state. Do not
+record either step as complete unless the user has explicitly confirmed the
+specific choice after hearing the options and consequences.
+
+For `heartbeat`, explain before asking:
+
+- `none`: no recurring work.
+- `manual`: user asks the agent to run workflows on demand.
+- `daily-prewarm`: create recurring prewarm/cache jobs only.
+- `market-heartbeat`: create recurring prewarm plus market heartbeat/review jobs.
+- `full`: create morning, midday, heartbeat, nightly, and weekly review jobs.
+
+Before creating any automation, tell the user exactly which jobs would be
+created, what each job does, its schedule/frequency, where it will run, and that
+all outputs remain research-only with no live trading or external sends. Then
+ask whether to create those automations. If the current runtime cannot create
+the exact requested schedule, explain the supported approximation and ask again.
+
+When recording `heartbeat`, include `user_confirmed=true` and metadata:
+
+- `capability_explained=true`
+- `options_explained=true`
+- `selected_mode`
+- for active automation modes, `automation_plan` and
+  `user_approved_automation_create=true`
+- for manual/none/skip, `automation_plan=[]`
+
+For `portfolio`, explain before asking:
+
+- `none`: no portfolio source; portfolio analysis is unavailable.
+- `manual-ledger`: user will maintain a local ledger or provide positions in chat.
+- `imported-file`: user provides a CSV/JSON/XLSX holdings file.
+- `read-only-api`: user configures a read-only portfolio source.
+
+Always ask whether the user has current holdings. If holdings are not provided,
+do not infer an empty portfolio. The user may explicitly choose to continue with
+`manual-ledger` and no holdings yet, but metadata must mark
+`holdings_state=not_provided_fail_closed`; future portfolio analysis must fail
+closed until holdings are recorded or imported.
+
+When recording `portfolio`, include `user_confirmed=true` and metadata:
+
+- `options_explained=true`
+- `holdings_question_asked=true`
+- `holdings_state` as one of `provided`, `imported`, `read_only_api`,
+  `none_confirmed`, or `not_provided_fail_closed`
+- `fail_closed_without_holdings=true` unless holdings were actually provided,
+  imported, or connected through read-only API.
+
 ## Commands
 
 ### init-status
@@ -155,6 +207,10 @@ before asking for API keys or automation choices.
 Record a user-confirmed initialization choice. Use it for optional API groups,
 prewarm, heartbeat, portfolio source, and external push decisions. Do not
 invent a choice on behalf of the user.
+
+For `heartbeat` and `portfolio`, `record-choice` must include
+`user_confirmed=true` and the mandatory metadata described above. The dispatcher
+must reject missing confirmation metadata rather than trusting agent intent.
 
 ### bootstrap-profile
 Write the confirmed runtime profile. Use only after the user has chosen the

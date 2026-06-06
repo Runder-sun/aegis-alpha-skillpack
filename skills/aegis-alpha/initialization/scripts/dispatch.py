@@ -81,7 +81,9 @@ OPTIONAL_API_GROUPS = ["market_intel", "research_search", "document_parse", "ext
 TERMINAL_SKIP_DECISIONS = {"skip", "disabled", "none"}
 TERMINAL_PREWARM_DECISIONS = {"skip", "accept-partial"}
 TERMINAL_HEARTBEAT_DECISIONS = {"manual", "none", "skip"}
+ACTIVE_HEARTBEAT_DECISIONS = {"daily-prewarm", "market-heartbeat", "full"}
 TERMINAL_PORTFOLIO_DECISIONS = {"none", "manual-ledger", "imported-file", "read-only-api", "skip"}
+PORTFOLIO_HOLDINGS_STATES = {"provided", "imported", "read_only_api", "none_confirmed", "not_provided_fail_closed"}
 
 
 def _workspace(raw: str | None = None) -> Path:
@@ -182,6 +184,13 @@ def _choice_decision(choices: dict[str, Any], key: str) -> str:
     if isinstance(raw, dict):
         return str(raw.get("decision") or "")
     return ""
+
+
+def _choice_metadata(choices: dict[str, Any], key: str) -> dict[str, Any]:
+    raw = choices.get("choices", {}).get(key) if isinstance(choices.get("choices"), dict) else None
+    if isinstance(raw, dict) and isinstance(raw.get("metadata"), dict):
+        return raw["metadata"]
+    return {}
 
 
 def _api_group_configured(api: dict[str, Any], group: str) -> bool:
@@ -285,14 +294,28 @@ def _completion_state(profile: dict[str, Any] | None, choices: dict[str, Any] | 
     prewarm_critical_gaps = _prewarm_critical_gaps(prewarm) if prewarm_available else []
     prewarm_partial = bool(prewarm_critical_gaps)
     heartbeat_decision = _choice_decision(choices, "heartbeat")
+    heartbeat_meta = _choice_metadata(choices, "heartbeat")
     portfolio_decision = _choice_decision(choices, "portfolio")
+    portfolio_meta = _choice_metadata(choices, "portfolio")
     prewarm_ready = (
         (not prewarm_required)
         or (prewarm_available and not prewarm_partial)
         or prewarm_decision in TERMINAL_PREWARM_DECISIONS
     )
-    heartbeat_configured = (not heartbeat_requested) or bool(automation.get("configured_by_agent")) or heartbeat_decision in TERMINAL_HEARTBEAT_DECISIONS
-    portfolio_ready = portfolio_source == "none" or portfolio_decision in TERMINAL_PORTFOLIO_DECISIONS
+    heartbeat_configured = (
+        (not heartbeat_requested)
+        or heartbeat_decision in TERMINAL_HEARTBEAT_DECISIONS
+        or (
+            heartbeat_decision in ACTIVE_HEARTBEAT_DECISIONS
+            and bool(automation.get("configured_by_agent"))
+            and bool(heartbeat_meta.get("user_approved_automation_create"))
+        )
+    )
+    portfolio_ready = (
+        portfolio_decision in TERMINAL_PORTFOLIO_DECISIONS
+        and bool(portfolio_meta.get("holdings_question_asked"))
+        and str(portfolio_meta.get("holdings_state") or "") in PORTFOLIO_HOLDINGS_STATES
+    )
     optional_api_status = {
         group: {
             "configured": _api_group_configured(api, group),
@@ -449,6 +472,57 @@ def _init_guide(command: str, payload: dict[str, Any]) -> dict[str, Any]:
     return output
 
 
+def _validate_record_choice(choice: str, decision: str, payload: dict[str, Any]) -> list[str]:
+    if choice not in {"heartbeat", "portfolio"}:
+        return []
+    errors: list[str] = []
+    metadata = payload.get("metadata") if isinstance(payload.get("metadata"), dict) else {}
+    if payload.get("user_confirmed") is not True:
+        errors.append("user_confirmed_required")
+    if choice == "heartbeat":
+        if not metadata.get("capability_explained"):
+            errors.append("heartbeat_capability_explained_required")
+        if not metadata.get("options_explained"):
+            errors.append("heartbeat_options_explained_required")
+        selected_mode = str(metadata.get("selected_mode") or "")
+        if selected_mode != decision:
+            errors.append("heartbeat_selected_mode_must_match_decision")
+        if decision in ACTIVE_HEARTBEAT_DECISIONS:
+            plan = metadata.get("automation_plan")
+            if not isinstance(plan, list) or not plan:
+                errors.append("heartbeat_automation_plan_required")
+            if metadata.get("user_approved_automation_create") is not True:
+                errors.append("heartbeat_user_approved_automation_create_required")
+        elif decision in TERMINAL_HEARTBEAT_DECISIONS:
+            plan = metadata.get("automation_plan")
+            if plan not in ([], None):
+                errors.append("heartbeat_manual_or_none_requires_empty_automation_plan")
+        else:
+            errors.append(f"invalid_heartbeat_decision:{decision}")
+    if choice == "portfolio":
+        if not metadata.get("options_explained"):
+            errors.append("portfolio_options_explained_required")
+        if not metadata.get("holdings_question_asked"):
+            errors.append("portfolio_holdings_question_asked_required")
+        holdings_state = str(metadata.get("holdings_state") or "")
+        if holdings_state not in PORTFOLIO_HOLDINGS_STATES:
+            errors.append("portfolio_holdings_state_required")
+        if decision not in TERMINAL_PORTFOLIO_DECISIONS:
+            errors.append(f"invalid_portfolio_decision:{decision}")
+        if holdings_state in {"none_confirmed", "not_provided_fail_closed"}:
+            if metadata.get("fail_closed_without_holdings") is not True:
+                errors.append("portfolio_fail_closed_without_holdings_required")
+        if decision == "none" and holdings_state != "none_confirmed":
+            errors.append("portfolio_none_requires_none_confirmed_holdings_state")
+        if decision == "manual-ledger" and holdings_state == "none_confirmed":
+            errors.append("portfolio_manual_ledger_requires_holdings_or_fail_closed_pending_state")
+        if decision == "imported-file" and holdings_state != "imported":
+            errors.append("portfolio_imported_file_requires_imported_holdings_state")
+        if decision == "read-only-api" and holdings_state != "read_only_api":
+            errors.append("portfolio_read_only_api_requires_read_only_api_holdings_state")
+    return errors
+
+
 def _record_choice(command: str, payload: dict[str, Any]) -> dict[str, Any]:
     workspace = _workspace(payload.get("workspace"))
     choice = str(payload.get("choice") or "").strip()
@@ -458,6 +532,9 @@ def _record_choice(command: str, payload: dict[str, Any]) -> dict[str, Any]:
     valid_choices = {"prewarm", "heartbeat", "portfolio", *OPTIONAL_API_GROUPS}
     if choice not in valid_choices:
         return _fail(command, payload, [f"invalid_choice:{choice}"])
+    validation_errors = _validate_record_choice(choice, decision, payload)
+    if validation_errors:
+        return _fail(command, payload, validation_errors)
     choices = _load_choices(workspace)
     choices.setdefault("choices", {})
     choices["choices"][choice] = {
