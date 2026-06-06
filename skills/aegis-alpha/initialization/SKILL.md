@@ -28,6 +28,14 @@ that choice with `record-choice` before moving to the next step. Continue until
 but do not call initialization complete; only an explicit configure/skip/manual
 terminal choice can close a step.
 
+On first use, or whenever the user asks "how do I use this skillpack?", present
+the First-Run User Brief from `init-guide.result.user_onboarding` before asking
+for credentials or writing state. The brief must tell the user what the
+skillpack can do, which configuration is required, which configuration is
+optional, where provider setup happens, and what is lost when a choice is
+skipped. Do not compress this into "please provide keys"; users must understand
+the product surface before choosing setup.
+
 Do not tell the user "initialization is complete" merely because
 `runtime-profile.json` exists. Full initialization is complete only after the
 runtime profile exists, the global `market_data` baseline is ready, and every
@@ -45,6 +53,12 @@ initialization incomplete" and list the pending choices.
 
 Before writing or completing runtime state, explain what the skillpack can do
 and what each setup choice means. Then ask the user what to configure.
+
+Use `init-guide.result.user_onboarding.configuration_matrix` as the canonical
+user-facing setup table. It must be reflected in the conversation before the
+first credential or automation request. Use
+`init-guide.result.user_onboarding.step_prompt_templates` for the current step
+so the agent asks one concrete question at a time with the required context.
 
 1. Explain product experiences:
 
@@ -140,6 +154,25 @@ The `heartbeat` and `portfolio` steps are high-risk because they can create
 recurring work or cause portfolio analysis to rely on missing state. Do not
 record either step as complete unless the user has explicitly confirmed the
 specific choice after hearing the options and consequences.
+
+## First-Run UX Rules
+
+- First show capabilities and setup impact, then ask for the preset and setup
+  choices.
+- Do not ask for every credential in one message. Ask only for the current
+  pending step from `init-guide`.
+- For every API group, say whether it is required or optional, what it unlocks,
+  setup URL, completion condition, and what happens if skipped.
+- `market_data` is globally required. It is not an optional enhancement.
+- `prewarm` is an installation/runtime health step that seeds an auditable
+  cache artifact. It is not a public user skill and does not create recurring
+  automation.
+- `heartbeat` is the recurring automation choice. It must name the exact jobs
+  that will be created before asking for approval.
+- `portfolio` must ask whether the user has current holdings. Do not infer an
+  empty portfolio.
+- The final review must summarize configured, skipped, deferred, and fail-closed
+  items before saying initialization is complete.
 
 For `heartbeat`, explain before asking:
 

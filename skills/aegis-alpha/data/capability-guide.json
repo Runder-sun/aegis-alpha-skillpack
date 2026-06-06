@@ -1,6 +1,93 @@
 {
   "schema_version": 1,
   "purpose": "Explain Aegis Alpha capabilities, agent-native limits, API groups, and what remains usable without APIs.",
+  "user_onboarding": {
+    "first_run_brief": [
+      "Aegis Alpha is a research-only investment workflow pack. It can help with market desk reviews, macro and theme analysis, equity screening, equity research, portfolio/risk review, paper-only trade planning, advice lifecycle tracking, quant validation, report review, and scheduled research workflows.",
+      "It never enables live trading, order execution, allocation authorization, or executable investment advice. All outputs remain research and evidence workflow outputs.",
+      "Full initialization requires the global market_data baseline. A-share and China market data use TUSHARE_TOKEN from https://tushare.pro. Overseas market data should prefer LongBridge / LongPort from https://open.longbridge.com/skill/. Finnhub at https://finnhub.io is only a fallback when LongBridge is unavailable.",
+      "Optional API groups unlock better search, document parsing, market intelligence, and external push. Each optional group can be configured, explicitly skipped, or disabled. Deferred choices keep initialization incomplete.",
+      "Prewarm seeds an initial auditable cache artifact after providers are configured. It is an installation/runtime health step, not a separate public user skill and not a recurring automation by itself.",
+      "Heartbeat is the recurring automation choice. It may create future prewarm or market review jobs, but only after the agent explains exact jobs, schedules, runtime location, and receives explicit approval.",
+      "Portfolio setup decides where holdings come from. The agent must ask whether current holdings exist and must fail closed for portfolio analysis until holdings are provided, imported, or connected through a read-only source."
+    ],
+    "configuration_matrix": [
+      {
+        "item": "market_data",
+        "required": "required globally",
+        "unlocks": "A-share, Hong Kong, US, and overseas market data baseline; quotes; daily bars; historical series; screening and quant inputs.",
+        "setup": "Tushare TUSHARE_TOKEN at https://tushare.pro; LongBridge / LongPort at https://open.longbridge.com/skill/; Finnhub fallback at https://finnhub.io.",
+        "completion_condition": "TUSHARE_TOKEN is configured and either LongBridge/LongPort credentials, an authenticated LongBridge CLI session, or FINNHUB_API_KEY is available.",
+        "if_skipped": "Aegis Alpha is not fully initialized. Market-sensitive workflows must stay in setup guidance or fail closed."
+      },
+      {
+        "item": "research_search",
+        "required": "optional",
+        "unlocks": "Provider-backed source discovery, search expansion, and fresh research intake.",
+        "setup": "Tavily at https://app.tavily.com or Qveris at https://qveris.ai/docs.",
+        "completion_condition": "TAVILY_API_KEYS or QVERIS_API_KEY is configured, or the user explicitly skips/disables it.",
+        "if_skipped": "Use agent-native web/search tools when available, or ask the user for source files and links."
+      },
+      {
+        "item": "document_parse",
+        "required": "optional",
+        "unlocks": "Provider-backed large PDF/report parsing and document evidence normalization.",
+        "setup": "MinerU at https://mineru.net/apiManage/docs.",
+        "completion_condition": "MINERU_API_KEY is configured, or the user explicitly skips/disables it.",
+        "if_skipped": "Use agent-native file/document reading for simple files, or ask the user for extracted text."
+      },
+      {
+        "item": "market_intel",
+        "required": "optional, recommended for desk workflows",
+        "unlocks": "Provider-backed market news, macro events, theme catalysts, and desk brief enrichment.",
+        "setup": "Jin10 at https://www.jin10.com/, Tavily at https://app.tavily.com, or Qveris at https://qveris.ai/docs.",
+        "completion_condition": "JIN10_API_KEY, TAVILY_API_KEYS, or QVERIS_API_KEY is configured, or the user explicitly skips/disables it.",
+        "if_skipped": "Use agent-native search when available; fail closed if fresh evidence cannot be obtained."
+      },
+      {
+        "item": "external_push",
+        "required": "optional, only if the user wants external delivery",
+        "unlocks": "Confirmed Feishu report delivery and scheduled push workflows.",
+        "setup": "Feishu Open Platform at https://open.feishu.cn.",
+        "completion_condition": "FEISHU_APP_ID, FEISHU_APP_SECRET, FEISHU_RECEIVE_ID, and FEISHU_CHAT_ID are configured, or the user explicitly skips/disables it.",
+        "if_skipped": "External push is unavailable. Keep output in agent chat or workspace."
+      },
+      {
+        "item": "prewarm",
+        "required": "required only when cache_policy is prewarm-required; otherwise optional",
+        "unlocks": "Initial auditable cache artifact and provider/runtime health check.",
+        "setup": "Run the execution-automation prewarm command after market_data is configured.",
+        "completion_condition": "A fresh prewarm artifact exists without critical gaps, or the user explicitly skips/accepts partial/defer according to policy.",
+        "if_skipped": "No initial cache artifact. Workflows may need live evidence retrieval and must fail closed on stale or missing critical data."
+      },
+      {
+        "item": "heartbeat",
+        "required": "operational choice required; automation itself is optional",
+        "unlocks": "Recurring prewarm and market review jobs for selected desk modes.",
+        "setup": "Use native Codex automations when available, or explain an OS scheduler fallback and ask for approval.",
+        "completion_condition": "The user chooses none/manual/skip, or approves a real supported automation plan that has been created.",
+        "if_skipped": "No recurring work. The user must ask the agent to run workflows manually."
+      },
+      {
+        "item": "portfolio",
+        "required": "operational choice required",
+        "unlocks": "Holdings-aware portfolio review, risk checks, advice tracking, and paper-only trade planning.",
+        "setup": "Choose none, manual-ledger, imported-file, or read-only-api; then provide holdings, import a file, or connect a read-only source.",
+        "completion_condition": "The source is confirmed and holdings state is recorded as provided, imported, read_only_api, none_confirmed, or not_provided_fail_closed.",
+        "if_skipped": "Portfolio analysis is unavailable or must fail closed until holdings are supplied."
+      }
+    ],
+    "step_prompt_templates": {
+      "capabilities": "First explain the first_run_brief and configuration_matrix in concise user-facing language. Then ask which product experience or preset the user wants to initialize.",
+      "runtime_profile": "Explain the preset choices and required axes: data_providers, cache_policy, manual_input, portfolio_source, heartbeat. Ask the user to choose or explicitly accept recommended defaults.",
+      "market_data": "Explain that market_data is globally required, list Tushare, LongBridge/LongPort, and Finnhub fallback setup URLs, describe the completion condition, then ask whether to configure now or provide existing credentials.",
+      "optional_api_groups": "For each optional group, explain what it unlocks, setup URL, completion condition, and skipped behavior. Ask configure, skip/disable, or defer for one group at a time.",
+      "prewarm": "Explain that prewarm runs once to seed an initial auditable cache and check provider/runtime health. Ask whether to run it now, skip, accept partial, or defer.",
+      "heartbeat": "Explain none, manual, daily-prewarm, market-heartbeat, and full. If automation is requested, list exact jobs and schedules before asking for approval to create them.",
+      "portfolio": "Explain none, manual-ledger, imported-file, and read-only-api. Ask whether the user has current holdings and record provided/imported/read-only/none/fail-closed state.",
+      "final_review": "Summarize configured, skipped, deferred, and fail-closed items. Only say initialization is complete when init-guide returns initialized=true."
+    }
+  },
   "provider_model": {
     "agent_native": {
       "label": "Agent-native tools",
