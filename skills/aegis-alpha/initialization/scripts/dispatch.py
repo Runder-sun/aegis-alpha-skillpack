@@ -77,6 +77,12 @@ MARKET_DATA_REQUIRED_ENV = {
     "overseas_fallback": ["FINNHUB_API_KEY"],
 }
 
+OPTIONAL_API_GROUPS = ["market_intel", "research_search", "document_parse", "external_push"]
+TERMINAL_SKIP_DECISIONS = {"skip", "disabled", "none"}
+TERMINAL_PREWARM_DECISIONS = {"skip"}
+TERMINAL_HEARTBEAT_DECISIONS = {"manual", "none", "skip"}
+TERMINAL_PORTFOLIO_DECISIONS = {"none", "manual-ledger", "imported-file", "read-only-api", "skip"}
+
 
 def _workspace(raw: str | None = None) -> Path:
     if raw:
@@ -149,7 +155,42 @@ def _load_workspace_env(workspace: Path) -> None:
         os.environ.setdefault(key.strip(), value.strip())
 
 
-def _completion_state(profile: dict[str, Any] | None) -> dict[str, Any]:
+def _choices_path(workspace: Path) -> Path:
+    return workspace / "config" / "initialization-choices.json"
+
+
+def _load_choices(workspace: Path) -> dict[str, Any]:
+    data = _load_json(_choices_path(workspace), {})
+    if isinstance(data, dict):
+        data.setdefault("schema_version", 1)
+        data.setdefault("choices", {})
+        return data
+    return {"schema_version": 1, "choices": {}}
+
+
+def _save_choices(workspace: Path, choices: dict[str, Any]) -> Path:
+    path = _choices_path(workspace)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    choices["schema_version"] = 1
+    choices["updated_at"] = _now()
+    path.write_text(json.dumps(choices, ensure_ascii=False, indent=2), encoding="utf-8")
+    return path
+
+
+def _choice_decision(choices: dict[str, Any], key: str) -> str:
+    raw = choices.get("choices", {}).get(key) if isinstance(choices.get("choices"), dict) else None
+    if isinstance(raw, dict):
+        return str(raw.get("decision") or "")
+    return ""
+
+
+def _api_group_configured(api: dict[str, Any], group: str) -> bool:
+    status = api.get(group) if isinstance(api, dict) else None
+    return bool(isinstance(status, dict) and status.get("configured"))
+
+
+def _completion_state(profile: dict[str, Any] | None, choices: dict[str, Any] | None = None) -> dict[str, Any]:
+    choices = choices or {"choices": {}}
     if not isinstance(profile, dict):
         return {
             "runtime_profile_exists": False,
@@ -165,11 +206,24 @@ def _completion_state(profile: dict[str, Any] | None) -> dict[str, Any]:
     automation = profile.get("automation", {}) if isinstance(profile.get("automation"), dict) else {}
     cache_policy = str(profile.get("cache_policy") or "none")
     heartbeat = str(automation.get("heartbeat_mode") or "none")
+    portfolio_source = str(profile.get("portfolio_source") or "none")
     prewarm_required = cache_policy == "prewarm-required"
     heartbeat_requested = heartbeat not in {"none", "manual"}
     market_data_ready = bool(market_data.get("configured"))
-    prewarm_ready = (not prewarm_required) or bool(prewarm.get("available"))
-    heartbeat_configured = (not heartbeat_requested) or bool(automation.get("configured_by_agent"))
+    prewarm_decision = _choice_decision(choices, "prewarm")
+    heartbeat_decision = _choice_decision(choices, "heartbeat")
+    portfolio_decision = _choice_decision(choices, "portfolio")
+    prewarm_ready = (not prewarm_required) or bool(prewarm.get("available")) or prewarm_decision in TERMINAL_PREWARM_DECISIONS
+    heartbeat_configured = (not heartbeat_requested) or bool(automation.get("configured_by_agent")) or heartbeat_decision in TERMINAL_HEARTBEAT_DECISIONS
+    portfolio_ready = portfolio_source == "none" or portfolio_decision in TERMINAL_PORTFOLIO_DECISIONS
+    optional_api_status = {
+        group: {
+            "configured": _api_group_configured(api, group),
+            "decision": _choice_decision(choices, group),
+            "complete": _api_group_configured(api, group) or _choice_decision(choices, group) in TERMINAL_SKIP_DECISIONS,
+        }
+        for group in OPTIONAL_API_GROUPS
+    }
     pending: list[str] = []
     if not market_data_ready:
         pending.append("market_data")
@@ -177,16 +231,170 @@ def _completion_state(profile: dict[str, Any] | None) -> dict[str, Any]:
         pending.append("prewarm")
     if not heartbeat_configured:
         pending.append("heartbeat")
+    if not portfolio_ready:
+        pending.append("portfolio")
+    pending.extend([f"optional_api:{group}" for group, status in optional_api_status.items() if not status["complete"]])
+    fully_initialized = market_data_ready and prewarm_ready and heartbeat_configured and portfolio_ready and all(
+        status["complete"] for status in optional_api_status.values()
+    )
     return {
         "runtime_profile_exists": True,
         "market_data_ready": market_data_ready,
         "prewarm_required": prewarm_required,
         "prewarm_ready": prewarm_ready,
+        "prewarm_decision": prewarm_decision,
         "heartbeat_requested": heartbeat_requested,
         "heartbeat_configured": heartbeat_configured,
-        "fully_initialized": market_data_ready and prewarm_ready and heartbeat_configured,
+        "heartbeat_decision": heartbeat_decision,
+        "portfolio_ready": portfolio_ready,
+        "portfolio_decision": portfolio_decision,
+        "optional_api_status": optional_api_status,
+        "fully_initialized": fully_initialized,
         "pending_operational_choices": pending,
     }
+
+
+def _wizard_steps(profile: dict[str, Any] | None, choices: dict[str, Any], guide: dict[str, Any]) -> list[dict[str, Any]]:
+    state = _completion_state(profile, choices)
+    api = profile.get("providers", {}).get("api", {}) if isinstance(profile, dict) and isinstance(profile.get("providers"), dict) else {}
+    api_groups = guide.get("api_groups", {}) if isinstance(guide.get("api_groups"), dict) else {}
+
+    def api_urls(group: str) -> dict[str, str]:
+        meta = api_groups.get(group) if isinstance(api_groups.get(group), dict) else {}
+        urls = meta.get("setup_urls") if isinstance(meta.get("setup_urls"), dict) else {}
+        return {str(k): str(v) for k, v in urls.items()}
+
+    steps = [
+        {
+            "id": "capabilities",
+            "label": "Explain Aegis Alpha capabilities and safety boundaries",
+            "status": "done",
+            "required": True,
+        },
+        {
+            "id": "runtime_profile",
+            "label": "Choose preset and required axes, then write runtime profile",
+            "status": "done" if state["runtime_profile_exists"] else "pending",
+            "required": True,
+        },
+        {
+            "id": "market_data",
+            "label": "Configure required market_data baseline",
+            "status": "done" if state["market_data_ready"] else "pending",
+            "required": True,
+            "setup_urls": api_urls("market_data"),
+        },
+        {
+            "id": "optional_api_groups",
+            "label": "Confirm optional API groups: configure now, skip, or defer",
+            "status": "done" if all(item["complete"] for item in state.get("optional_api_status", {}).values()) else "pending",
+            "required": False,
+            "groups": {
+                group: {
+                    **state.get("optional_api_status", {}).get(group, {}),
+                    "setup_urls": api_urls(group),
+                }
+                for group in OPTIONAL_API_GROUPS
+            },
+        },
+        {
+            "id": "prewarm",
+            "label": "Run, skip, or defer prewarm/cache artifact setup",
+            "status": "done" if state["prewarm_ready"] else "pending",
+            "required": state.get("prewarm_required", False),
+            "decision": state.get("prewarm_decision", ""),
+        },
+        {
+            "id": "heartbeat",
+            "label": "Configure real heartbeat automation or choose manual/no heartbeat",
+            "status": "done" if state["heartbeat_configured"] else "pending",
+            "required": state.get("heartbeat_requested", False),
+            "decision": state.get("heartbeat_decision", ""),
+        },
+        {
+            "id": "portfolio",
+            "label": "Confirm portfolio source and ledger/import/read-only setup",
+            "status": "done" if state.get("portfolio_ready") else "pending",
+            "required": True,
+            "decision": state.get("portfolio_decision", ""),
+        },
+        {
+            "id": "final_review",
+            "label": "Review all configured or explicitly skipped choices",
+            "status": "done" if state["fully_initialized"] else "pending",
+            "required": True,
+        },
+    ]
+    return steps
+
+
+def _init_guide(command: str, payload: dict[str, Any]) -> dict[str, Any]:
+    workspace = _workspace(payload.get("workspace"))
+    _load_workspace_env(workspace)
+    profile_path = workspace / "config" / "runtime-profile.json"
+    profile = _load_json(profile_path, None)
+    choices = _load_choices(workspace)
+    guide = _load_json(_package_root() / "data" / "capability-guide.json", {})
+    state = _completion_state(profile if isinstance(profile, dict) else None, choices)
+    steps = _wizard_steps(profile if isinstance(profile, dict) else None, choices, guide if isinstance(guide, dict) else {})
+    current = next((step for step in steps if step.get("status") != "done"), None)
+    output = _base_output(command, payload)
+    output["source"] = [str(profile_path), str(_choices_path(workspace)), str(_package_root() / "data" / "capability-guide.json")]
+    output["sources"] = list(output["source"])
+    if not state["fully_initialized"]:
+        output["warnings"] = [
+            "initialization_incomplete",
+            *[f"pending:{item}" for item in state["pending_operational_choices"]],
+        ]
+    output["result"] = {
+        "initialized": state["fully_initialized"],
+        "initialization_state": state,
+        "steps": steps,
+        "current_step": current,
+        "choices_path": str(_choices_path(workspace)),
+        "profile_path": str(profile_path),
+        "instructions": [
+            "Guide the user one step at a time.",
+            "For each API group, explain what it unlocks, whether it is required, and where to configure credentials before asking for a key.",
+            "Record every configure/skip/defer decision with record-choice.",
+            "Do not claim initialization is complete until current_step is null and initialized is true.",
+        ],
+    }
+    return output
+
+
+def _record_choice(command: str, payload: dict[str, Any]) -> dict[str, Any]:
+    workspace = _workspace(payload.get("workspace"))
+    choice = str(payload.get("choice") or "").strip()
+    decision = str(payload.get("decision") or "").strip()
+    if not choice or not decision:
+        return _fail(command, payload, ["choice_and_decision_required"])
+    valid_choices = {"prewarm", "heartbeat", "portfolio", *OPTIONAL_API_GROUPS}
+    if choice not in valid_choices:
+        return _fail(command, payload, [f"invalid_choice:{choice}"])
+    choices = _load_choices(workspace)
+    choices.setdefault("choices", {})
+    choices["choices"][choice] = {
+        "decision": decision,
+        "decided_at": _now(),
+        "note": str(payload.get("note") or ""),
+    }
+    if payload.get("metadata") and isinstance(payload.get("metadata"), dict):
+        choices["choices"][choice]["metadata"] = payload["metadata"]
+    path = _save_choices(workspace, choices)
+    guide = _init_guide("init-guide", {"workspace": str(workspace)})
+    output = _base_output(command, payload)
+    output["artifacts"] = [str(path)]
+    output["source"] = [str(path)]
+    output["sources"] = [str(path)]
+    output["warnings"] = guide.get("warnings", [])
+    output["result"] = {
+        "recorded": True,
+        "choices_path": str(path),
+        "choice": choices["choices"][choice],
+        "guide": guide.get("result", {}),
+    }
+    return output
 
 
 def _init_status(command: str, payload: dict[str, Any]) -> dict[str, Any]:
@@ -412,8 +620,12 @@ def main() -> int:
 
     if args.command == "init-status":
         output = _init_status(args.command, payload)
+    elif args.command == "init-guide":
+        output = _init_guide(args.command, payload)
     elif args.command == "init-plan":
         output = _init_plan(args.command, payload)
+    elif args.command == "record-choice":
+        output = _record_choice(args.command, payload)
     elif args.command == "bootstrap-profile":
         output = _bootstrap_profile(args.command, payload)
     else:

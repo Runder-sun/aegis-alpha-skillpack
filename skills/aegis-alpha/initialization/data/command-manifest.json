@@ -31,6 +31,28 @@
       ]
     },
     {
+      "name": "init-guide",
+      "description": "Return the step-by-step initialization wizard state, current step, setup URLs, and pending choices.",
+      "status": "implemented",
+      "payload_schema": {
+        "type": "object",
+        "properties": {
+          "workspace": {"type": "string"}
+        }
+      },
+      "result_schema": {"$ref": "#/$defs/initialization_result"},
+      "example": {},
+      "upstream_dependencies": [
+        "runtime-profile.json",
+        "initialization-choices.json",
+        "capability-guide.json"
+      ],
+      "freshness_policy": "Guide state is derived from current runtime profile, recorded choices, and capability guide at command runtime.",
+      "error_behavior": [
+        "invalid_payload"
+      ]
+    },
+    {
       "name": "init-plan",
       "description": "Build a user-facing initialization plan for a preset without writing runtime state.",
       "status": "implemented",
@@ -53,6 +75,36 @@
       "error_behavior": [
         "capability_guide_missing",
         "invalid_preset",
+        "invalid_payload"
+      ]
+    },
+    {
+      "name": "record-choice",
+      "description": "Record a user-confirmed initialization choice such as configure, skip, defer, manual, or none for prewarm, heartbeat, portfolio, or optional API groups.",
+      "status": "implemented",
+      "payload_schema": {
+        "type": "object",
+        "required": ["choice", "decision"],
+        "properties": {
+          "choice": {
+            "type": "string",
+            "enum": ["prewarm", "heartbeat", "portfolio", "market_intel", "research_search", "document_parse", "external_push"]
+          },
+          "decision": {"type": "string"},
+          "note": {"type": "string"},
+          "metadata": {"type": "object"},
+          "workspace": {"type": "string"}
+        }
+      },
+      "result_schema": {"$ref": "#/$defs/initialization_result"},
+      "example": {"choice": "heartbeat", "decision": "manual", "note": "User chose not to configure recurring automation yet."},
+      "upstream_dependencies": [
+        "confirmed user choice"
+      ],
+      "freshness_policy": "Choice is recorded with command runtime timestamp.",
+      "error_behavior": [
+        "choice_and_decision_required",
+        "invalid_choice",
         "invalid_payload"
       ]
     },

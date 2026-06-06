@@ -20,6 +20,14 @@ Initialization is a skill-mediated conversation. The bootstrap script only
 writes a confirmed runtime profile; it does not replace user education or
 choice.
 
+Initialization must behave like a guided wizard, not a one-shot script. Start
+or resume by running `init-guide`. Handle only the current pending step, explain
+the capability and tradeoffs, ask the user for the exact choice, then record
+that choice with `record-choice` before moving to the next step. Continue until
+`init-guide.result.initialized=true`. If the user chooses "defer", record it,
+but do not call initialization complete; only an explicit configure/skip/manual
+terminal choice can close a step.
+
 Do not tell the user "initialization is complete" merely because
 `runtime-profile.json` exists. Full initialization is complete only after the
 runtime profile exists, the global `market_data` baseline is ready, and every
@@ -33,8 +41,8 @@ written, initialization incomplete" and list the pending choices.
 
 ## Required Conversation
 
-Before writing runtime state, explain what the skillpack can do and what each
-setup choice means. Then ask the user what to configure.
+Before writing or completing runtime state, explain what the skillpack can do
+and what each setup choice means. Then ask the user what to configure.
 
 1. Explain product experiences:
 
@@ -104,6 +112,21 @@ asking for a key. Use `capability-guide.json` `setup_urls` when present.
 assume they approved APIs, prewarm execution, recurring wakeups, portfolio
 ledger creation, or external push. Ask those items separately.
 
+7. Continue the wizard until all steps are closed:
+
+- Required `market_data` must be configured.
+- Optional API groups (`market_intel`, `research_search`, `document_parse`,
+  `external_push`) must be configured, explicitly skipped, or explicitly
+  disabled. If deferred, initialization remains incomplete.
+- Prewarm must be run, or explicitly skipped/deferred. If deferred,
+  initialization remains incomplete.
+- Heartbeat must be configured as a real supported automation, or explicitly
+  set to `manual`/`none`/`skip`. If deferred, initialization remains incomplete.
+- Portfolio source must be confirmed as `none`, `manual-ledger`,
+  `imported-file`, or `read-only-api`.
+- Only say initialization is complete when `init-guide` or `init-status`
+  returns `initialized=true`.
+
 ## Commands
 
 ### init-status
@@ -112,9 +135,19 @@ Treat `result.initialized` as full initialization status. Use
 `result.runtime_profile_exists` when you only mean that the runtime profile has
 been written.
 
+### init-guide
+Return the step-by-step initialization wizard state. Use this at the start of
+every initialization or reconfiguration turn. Ask the user only about
+`result.current_step`, not every remaining step at once.
+
 ### init-plan
 Return a setup explanation bundle for a preset without writing state. Use this
 before asking for API keys or automation choices.
+
+### record-choice
+Record a user-confirmed initialization choice. Use it for optional API groups,
+prewarm, heartbeat, portfolio source, and external push decisions. Do not
+invent a choice on behalf of the user.
 
 ### bootstrap-profile
 Write the confirmed runtime profile. Use only after the user has chosen the

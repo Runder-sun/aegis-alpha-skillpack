@@ -32,6 +32,12 @@ optional API groups, prewarm/cache, heartbeat automation, portfolio sources,
 and external push before writing runtime state. This aggregate wrapper should
 not duplicate or shortcut that conversation.
 
+For initialization or reconfiguration, start by running
+`aegis-alpha-initialization` `init-guide`. Guide the user through the current
+pending step only, record each explicit configure/skip/defer/manual decision
+with `record-choice`, and continue until `init-guide` or `init-status` returns
+`initialized=true`.
+
 Portfolio source describes where holdings and trade records come from:
 `none` means no known portfolio state, `manual-ledger` means a local
 user-maintained ledger, `imported-file` means a CSV/JSON-style position file,
