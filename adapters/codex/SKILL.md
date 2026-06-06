@@ -18,23 +18,15 @@ asks to initialize/configure Aegis Alpha, treat initialization as a
 skill-mediated workflow, not as a silent script default. The script is only the
 executor that writes the confirmed runtime profile.
 
-Do not run the bootstrap command until the user has explicitly selected a
-product experience or confirmed that the default `quick-research`
-initialization is acceptable. If the user only says "initialize" or
-"configure Aegis Alpha", ask for the intended product experience first. Do not
-choose `quick-research` on the user's behalf.
+Do not run the bootstrap command until the user has enough context to choose.
+If the user only says "initialize" or "configure Aegis Alpha", first explain
+the available capabilities, what each preset is for, which configuration items
+are required for initialization, which API groups or automations are optional,
+and what remains unavailable without them. Then ask the user what to configure.
 
-After the user confirms the product experience and any capability axes, run:
+Initialization conversation order:
 
-```bash
-python3 scripts/bootstrap_runtime.py --agent codex --preset <preset> --data-providers <provider_priority> --cache-policy <cache_policy> --manual-input <manual_input_policy> --portfolio-source <portfolio_source> --heartbeat <heartbeat_mode>
-```
-
-Use `--accept-defaults` only when the user explicitly confirms the default
-initialization without choosing every axis. Never use it as a convenience
-fallback.
-
-Ask the user for the intended product experience:
+1. Explain the five product experiences:
 
 - `quick-research`: one-off research and evidence collection.
 - `daily-desk`: morning/nightly market desk workflow.
@@ -42,7 +34,7 @@ Ask the user for the intended product experience:
 - `report-review`: evidence capture, report review, and outcome alignment.
 - `full-institutional`: the full research, market, portfolio, validation, and reporting loop.
 
-Then configure the orthogonal capability axes:
+2. Explain the required initialization choices:
 
 - `data-providers`: comma-separated priority such as
   `agent_native,skill_api`. Agent-native web and skill APIs are compatible;
@@ -54,6 +46,41 @@ Then configure the orthogonal capability axes:
   `read-only-api`.
 - `heartbeat`: `none`, `manual`, `daily-prewarm`, `market-heartbeat`, or
   `full`.
+
+3. Explain optional capability unlocks before asking for API keys:
+
+- `research_search` (`TAVILY_API_KEYS`, `QVERIS_API_KEY`): source discovery and search expansion. Optional when Codex can use native web/search tools.
+- `document_parse` (`MINERU_API_KEY`): large PDF/report parsing. Optional unless native file reading is insufficient.
+- `market_data` (`TUSHARE_TOKEN`, `FINNHUB_API_KEY`): quotes, bars, fundamentals, screening data, and quant inputs. Required for structured screening or quant validation unless the user provides a dataset/cache.
+- `market_intel` (`JIN10_API_KEY`, `TAVILY_API_KEYS`, `QVERIS_API_KEY`): provider-backed market news, macro events, and theme catalysts. Recommended for desk workflows.
+- `external_push` (`FEISHU_APP_ID`, `FEISHU_APP_SECRET`, `FEISHU_RECEIVE_ID`, `FEISHU_CHAT_ID`): confirmed Feishu delivery. Required only if the user explicitly wants external push.
+
+4. Explain operational options separately from the preset:
+
+- Prewarm/cache jobs prepare auditable evidence artifacts; choosing a preset
+  does not mean prewarm has already run.
+- Heartbeat/recurring workflows require Codex-native automation support or an
+  OS scheduler fallback; choosing `market-heartbeat` does not configure actual
+  wakeups by itself.
+- Portfolio setup requires a source (`manual-ledger`, `imported-file`, or
+  `read-only-api`) before portfolio review can rely on holdings.
+- External push is disabled unless the user explicitly enables it and provides
+  credentials.
+
+5. Ask the user to choose the preset and required axes. If they choose a preset
+such as `full-institutional`, do not assume they also approved APIs, prewarm
+runs, heartbeat automation, portfolio ledger creation, or external push. Ask
+about those items explicitly.
+
+After the user confirms the product experience and capability axes, run:
+
+```bash
+python3 scripts/bootstrap_runtime.py --agent codex --preset <preset> --data-providers <provider_priority> --cache-policy <cache_policy> --manual-input <manual_input_policy> --portfolio-source <portfolio_source> --heartbeat <heartbeat_mode>
+```
+
+Use `--accept-defaults` only when the user explicitly confirms the default
+initialization after hearing the capability/required/optional explanation.
+Never use it as a convenience fallback.
 
 Portfolio source describes where holdings and trade records come from:
 `none` means no known portfolio state, `manual-ledger` means a local

@@ -170,8 +170,22 @@ Existing Aegis Alpha targets are not overwritten unless `--force` is provided.
 ## Runtime Initialization
 
 Initialization is a skill-mediated workflow. The agent must ask the user to
-choose the intended product experience before writing a runtime profile, unless
-the user explicitly confirms the default `quick-research` initialization.
+choose the intended product experience and capability axes before writing a
+runtime profile.
+
+Before asking the user to configure API keys or automation, the agent should
+explain:
+
+- the five presets and what workflows they enable.
+- the required initialization axes: data providers, cache/prewarm policy,
+  manual-input policy, portfolio source, and heartbeat mode.
+- which API groups are recommended or required for specific capabilities.
+- what remains usable without APIs, prewarm artifacts, automation, portfolio
+  data, or external-push credentials.
+
+Choosing a preset such as `full-institutional` does not by itself authorize API
+setup, prewarm execution, recurring wakeups, portfolio ledger creation, or
+external push. Those items must be explained and confirmed separately.
 
 The bootstrap script is the deterministic executor for the confirmed choices:
 
@@ -181,8 +195,9 @@ python3 skills/aegis-alpha/scripts/bootstrap_runtime.py --agent codex --preset q
 
 The script refuses to write implicit `quick-research` defaults when `--preset`
 is omitted. Use `--accept-defaults` only after the user explicitly confirms the
-default initialization. `--dry-run` remains available for inspection without
-writing runtime state.
+default initialization after hearing the capability and dependency
+explanation. `--dry-run` remains available for inspection without writing
+runtime state.
 
 ## Validate
 
