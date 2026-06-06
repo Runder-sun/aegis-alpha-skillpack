@@ -11,8 +11,9 @@ skill output.
 
 ## Public Surface
 
-The default agent-facing surface is limited to 15 public skills:
+The default agent-facing surface is limited to 16 public skills:
 
+- `initialization`
 - `information-retrieval`
 - `market-data`
 - `market-intel`
@@ -109,7 +110,7 @@ repeatable data. For example, `quick-research` can often run with agent-native
 web/search tools, while structured screening or quant validation needs
 `market_data` API, cache, or a user-provided dataset.
 
-Presets are default operating profiles, not feature gates. All 15 public skills
+Presets are default operating profiles, not feature gates. All 16 public skills
 remain available after any preset is selected. If a user asks for work outside
 the selected preset, the conductor should route to the relevant public skill,
 resolve providers from the runtime profile, ask for missing inputs when needed,
@@ -169,9 +170,12 @@ Existing Aegis Alpha targets are not overwritten unless `--force` is provided.
 
 ## Runtime Initialization
 
-Initialization is a skill-mediated workflow. The agent must ask the user to
-choose the intended product experience and capability axes before writing a
-runtime profile.
+Initialization is a dedicated public skill-mediated workflow. On first use, if
+`runtime-profile.json` is missing, agents should route to
+`aegis-alpha-initialization` before any research, portfolio, pipeline, or
+automation skill. The initialization skill must ask the user to choose the
+intended product experience and capability axes before writing a runtime
+profile.
 
 Before asking the user to configure API keys or automation, the agent should
 explain:

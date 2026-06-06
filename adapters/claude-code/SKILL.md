@@ -14,73 +14,17 @@ automation configuration, and cross-skill investment workflows.
 ## First Run
 
 If `AEGIS_ALPHA_WORKSPACE/config/runtime-profile.json` is missing or the user
-asks to initialize/configure Aegis Alpha, treat initialization as a
-skill-mediated workflow, not as a silent script default. The script is only the
-executor that writes the confirmed runtime profile.
+asks to initialize/configure Aegis Alpha, route to the public
+`aegis-alpha-initialization` skill before any other public skill. Do not run
+research, portfolio, pipeline, automation, or provider commands until
+initialization has either completed or the user explicitly asks for a dry-run
+plan only.
 
-Do not run the bootstrap command until the user has enough context to choose.
-If the user only says "initialize" or "configure Aegis Alpha", first explain
-the available capabilities, what each preset is for, which configuration items
-are required for initialization, which API groups or automations are optional,
-and what remains unavailable without them. Then ask the user what to configure.
-
-Initialization conversation order:
-
-1. Explain the five product experiences:
-
-- `quick-research`: one-off research and evidence collection.
-- `daily-desk`: morning/nightly market desk workflow.
-- `portfolio-desk`: holdings, trade ledger, risk review, and advice tracking.
-- `report-review`: evidence capture, report review, and outcome alignment.
-- `full-institutional`: the full research, market, portfolio, validation, and reporting loop.
-
-2. Explain the required initialization choices:
-
-- `data-providers`: comma-separated priority such as
-  `agent_native,skill_api`. Agent-native web and skill APIs are compatible;
-  they are not mutually exclusive.
-- `cache-policy`: `none`, `read-if-fresh`, `cache-first`,
-  `refresh-if-stale`, or `prewarm-required`.
-- `manual-input`: `ask-when-missing` or `disabled`.
-- `portfolio-source`: `none`, `manual-ledger`, `imported-file`, or
-  `read-only-api`.
-- `heartbeat`: `none`, `manual`, `daily-prewarm`, `market-heartbeat`, or
-  `full`.
-
-3. Explain optional capability unlocks before asking for API keys:
-
-- `research_search` (`TAVILY_API_KEYS`, `QVERIS_API_KEY`): source discovery and search expansion. Optional when Claude Code can use native web/search tools.
-- `document_parse` (`MINERU_API_KEY`): large PDF/report parsing. Optional unless native file reading is insufficient.
-- `market_data` (`TUSHARE_TOKEN`, `FINNHUB_API_KEY`): quotes, bars, fundamentals, screening data, and quant inputs. Required for structured screening or quant validation unless the user provides a dataset/cache.
-- `market_intel` (`JIN10_API_KEY`, `TAVILY_API_KEYS`, `QVERIS_API_KEY`): provider-backed market news, macro events, and theme catalysts. Recommended for desk workflows.
-- `external_push` (`FEISHU_APP_ID`, `FEISHU_APP_SECRET`, `FEISHU_RECEIVE_ID`, `FEISHU_CHAT_ID`): confirmed Feishu delivery. Required only if the user explicitly wants external push.
-
-4. Explain operational options separately from the preset:
-
-- Prewarm/cache jobs prepare auditable evidence artifacts; choosing a preset
-  does not mean prewarm has already run.
-- Heartbeat/recurring workflows require Claude Code-native automation support
-  or an OS scheduler fallback; choosing `market-heartbeat` does not configure
-  actual wakeups by itself.
-- Portfolio setup requires a source (`manual-ledger`, `imported-file`, or
-  `read-only-api`) before portfolio review can rely on holdings.
-- External push is disabled unless the user explicitly enables it and provides
-  credentials.
-
-5. Ask the user to choose the preset and required axes. If they choose a preset
-such as `full-institutional`, do not assume they also approved APIs, prewarm
-runs, heartbeat automation, portfolio ledger creation, or external push. Ask
-about those items explicitly.
-
-After the user confirms the product experience and capability axes, run:
-
-```bash
-python3 scripts/bootstrap_runtime.py --agent claude-code --preset <preset> --data-providers <provider_priority> --cache-policy <cache_policy> --manual-input <manual_input_policy> --portfolio-source <portfolio_source> --heartbeat <heartbeat_mode>
-```
-
-Use `--accept-defaults` only when the user explicitly confirms the default
-initialization after hearing the capability/required/optional explanation.
-Never use it as a convenience fallback.
+`aegis-alpha-initialization` owns the first-run conversation: explaining
+capabilities, required setup axes, optional API groups, prewarm/cache,
+heartbeat automation, portfolio sources, and external push before writing
+runtime state. This aggregate wrapper should not duplicate or shortcut that
+conversation.
 
 Portfolio source describes where holdings and trade records come from:
 `none` means no known portfolio state, `manual-ledger` means a local
@@ -110,6 +54,7 @@ explaining the investment capabilities they unlock.
 
 Prefer the individual native public skills when the request clearly matches one area:
 
+- `aegis-alpha-initialization`
 - `aegis-alpha-information-retrieval`
 - `aegis-alpha-market-data`
 - `aegis-alpha-market-intel`

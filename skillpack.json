@@ -5,8 +5,9 @@
   "private": false,
   "description": "Research-only multi-agent investment skillpack with fail-closed data, provenance, screening, research, paper planning, portfolio review, advice lifecycle, and report evolution workflows.",
   "canonical_source": "skills/aegis-alpha",
-  "public_skill_limit": 15,
+  "public_skill_limit": 16,
   "public_skills": [
+    "initialization",
     "information-retrieval",
     "market-data",
     "market-intel",
