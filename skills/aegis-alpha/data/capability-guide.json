@@ -49,6 +49,14 @@
     }
   },
   "api_groups": {
+    "global_market_data": {
+      "label": "Global required market data baseline",
+      "env": ["TUSHARE_TOKEN", "LONGPORT_APP_KEY", "LONGPORT_APP_SECRET", "LONGPORT_ACCESS_TOKEN"],
+      "fallback_env": ["FINNHUB_API_KEY"],
+      "unlocks": ["A-share market data via $tushare", "overseas market data via $longbridge / LongPort", "quotes", "daily bars", "historical series", "fundamentals", "screening data", "quant inputs"],
+      "required_when": "Always required before Aegis Alpha is considered fully initialized.",
+      "without_api": "Initialization must treat market data as missing. Do not run market-sensitive workflows as fully configured; only provide setup guidance or fail closed."
+    },
     "research_search": {
       "label": "Research search and source discovery",
       "env": ["TAVILY_API_KEYS", "QVERIS_API_KEY"],
@@ -65,10 +73,11 @@
     },
     "market_data": {
       "label": "Structured market data",
-      "env": ["TUSHARE_TOKEN", "FINNHUB_API_KEY"],
-      "unlocks": ["quotes", "daily bars", "historical series", "fundamentals", "screening data", "quant inputs"],
-      "required_when": "The task needs structured prices, time series, fundamentals, factor data, or repeatable market datasets.",
-      "without_api": "Do not fabricate structured data. Use user-provided files/cache, or fail closed for data-dependent analysis."
+      "env": ["TUSHARE_TOKEN", "LONGPORT_APP_KEY", "LONGPORT_APP_SECRET", "LONGPORT_ACCESS_TOKEN"],
+      "fallback_env": ["FINNHUB_API_KEY"],
+      "unlocks": ["A-share market data via $tushare", "overseas market data via $longbridge / LongPort", "quotes", "daily bars", "historical series", "fundamentals", "screening data", "quant inputs"],
+      "required_when": "Always required as the global market-data baseline. A-share/China data should follow the $tushare skill token convention (`TUSHARE_TOKEN`); overseas market data should prefer the $longbridge / LongPort credential convention (`LONGPORT_APP_KEY`, `LONGPORT_APP_SECRET`, `LONGPORT_ACCESS_TOKEN`). `FINNHUB_API_KEY` is only a fallback.",
+      "without_api": "Do not fabricate structured data. Initialization is incomplete until market_data is configured; market-sensitive workflows must fail closed or stay in setup guidance mode."
     },
     "market_intel": {
       "label": "Market news and macro intelligence",
@@ -98,17 +107,17 @@
       "label": "One-off investment research",
       "public_skills": ["information-retrieval", "equity-research", "quality-gate"],
       "agent_native_fit": "strong when the agent has web/search/file tools",
-      "api_groups": ["research_search", "document_parse"],
-      "api_required": false,
-      "without_api": "Usable with agent-native tools or user-provided sources."
+      "api_groups": ["market_data", "research_search", "document_parse"],
+      "api_required": true,
+      "without_api": "Only setup guidance or source-reading dry runs are allowed until the global market_data baseline is configured."
     },
     "market_desk": {
       "label": "Market desk, macro, themes, and news",
       "public_skills": ["market-intel", "macro-regime", "theme-cycle", "execution-automation"],
       "agent_native_fit": "useful for verification and fresh source inspection",
       "api_groups": ["market_data", "market_intel", "research_search"],
-      "api_required": false,
-      "without_api": "Can run source-backed research, but structured desk data and repeatability are limited."
+      "api_required": true,
+      "without_api": "Requires the global market_data baseline; without it, stay in setup guidance or fail closed."
     },
     "structured_screening_and_quant": {
       "label": "Structured screening and quant validation",
@@ -123,8 +132,8 @@
       "public_skills": ["portfolio-ops", "advice-lifecycle", "trade-planning"],
       "agent_native_fit": "strong for analyzing provided ledgers, holdings, and reports",
       "api_groups": ["market_data"],
-      "api_required": false,
-      "without_api": "Usable with manual ledger or imported files; market marks require cache, files, or market-data API."
+      "api_required": true,
+      "without_api": "Manual ledgers can be inspected, but portfolio marks and risk review require the global market_data baseline."
     },
     "report_review": {
       "label": "Report review and outcome alignment",
@@ -145,29 +154,34 @@
   },
   "preset_api_guidance": {
     "quick-research": {
+      "required": ["market_data"],
       "recommended": ["research_search"],
       "optional": ["document_parse"],
-      "message": "Start without APIs if the current agent has web/search/file tools. Add search or parsing APIs only when agent-native evidence is insufficient."
+      "message": "Market data is globally required. Configure Tushare for A-shares and LongBridge/LongPort for overseas markets first; add search or parsing APIs when agent-native evidence is insufficient."
     },
     "daily-desk": {
-      "recommended": ["market_data", "market_intel"],
+      "required": ["market_data"],
+      "recommended": ["market_intel"],
       "optional": ["research_search"],
-      "message": "Market desk workflows get much better with structured market data and news APIs, but can still run source-backed research without them."
+      "message": "Market desk workflows require the market_data baseline; market_intel is recommended for provider-backed news and macro events."
     },
     "portfolio-desk": {
-      "recommended": ["market_data"],
+      "required": ["market_data"],
+      "recommended": [],
       "optional": [],
-      "message": "Portfolio review needs holdings from manual-ledger, imported-file, or read-only-api. Market-data API is recommended for marks and time-series context."
+      "message": "Portfolio review needs holdings from manual-ledger, imported-file, or read-only-api, and market_data is required for marks and time-series context."
     },
     "report-review": {
+      "required": ["market_data"],
       "recommended": ["document_parse", "research_search"],
       "optional": [],
-      "message": "Report review can start with local reports and agent-native reading; parsing/search APIs improve coverage for complex documents and evidence checks."
+      "message": "Report review can inspect local reports, but Aegis Alpha still requires the market_data baseline before being fully initialized. Parsing/search APIs improve evidence coverage."
     },
     "full-institutional": {
-      "recommended": ["market_data", "market_intel", "research_search", "document_parse"],
+      "required": ["market_data"],
+      "recommended": ["market_intel", "research_search", "document_parse"],
       "optional": ["external_push"],
-      "message": "Full workflow can install and start without APIs, but institutional-grade repeatability requires structured market data, market intelligence, search, parsing, and prewarm artifacts."
+      "message": "Full workflow requires the market_data baseline, then recommends market intelligence, search, parsing, and prewarm artifacts for repeatability."
     }
   }
 }

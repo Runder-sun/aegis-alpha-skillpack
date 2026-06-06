@@ -46,15 +46,22 @@ setup choice means. Then ask the user what to configure.
 - `heartbeat`: `none`, `manual`, `daily-prewarm`, `market-heartbeat`, or
   `full`.
 
-3. Explain optional capability unlocks before asking for API keys:
+3. Explain the global required API group before optional capability unlocks:
+
+- `market_data` is globally required before Aegis Alpha is considered fully
+  initialized. For A-share and China market data, follow the existing
+  `$tushare` convention and configure `TUSHARE_TOKEN`. For overseas market
+  data, prefer the existing `$longbridge` / LongPort convention and configure
+  `LONGPORT_APP_KEY`, `LONGPORT_APP_SECRET`, and `LONGPORT_ACCESS_TOKEN`.
+  `FINNHUB_API_KEY` is only a fallback when LongBridge/LongPort is unavailable.
+  Without this baseline, stay in setup guidance or fail closed.
+
+4. Explain optional capability unlocks before asking for other API keys:
 
 - `research_search` (`TAVILY_API_KEYS`, `QVERIS_API_KEY`): source discovery
   and search expansion. Optional when the agent has native web/search tools.
 - `document_parse` (`MINERU_API_KEY`): large PDF/report parsing. Optional
   unless native file reading is insufficient.
-- `market_data` (`TUSHARE_TOKEN`, `FINNHUB_API_KEY`): quotes, bars,
-  fundamentals, screening data, and quant inputs. Required for structured
-  screening or quant validation unless the user provides a dataset/cache.
 - `market_intel` (`JIN10_API_KEY`, `TAVILY_API_KEYS`, `QVERIS_API_KEY`):
   provider-backed market news, macro events, and theme catalysts. Recommended
   for desk workflows.
@@ -62,7 +69,7 @@ setup choice means. Then ask the user what to configure.
   `FEISHU_RECEIVE_ID`, `FEISHU_CHAT_ID`): confirmed Feishu delivery. Required
   only if the user explicitly wants external push.
 
-4. Explain operational choices separately from the preset:
+5. Explain operational choices separately from the preset:
 
 - Prewarm/cache jobs prepare auditable evidence artifacts; choosing a preset
   does not mean prewarm has run.
@@ -73,7 +80,7 @@ setup choice means. Then ask the user what to configure.
 - External push is disabled unless the user explicitly enables it and provides
   credentials.
 
-5. Ask for explicit choices. If the user chooses `full-institutional`, do not
+6. Ask for explicit choices. If the user chooses `full-institutional`, do not
 assume they approved APIs, prewarm execution, recurring wakeups, portfolio
 ledger creation, or external push. Ask those items separately.
 
@@ -103,4 +110,6 @@ python3 scripts/dispatch.py --command bootstrap-profile --payload '{"user_confir
 - `decision_allowed` remains `false`.
 - Do not treat a preset as authorization for optional API setup, prewarm runs,
   wakeups, portfolio ledger creation, or external push.
+- Do not write a full runtime profile until the global `market_data` baseline
+  is configured.
 - Missing critical setup choices must fail closed by asking the user.

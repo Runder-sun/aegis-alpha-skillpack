@@ -29,8 +29,11 @@ cache/prewarm and user-supplied evidence are separate policies, not providers.
 
 Before asking users for API keys, explain the skillpack's investment
 capabilities from `data/capability-guide.json` or the generated
-`profile.onboarding` block. API keys are capability-specific evidence feeds,
-not a global prerequisite for installing or starting the skillpack.
+`profile.onboarding` block. The `market_data` baseline is a global
+initialization requirement: use `TUSHARE_TOKEN` for A-share/China data via
+`$tushare`, prefer LongBridge/LongPort credentials for overseas data via
+`$longbridge`, and treat `FINNHUB_API_KEY` as an overseas fallback. Other API
+keys are capability-specific evidence feeds or optional integrations.
 
 Presets are default operating profiles, not feature gates. All public skills
 remain available after any preset. Requests outside the selected preset should
@@ -42,6 +45,7 @@ missing-input prompts, and fail-closed safety applied as usual.
 Prefer these high-level skills when asking an agent to work on investment
 research, planning, reporting, or workflow orchestration:
 
+- `initialization`
 - `information-retrieval`
 - `market-data`
 - `market-intel`

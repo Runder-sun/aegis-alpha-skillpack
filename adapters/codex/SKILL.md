@@ -21,10 +21,10 @@ initialization has either completed or the user explicitly asks for a dry-run
 plan only.
 
 `aegis-alpha-initialization` owns the first-run conversation: explaining
-capabilities, required setup axes, optional API groups, prewarm/cache,
-heartbeat automation, portfolio sources, and external push before writing
-runtime state. This aggregate wrapper should not duplicate or shortcut that
-conversation.
+capabilities, the global required `market_data` baseline, required setup axes,
+optional API groups, prewarm/cache, heartbeat automation, portfolio sources,
+and external push before writing runtime state. This aggregate wrapper should
+not duplicate or shortcut that conversation.
 
 Portfolio source describes where holdings and trade records come from:
 `none` means no known portfolio state, `manual-ledger` means a local
@@ -44,10 +44,12 @@ needed, and fail closed if critical evidence is unavailable.
 
 Before asking the user to configure API keys, read
 `../.aegis-alpha-core/data/capability-guide.json` or the generated
-`profile.onboarding` block. Explain what the package can do without APIs, what
-Codex can cover with agent-native tools, which API groups are recommended for
-the selected preset, and which specific tasks require APIs, cache, or
-user-provided evidence. Do not ask the user to choose raw API names before
+`profile.onboarding` block. Explain that `market_data` is globally required:
+`TUSHARE_TOKEN` for A-share/China data via `$tushare`, and LongBridge/LongPort
+credentials for overseas data via `$longbridge` (`LONGPORT_APP_KEY`,
+`LONGPORT_APP_SECRET`, `LONGPORT_ACCESS_TOKEN`), with `FINNHUB_API_KEY` only as
+fallback. Then explain which other API groups are recommended or optional for
+the selected preset. Do not ask the user to choose raw API names before
 explaining the investment capabilities they unlock.
 
 ## Public Surface

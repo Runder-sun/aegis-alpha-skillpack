@@ -29,6 +29,10 @@ All commands return an initialization envelope:
 ## Safety Rules
 
 - `bootstrap-profile` must require `user_confirmed=true`.
+- `bootstrap-profile` must fail closed when the global `market_data` baseline
+  is missing: `TUSHARE_TOKEN` for A-share/China data plus LongBridge/LongPort
+  credentials (`LONGPORT_APP_KEY`, `LONGPORT_APP_SECRET`,
+  `LONGPORT_ACCESS_TOKEN`) for overseas data, or `FINNHUB_API_KEY` as fallback.
 - A preset choice does not imply approval for API credentials, prewarm
   execution, recurring wakeups, portfolio ledger creation, or external push.
 - Missing required axis values must return `ok=false`.

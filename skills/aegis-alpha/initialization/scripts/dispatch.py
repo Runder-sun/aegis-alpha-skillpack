@@ -70,6 +70,12 @@ REQUIRED_AXES = {
     "heartbeat": "Requested recurring workflow mode; does not configure wakeups by itself.",
 }
 
+MARKET_DATA_REQUIRED_ENV = {
+    "a_share": ["TUSHARE_TOKEN"],
+    "overseas_primary": ["LONGPORT_APP_KEY", "LONGPORT_APP_SECRET", "LONGPORT_ACCESS_TOKEN"],
+    "overseas_fallback": ["FINNHUB_API_KEY"],
+}
+
 
 def _workspace(raw: str | None = None) -> Path:
     if raw:
@@ -154,11 +160,11 @@ def _api_status() -> dict[str, Any]:
     groups = {
         "research_search": ["TAVILY_API_KEYS", "QVERIS_API_KEY"],
         "document_parse": ["MINERU_API_KEY"],
-        "market_data": ["TUSHARE_TOKEN", "FINNHUB_API_KEY"],
+        "market_data": ["TUSHARE_TOKEN", "LONGPORT_APP_KEY", "LONGPORT_APP_SECRET", "LONGPORT_ACCESS_TOKEN", "FINNHUB_API_KEY"],
         "market_intel": ["JIN10_API_KEY", "TAVILY_API_KEYS", "QVERIS_API_KEY"],
         "external_push": ["FEISHU_APP_ID", "FEISHU_APP_SECRET", "FEISHU_RECEIVE_ID", "FEISHU_CHAT_ID"],
     }
-    return {
+    status = {
         group: {
             "configured": any(os.environ.get(name) for name in names),
             "env": names,
@@ -166,6 +172,36 @@ def _api_status() -> dict[str, Any]:
             "missing_env": [name for name in names if not os.environ.get(name)],
         }
         for group, names in groups.items()
+    }
+    status["market_data"].update(_market_data_status())
+    return status
+
+
+def _all_present(names: list[str]) -> bool:
+    return all(os.environ.get(name) for name in names)
+
+
+def _market_data_status() -> dict[str, Any]:
+    a_share_configured = _all_present(MARKET_DATA_REQUIRED_ENV["a_share"])
+    overseas_primary_configured = _all_present(MARKET_DATA_REQUIRED_ENV["overseas_primary"])
+    overseas_fallback_configured = _all_present(MARKET_DATA_REQUIRED_ENV["overseas_fallback"])
+    missing = [
+        name for name in MARKET_DATA_REQUIRED_ENV["a_share"] if not os.environ.get(name)
+    ]
+    if not (overseas_primary_configured or overseas_fallback_configured):
+        missing.extend(MARKET_DATA_REQUIRED_ENV["overseas_primary"])
+    return {
+        "configured": a_share_configured and (overseas_primary_configured or overseas_fallback_configured),
+        "required": True,
+        "required_env": MARKET_DATA_REQUIRED_ENV,
+        "missing_required_env": missing,
+        "preferred_overseas_configured": overseas_primary_configured,
+        "fallback_configured": overseas_fallback_configured,
+        "routing": {
+            "a_share": "$tushare via TUSHARE_TOKEN",
+            "overseas_primary": "$longbridge / LongPort via LONGPORT_APP_KEY, LONGPORT_APP_SECRET, LONGPORT_ACCESS_TOKEN",
+            "overseas_fallback": "FINNHUB_API_KEY only when LongBridge/LongPort is unavailable",
+        },
     }
 
 
@@ -187,6 +223,12 @@ def _init_plan(command: str, payload: dict[str, Any]) -> dict[str, Any]:
         "capabilities": guide.get("capabilities", {}) if isinstance(guide, dict) else {},
         "preset_api_guidance": guide.get("preset_api_guidance", {}) if isinstance(guide, dict) else {},
         "current_api_status": _api_status(),
+        "global_required_api_groups": ["market_data"],
+        "global_required_market_data": {
+            "a_share": "$tushare via TUSHARE_TOKEN",
+            "overseas_primary": "$longbridge / LongPort via LONGPORT_APP_KEY, LONGPORT_APP_SECRET, LONGPORT_ACCESS_TOKEN",
+            "overseas_fallback": "FINNHUB_API_KEY only when LongBridge/LongPort is unavailable",
+        },
         "operational_options": {
             "prewarm": "Prewarm/cache artifacts must be run separately and are not created by choosing a preset.",
             "heartbeat": "Heartbeat requires native automation support or an OS scheduler fallback; preset choice does not configure wakeups.",
@@ -200,6 +242,7 @@ def _init_plan(command: str, payload: dict[str, Any]) -> dict[str, Any]:
             "manual_input",
             "portfolio_source",
             "heartbeat",
+            "market_data baseline: TUSHARE_TOKEN plus LongBridge/LongPort credentials, or Finnhub fallback for overseas data",
             "whether to configure recommended API groups",
             "whether to run prewarm jobs",
             "whether to configure real automation",
@@ -213,6 +256,10 @@ def _init_plan(command: str, payload: dict[str, Any]) -> dict[str, Any]:
 def _bootstrap_profile(command: str, payload: dict[str, Any]) -> dict[str, Any]:
     if payload.get("user_confirmed") is not True:
         return _fail(command, payload, ["user_confirmation_missing"])
+    market_data_status = _market_data_status()
+    if not market_data_status["configured"]:
+        missing = market_data_status["missing_required_env"]
+        return _fail(command, payload, [f"market_data_required_missing:{name}" for name in missing])
     required = ["preset", "data_providers", "cache_policy", "manual_input", "portfolio_source", "heartbeat"]
     missing = [key for key in required if not payload.get(key)]
     if missing:

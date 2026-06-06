@@ -124,9 +124,15 @@ AGENTS = ("auto", "codex", "claude-code", "hermes", "openclaw", "unknown")
 API_ENV_GROUPS = {
     "research_search": ("TAVILY_API_KEYS", "QVERIS_API_KEY"),
     "document_parse": ("MINERU_API_KEY",),
-    "market_data": ("TUSHARE_TOKEN", "FINNHUB_API_KEY"),
+    "market_data": ("TUSHARE_TOKEN", "LONGPORT_APP_KEY", "LONGPORT_APP_SECRET", "LONGPORT_ACCESS_TOKEN", "FINNHUB_API_KEY"),
     "market_intel": ("JIN10_API_KEY", "TAVILY_API_KEYS", "QVERIS_API_KEY"),
     "external_push": ("FEISHU_APP_ID", "FEISHU_APP_SECRET", "FEISHU_RECEIVE_ID", "FEISHU_CHAT_ID"),
+}
+
+MARKET_DATA_REQUIRED_ENV = {
+    "a_share": ("TUSHARE_TOKEN",),
+    "overseas_primary": ("LONGPORT_APP_KEY", "LONGPORT_APP_SECRET", "LONGPORT_ACCESS_TOKEN"),
+    "overseas_fallback": ("FINNHUB_API_KEY",),
 }
 
 
@@ -190,6 +196,27 @@ def _api_capabilities() -> dict[str, Any]:
             "present_env": present,
             "missing_env": [name for name in names if name not in present],
         }
+    a_share_present = all(os.environ.get(name) for name in MARKET_DATA_REQUIRED_ENV["a_share"])
+    overseas_primary_present = all(os.environ.get(name) for name in MARKET_DATA_REQUIRED_ENV["overseas_primary"])
+    overseas_fallback_present = all(os.environ.get(name) for name in MARKET_DATA_REQUIRED_ENV["overseas_fallback"])
+    groups["market_data"].update({
+        "configured": a_share_present and (overseas_primary_present or overseas_fallback_present),
+        "required": True,
+        "required_env": {
+            "a_share": list(MARKET_DATA_REQUIRED_ENV["a_share"]),
+            "overseas_primary": list(MARKET_DATA_REQUIRED_ENV["overseas_primary"]),
+            "overseas_fallback": list(MARKET_DATA_REQUIRED_ENV["overseas_fallback"]),
+        },
+        "missing_required_env": [
+            name for name in MARKET_DATA_REQUIRED_ENV["a_share"] if not os.environ.get(name)
+        ] + (
+            []
+            if overseas_primary_present or overseas_fallback_present
+            else list(MARKET_DATA_REQUIRED_ENV["overseas_primary"])
+        ),
+        "fallback_configured": overseas_fallback_present,
+        "preferred_overseas_configured": overseas_primary_present,
+    })
     return groups
 
 
@@ -343,7 +370,7 @@ def _next_actions(workflow_scope: str, provider_priority: list[str], cache_polic
             if isinstance(plan, list):
                 missing = [str(item.get("group")) for item in plan if isinstance(item, dict) and not item.get("configured")]
         if missing:
-            actions.append(f"Review onboarding.preset_api_plan before asking for API keys; missing recommended or optional API groups for this preset: {', '.join(missing)}.")
+            actions.append(f"Review onboarding.preset_api_plan before asking for API keys; missing required, recommended, or optional API groups for this preset: {', '.join(missing)}.")
         else:
             actions.append("No skill API groups are configured. The package can still start with agent-native tools, cache, or user-supplied evidence when the requested capability allows it.")
     if cache_policy in {"cache-first", "refresh-if-stale", "prewarm-required"} and not prewarm.get("available"):
@@ -369,18 +396,23 @@ def _api_readiness(guide: dict[str, Any], preset: str, provider_priority: list[s
         group for group, status in api.items() if isinstance(status, dict) and status.get("configured")
     )
     plan: list[dict[str, Any]] = []
-    for priority in ("recommended", "optional"):
+    for priority in ("required", "recommended", "optional"):
         for group in selected.get(priority, []) if isinstance(selected.get(priority), list) else []:
             meta = api_groups.get(group) if isinstance(api_groups.get(group), dict) else {}
             status = api.get(group) if isinstance(api.get(group), dict) else {}
             env = meta.get("env") if isinstance(meta.get("env"), list) else []
+            fallback_env = meta.get("fallback_env") if isinstance(meta.get("fallback_env"), list) else []
             plan.append({
                 "group": group,
                 "priority": priority,
                 "configured": bool(status.get("configured")),
                 "env": env,
+                "fallback_env": fallback_env,
+                "required": priority == "required" or bool(status.get("required")),
+                "required_env": status.get("required_env", {}),
                 "present_env": status.get("present_env", []),
                 "missing_env": status.get("missing_env", env),
+                "missing_required_env": status.get("missing_required_env", []),
                 "unlocks": meta.get("unlocks", []),
                 "required_when": meta.get("required_when", ""),
                 "without_api": meta.get("without_api", ""),
@@ -404,7 +436,9 @@ def _api_readiness(guide: dict[str, Any], preset: str, provider_priority: list[s
     return {
         "guide_path": str(_skillpack_root() / "data" / "capability-guide.json"),
         "agent": agent,
-        "can_start_without_api": True,
+        "can_start_without_api": False,
+        "global_required_api_groups": ["market_data"],
+        "market_data_required": True,
         "data_provider_priority": provider_priority,
         "skill_api_enabled": "skill_api" in provider_priority,
         "configured_api_groups": configured_groups,
@@ -414,9 +448,10 @@ def _api_readiness(guide: dict[str, Any], preset: str, provider_priority: list[s
         "agent_native_can_do": agent_native.get("can_do", []),
         "agent_native_cannot_guarantee": agent_native.get("cannot_guarantee", []),
         "user_explanation": [
-            "Aegis Alpha can install and start without API keys.",
-            "APIs are capability-specific accelerators and evidence feeds, not a prerequisite for every skill.",
-            "Use preset_api_plan to explain which API groups improve the selected preset and api_required_for_specific_tasks to explain what cannot run safely without matching APIs.",
+            "Aegis Alpha requires a configured market_data baseline before full initialization.",
+            "For A-share and China data, follow the $tushare convention: TUSHARE_TOKEN.",
+            "For overseas market data, prefer the $longbridge / LongPort convention: LONGPORT_APP_KEY, LONGPORT_APP_SECRET, LONGPORT_ACCESS_TOKEN. FINNHUB_API_KEY is a fallback only.",
+            "Other API groups are capability-specific accelerators and evidence feeds.",
         ],
     }
 

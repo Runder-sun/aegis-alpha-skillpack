@@ -88,7 +88,7 @@ Do not ask users to guess API names. On first run, the agent should read
 `data/capability-guide.json` or inspect `profile.onboarding` from
 `scripts/bootstrap_runtime.py`. That onboarding block tells the agent:
 
-- what Aegis Alpha can start doing without API keys.
+- why Aegis Alpha requires a global `market_data` baseline before full initialization.
 - what the current agent can usually cover with `agent_native` tools.
 - which API groups are recommended for the selected preset.
 - which specific tasks require matching APIs, cache, or user-provided evidence.
@@ -100,15 +100,17 @@ API groups are capability-specific:
 |---|---|---|---|
 | `research_search` | `TAVILY_API_KEYS`, `QVERIS_API_KEY` | source discovery and search expansion | current agent lacks usable web/search tools or the user requests API-backed search |
 | `document_parse` | `MINERU_API_KEY` | complex PDF/report parsing | agent-native file reading cannot parse the document reliably |
-| `market_data` | `TUSHARE_TOKEN`, `FINNHUB_API_KEY` | quotes, historical bars, fundamentals, screening and quant inputs | the task needs structured market datasets |
+| `market_data` | `TUSHARE_TOKEN`, `LONGPORT_APP_KEY`, `LONGPORT_APP_SECRET`, `LONGPORT_ACCESS_TOKEN`; fallback `FINNHUB_API_KEY` | A-share data via `$tushare`, overseas data via `$longbridge` / LongPort, quotes, historical bars, fundamentals, screening and quant inputs | always required before full initialization |
 | `market_intel` | `JIN10_API_KEY`, `TAVILY_API_KEYS`, `QVERIS_API_KEY` | news, macro events, theme catalysts | the task needs provider-backed market intelligence |
 | `external_push` | `FEISHU_APP_ID`, `FEISHU_APP_SECRET`, `FEISHU_RECEIVE_ID`, `FEISHU_CHAT_ID` | confirmed Feishu delivery | the user explicitly enables confirmed external push |
 
-The full skillpack can install and start without API keys. APIs are not a
-global prerequisite; they are evidence feeds for capabilities that need
-repeatable data. For example, `quick-research` can often run with agent-native
-web/search tools, while structured screening or quant validation needs
-`market_data` API, cache, or a user-provided dataset.
+The full skillpack can install without API keys, but it is not fully
+initialized until the global `market_data` baseline is configured. For A-share
+and China market data, use the existing `$tushare` convention:
+`TUSHARE_TOKEN`. For overseas market data, prefer the existing `$longbridge` /
+LongPort convention: `LONGPORT_APP_KEY`, `LONGPORT_APP_SECRET`, and
+`LONGPORT_ACCESS_TOKEN`; `FINNHUB_API_KEY` is only a fallback. Other API groups
+remain capability-specific accelerators or optional integrations.
 
 Presets are default operating profiles, not feature gates. All 16 public skills
 remain available after any preset is selected. If a user asks for work outside
@@ -181,6 +183,9 @@ Before asking the user to configure API keys or automation, the agent should
 explain:
 
 - the five presets and what workflows they enable.
+- the global required `market_data` baseline: `TUSHARE_TOKEN` for A-share data
+  plus LongBridge/LongPort credentials for overseas data, with Finnhub only as
+  fallback.
 - the required initialization axes: data providers, cache/prewarm policy,
   manual-input policy, portfolio source, and heartbeat mode.
 - which API groups are recommended or required for specific capabilities.
