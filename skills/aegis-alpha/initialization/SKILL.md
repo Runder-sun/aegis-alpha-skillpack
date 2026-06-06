@@ -20,6 +20,17 @@ Initialization is a skill-mediated conversation. The bootstrap script only
 writes a confirmed runtime profile; it does not replace user education or
 choice.
 
+Do not tell the user "initialization is complete" merely because
+`runtime-profile.json` exists. Full initialization is complete only after the
+runtime profile exists, the global `market_data` baseline is ready, and every
+operational choice required by the selected preset has either been explicitly
+configured or explicitly declined by the user. For `prewarm-required`, a
+prewarm artifact must exist or the user must explicitly choose to defer/skip
+prewarm. For `market-heartbeat`, `daily-prewarm`, or `full` heartbeat, the
+agent must configure a real supported automation or the user must explicitly
+choose manual/no heartbeat. Otherwise report the state as "runtime profile
+written, initialization incomplete" and list the pending choices.
+
 ## Required Conversation
 
 Before writing runtime state, explain what the skillpack can do and what each
@@ -97,6 +108,9 @@ ledger creation, or external push. Ask those items separately.
 
 ### init-status
 Inspect whether a runtime profile exists and summarize current state.
+Treat `result.initialized` as full initialization status. Use
+`result.runtime_profile_exists` when you only mean that the runtime profile has
+been written.
 
 ### init-plan
 Return a setup explanation bundle for a preset without writing state. Use this

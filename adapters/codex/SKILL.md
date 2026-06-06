@@ -20,6 +20,12 @@ research, portfolio, pipeline, automation, or provider commands until
 initialization has either completed or the user explicitly asks for a dry-run
 plan only.
 
+Do not equate "runtime profile exists" with "initialization complete." For
+`prewarm-required`, prewarm must either be run or explicitly deferred/skipped by
+the user. For requested heartbeat modes, a real supported automation must be
+configured or the user must explicitly choose manual/no heartbeat. Otherwise
+describe the state as runtime profile written but initialization incomplete.
+
 `aegis-alpha-initialization` owns the first-run conversation: explaining
 capabilities, the global required `market_data` baseline, required setup axes,
 optional API groups, prewarm/cache, heartbeat automation, portfolio sources,

@@ -149,22 +149,70 @@ def _load_workspace_env(workspace: Path) -> None:
         os.environ.setdefault(key.strip(), value.strip())
 
 
+def _completion_state(profile: dict[str, Any] | None) -> dict[str, Any]:
+    if not isinstance(profile, dict):
+        return {
+            "runtime_profile_exists": False,
+            "market_data_ready": False,
+            "prewarm_ready": False,
+            "heartbeat_configured": False,
+            "fully_initialized": False,
+            "pending_operational_choices": ["runtime_profile"],
+        }
+    api = profile.get("providers", {}).get("api", {}) if isinstance(profile.get("providers"), dict) else {}
+    market_data = api.get("market_data", {}) if isinstance(api, dict) else {}
+    prewarm = profile.get("providers", {}).get("prewarm", {}) if isinstance(profile.get("providers"), dict) else {}
+    automation = profile.get("automation", {}) if isinstance(profile.get("automation"), dict) else {}
+    cache_policy = str(profile.get("cache_policy") or "none")
+    heartbeat = str(automation.get("heartbeat_mode") or "none")
+    prewarm_required = cache_policy == "prewarm-required"
+    heartbeat_requested = heartbeat not in {"none", "manual"}
+    market_data_ready = bool(market_data.get("configured"))
+    prewarm_ready = (not prewarm_required) or bool(prewarm.get("available"))
+    heartbeat_configured = (not heartbeat_requested) or bool(automation.get("configured_by_agent"))
+    pending: list[str] = []
+    if not market_data_ready:
+        pending.append("market_data")
+    if not prewarm_ready:
+        pending.append("prewarm")
+    if not heartbeat_configured:
+        pending.append("heartbeat")
+    return {
+        "runtime_profile_exists": True,
+        "market_data_ready": market_data_ready,
+        "prewarm_required": prewarm_required,
+        "prewarm_ready": prewarm_ready,
+        "heartbeat_requested": heartbeat_requested,
+        "heartbeat_configured": heartbeat_configured,
+        "fully_initialized": market_data_ready and prewarm_ready and heartbeat_configured,
+        "pending_operational_choices": pending,
+    }
+
+
 def _init_status(command: str, payload: dict[str, Any]) -> dict[str, Any]:
     workspace = _workspace(payload.get("workspace"))
+    _load_workspace_env(workspace)
     profile_path = workspace / "config" / "runtime-profile.json"
     output = _base_output(command, payload)
     profile = _load_json(profile_path, None)
-    initialized = isinstance(profile, dict)
+    state = _completion_state(profile)
     output["source"] = [str(profile_path)]
     output["sources"] = [str(profile_path)]
     output["result"] = {
-        "initialized": initialized,
+        "initialized": state["fully_initialized"],
+        "runtime_profile_exists": state["runtime_profile_exists"],
+        "initialization_state": state,
         "profile_path": str(profile_path),
         "workspace": str(workspace),
-        "profile": profile if initialized else None,
+        "profile": profile if state["runtime_profile_exists"] else None,
     }
-    if not initialized:
+    if not state["runtime_profile_exists"]:
         output["warnings"] = ["runtime_profile_missing"]
+    elif not state["fully_initialized"]:
+        output["warnings"] = [
+            "runtime_profile_exists_but_initialization_incomplete",
+            *[f"pending:{item}" for item in state["pending_operational_choices"]],
+        ]
     return output
 
 
