@@ -433,12 +433,14 @@ def _api_readiness(guide: dict[str, Any], preset: str, provider_priority: list[s
             status = api.get(group) if isinstance(api.get(group), dict) else {}
             env = meta.get("env") if isinstance(meta.get("env"), list) else []
             fallback_env = meta.get("fallback_env") if isinstance(meta.get("fallback_env"), list) else []
+            setup_urls = meta.get("setup_urls") if isinstance(meta.get("setup_urls"), dict) else {}
             plan.append({
                 "group": group,
                 "priority": priority,
                 "configured": bool(status.get("configured")),
                 "env": env,
                 "fallback_env": fallback_env,
+                "setup_urls": setup_urls,
                 "required": priority == "required" or bool(status.get("required")),
                 "required_env": status.get("required_env", {}),
                 "present_env": status.get("present_env", []),

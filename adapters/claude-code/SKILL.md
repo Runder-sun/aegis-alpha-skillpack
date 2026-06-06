@@ -49,9 +49,12 @@ Before asking the user to configure API keys, read
 for overseas data via `$longbridge`: either `LONGPORT_APP_KEY`,
 `LONGPORT_APP_SECRET`, and `LONGPORT_ACCESS_TOKEN`, or an installed and
 authenticated LongBridge CLI session verified by `longbridge auth status`.
-`FINNHUB_API_KEY` is only a fallback. Then explain which other API groups are
-recommended or optional for the selected preset. Do not ask the user to choose
-raw API names before explaining the investment capabilities they unlock.
+`FINNHUB_API_KEY` is only a fallback. Include setup URLs when asking for
+credentials, especially LongBridge `https://open.longbridge.com/skill/` and
+Tushare `https://tushare.pro`; use `capability-guide.json` `setup_urls` for
+other API groups. Then explain which other API groups are recommended or
+optional for the selected preset. Do not ask the user to choose raw API names
+before explaining the investment capabilities they unlock.
 
 ## Public Surface
 

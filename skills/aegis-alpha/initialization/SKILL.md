@@ -58,6 +58,10 @@ setup choice means. Then ask the user what to configure.
   LongBridge/LongPort is unavailable.
   Without this baseline, stay in setup guidance or fail closed.
 
+When asking the user to configure `market_data`, include provider setup URLs:
+Tushare `https://tushare.pro`, LongBridge `https://open.longbridge.com/skill/`,
+and Finnhub fallback `https://finnhub.io`.
+
 4. Explain optional capability unlocks before asking for other API keys:
 
 - `research_search` (`TAVILY_API_KEYS`, `QVERIS_API_KEY`): source discovery
@@ -70,6 +74,9 @@ setup choice means. Then ask the user what to configure.
 - `external_push` (`FEISHU_APP_ID`, `FEISHU_APP_SECRET`,
   `FEISHU_RECEIVE_ID`, `FEISHU_CHAT_ID`): confirmed Feishu delivery. Required
   only if the user explicitly wants external push.
+
+For every optional API group, include the setup URL or provider portal before
+asking for a key. Use `capability-guide.json` `setup_urls` when present.
 
 5. Explain operational choices separately from the preset:
 

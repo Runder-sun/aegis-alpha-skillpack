@@ -54,6 +54,11 @@
       "env": ["TUSHARE_TOKEN", "LONGPORT_APP_KEY", "LONGPORT_APP_SECRET", "LONGPORT_ACCESS_TOKEN"],
       "fallback_env": ["FINNHUB_API_KEY"],
       "cli": ["longbridge auth status"],
+      "setup_urls": {
+        "tushare": "https://tushare.pro",
+        "longbridge": "https://open.longbridge.com/skill/",
+        "finnhub_fallback": "https://finnhub.io"
+      },
       "unlocks": ["A-share market data via $tushare", "overseas market data via $longbridge / LongPort", "quotes", "daily bars", "historical series", "fundamentals", "screening data", "quant inputs"],
       "required_when": "Always required before Aegis Alpha is considered fully initialized.",
       "without_api": "Initialization must treat market data as missing. Do not run market-sensitive workflows as fully configured; only provide setup guidance or fail closed."
@@ -61,6 +66,10 @@
     "research_search": {
       "label": "Research search and source discovery",
       "env": ["TAVILY_API_KEYS", "QVERIS_API_KEY"],
+      "setup_urls": {
+        "tavily": "https://app.tavily.com",
+        "qveris": "https://qveris.ai/docs"
+      },
       "unlocks": ["information retrieval", "source discovery", "fresh research expansion"],
       "required_when": "The current agent lacks usable web/search tools or the user requests API-backed search.",
       "without_api": "Use agent-native search/browser tools when available, or ask the user for source files and links."
@@ -68,6 +77,9 @@
     "document_parse": {
       "label": "Document parsing",
       "env": ["MINERU_API_KEY"],
+      "setup_urls": {
+        "mineru": "https://mineru.net/apiManage/docs"
+      },
       "unlocks": ["large PDF parsing", "report extraction", "document evidence normalization"],
       "required_when": "The task requires provider-backed parsing for complex PDFs or documents the current agent cannot read reliably.",
       "without_api": "Use agent-native file/document reading for simple files, or ask the user for extracted text."
@@ -77,6 +89,11 @@
       "env": ["TUSHARE_TOKEN", "LONGPORT_APP_KEY", "LONGPORT_APP_SECRET", "LONGPORT_ACCESS_TOKEN"],
       "fallback_env": ["FINNHUB_API_KEY"],
       "cli": ["longbridge auth status"],
+      "setup_urls": {
+        "tushare": "https://tushare.pro",
+        "longbridge": "https://open.longbridge.com/skill/",
+        "finnhub_fallback": "https://finnhub.io"
+      },
       "unlocks": ["A-share market data via $tushare", "overseas market data via $longbridge / LongPort", "quotes", "daily bars", "historical series", "fundamentals", "screening data", "quant inputs"],
       "required_when": "Always required as the global market-data baseline. A-share/China data should follow the $tushare skill token convention (`TUSHARE_TOKEN`); overseas market data should prefer the $longbridge / LongPort convention, either via `LONGPORT_APP_KEY`, `LONGPORT_APP_SECRET`, and `LONGPORT_ACCESS_TOKEN`, or via an authenticated LongBridge CLI session verified by `longbridge auth status`. `FINNHUB_API_KEY` is only a fallback.",
       "without_api": "Do not fabricate structured data. Initialization is incomplete until market_data is configured; market-sensitive workflows must fail closed or stay in setup guidance mode."
@@ -84,6 +101,11 @@
     "market_intel": {
       "label": "Market news and macro intelligence",
       "env": ["JIN10_API_KEY", "TAVILY_API_KEYS", "QVERIS_API_KEY"],
+      "setup_urls": {
+        "jin10": "https://www.jin10.com/",
+        "tavily": "https://app.tavily.com",
+        "qveris": "https://qveris.ai/docs"
+      },
       "unlocks": ["market news", "macro events", "theme catalysts", "desk brief enrichment"],
       "required_when": "The task needs provider-backed news feeds or broad market intelligence beyond agent-native search.",
       "without_api": "Use agent-native search when available, cite sources, and fail closed if fresh evidence cannot be obtained."
@@ -91,6 +113,9 @@
     "external_push": {
       "label": "External confirmed push",
       "env": ["FEISHU_APP_ID", "FEISHU_APP_SECRET", "FEISHU_RECEIVE_ID", "FEISHU_CHAT_ID"],
+      "setup_urls": {
+        "feishu_open_platform": "https://open.feishu.cn"
+      },
       "unlocks": ["confirmed Feishu delivery", "scheduled report push"],
       "required_when": "The user explicitly enables external-push=confirm-only and wants delivery outside the agent chat.",
       "without_api": "External push is unavailable. Do not degrade to manual input or silent sending."

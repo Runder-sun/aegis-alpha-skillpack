@@ -96,13 +96,13 @@ Do not ask users to guess API names. On first run, the agent should read
 
 API groups are capability-specific:
 
-| API group | Env vars | Unlocks | Required when |
-|---|---|---|---|
-| `research_search` | `TAVILY_API_KEYS`, `QVERIS_API_KEY` | source discovery and search expansion | current agent lacks usable web/search tools or the user requests API-backed search |
-| `document_parse` | `MINERU_API_KEY` | complex PDF/report parsing | agent-native file reading cannot parse the document reliably |
-| `market_data` | `TUSHARE_TOKEN`; overseas via `LONGPORT_APP_KEY`, `LONGPORT_APP_SECRET`, `LONGPORT_ACCESS_TOKEN` or an authenticated LongBridge CLI; fallback `FINNHUB_API_KEY` | A-share data via `$tushare`, overseas data via `$longbridge` / LongPort, quotes, historical bars, fundamentals, screening and quant inputs | always required before full initialization |
-| `market_intel` | `JIN10_API_KEY`, `TAVILY_API_KEYS`, `QVERIS_API_KEY` | news, macro events, theme catalysts | the task needs provider-backed market intelligence |
-| `external_push` | `FEISHU_APP_ID`, `FEISHU_APP_SECRET`, `FEISHU_RECEIVE_ID`, `FEISHU_CHAT_ID` | confirmed Feishu delivery | the user explicitly enables confirmed external push |
+| API group | Env vars / auth | Setup URLs | Unlocks | Required when |
+|---|---|---|---|---|
+| `research_search` | `TAVILY_API_KEYS`, `QVERIS_API_KEY` | Tavily: `https://app.tavily.com`; QVeris: `https://qveris.ai/docs` | source discovery and search expansion | current agent lacks usable web/search tools or the user requests API-backed search |
+| `document_parse` | `MINERU_API_KEY` | MinerU: `https://mineru.net/apiManage/docs` | complex PDF/report parsing | agent-native file reading cannot parse the document reliably |
+| `market_data` | `TUSHARE_TOKEN`; overseas via `LONGPORT_APP_KEY`, `LONGPORT_APP_SECRET`, `LONGPORT_ACCESS_TOKEN` or an authenticated LongBridge CLI; fallback `FINNHUB_API_KEY` | Tushare: `https://tushare.pro`; LongBridge: `https://open.longbridge.com/skill/`; Finnhub fallback: `https://finnhub.io` | A-share data via `$tushare`, overseas data via `$longbridge` / LongPort, quotes, historical bars, fundamentals, screening and quant inputs | always required before full initialization |
+| `market_intel` | `JIN10_API_KEY`, `TAVILY_API_KEYS`, `QVERIS_API_KEY` | Jin10: `https://www.jin10.com/`, plus Tavily/QVeris URLs above | news, macro events, theme catalysts | the task needs provider-backed market intelligence |
+| `external_push` | `FEISHU_APP_ID`, `FEISHU_APP_SECRET`, `FEISHU_RECEIVE_ID`, `FEISHU_CHAT_ID` | Feishu Open Platform: `https://open.feishu.cn` | confirmed Feishu delivery | the user explicitly enables confirmed external push |
 
 The full skillpack can install without API keys, but it is not fully
 initialized until the global `market_data` baseline is configured. For A-share
@@ -112,7 +112,9 @@ LongPort convention: either `LONGPORT_APP_KEY`, `LONGPORT_APP_SECRET`, and
 `LONGPORT_ACCESS_TOKEN`, or an installed and authenticated LongBridge CLI
 session verified by `longbridge auth status`; `FINNHUB_API_KEY` is only a
 fallback. Other API groups remain capability-specific accelerators or optional
-integrations.
+integrations. When asking users to configure any API group, always include the
+setup URL or provider portal next to the required variables so the user knows
+where to obtain credentials.
 
 Presets are default operating profiles, not feature gates. All 16 public skills
 remain available after any preset is selected. If a user asks for work outside
