@@ -1,10 +1,61 @@
 {
   "package": "jin10-feed",
   "description": "Jin10 important news snapshot + daemon monitor.",
+  "safety_policy": {
+    "decision_allowed": false,
+    "requires_human_confirmation": true,
+    "max_action_level": "data_only",
+    "fail_closed": true
+  },
   "commands": [
-    {"name": "jin10-snapshot"},
-    {"name": "jin10-daemon-start"},
-    {"name": "jin10-daemon-stop"},
-    {"name": "jin10-daemon-status"}
+    {
+      "name": "jin10-snapshot",
+      "description": "Fetch one-shot Jin10 important news snapshot.",
+      "status": "implemented",
+      "payload_schema": {
+        "type": "object",
+        "properties": {
+          "limit": {"type": "integer", "minimum": 1, "maximum": 200}
+        }
+      },
+      "result_schema": {"type": "object"},
+      "example": {"limit": 50},
+      "upstream_dependencies": ["node", "playwright", "https://www.jin10.com/"],
+      "freshness_policy": "Snapshot is fetched at command runtime.",
+      "error_behavior": ["jin10_snapshot_failed"]
+    },
+    {
+      "name": "jin10-daemon-start",
+      "description": "Start Jin10 daemon monitor and write PID/log artifacts.",
+      "status": "implemented",
+      "payload_schema": {"type": "object", "properties": {}},
+      "result_schema": {"type": "object"},
+      "example": {},
+      "upstream_dependencies": ["node", "playwright", "AEGIS_ALPHA_WORKSPACE"],
+      "freshness_policy": "Daemon state is evaluated at command runtime.",
+      "error_behavior": ["daemon_start_failed"]
+    },
+    {
+      "name": "jin10-daemon-stop",
+      "description": "Stop Jin10 daemon monitor using PID artifact.",
+      "status": "implemented",
+      "payload_schema": {"type": "object", "properties": {}},
+      "result_schema": {"type": "object"},
+      "example": {},
+      "upstream_dependencies": ["AEGIS_ALPHA_WORKSPACE"],
+      "freshness_policy": "Daemon state is evaluated at command runtime.",
+      "error_behavior": ["kill_failed", "pid_invalid"]
+    },
+    {
+      "name": "jin10-daemon-status",
+      "description": "Inspect Jin10 daemon PID status.",
+      "status": "implemented",
+      "payload_schema": {"type": "object", "properties": {}},
+      "result_schema": {"type": "object"},
+      "example": {},
+      "upstream_dependencies": ["AEGIS_ALPHA_WORKSPACE"],
+      "freshness_policy": "Daemon state is evaluated at command runtime.",
+      "error_behavior": ["pid_invalid"]
+    }
   ]
 }

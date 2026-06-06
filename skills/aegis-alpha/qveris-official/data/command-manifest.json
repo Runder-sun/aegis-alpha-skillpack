@@ -1,4 +1,76 @@
 {
   "package": "qveris-official",
-  "commands": []
+  "description": "Internal QVeris connector for structured external search and tool execution.",
+  "safety_policy": {
+    "decision_allowed": false,
+    "requires_human_confirmation": true,
+    "max_action_level": "data_only",
+    "fail_closed": true
+  },
+  "commands": [
+    {
+      "name": "search",
+      "description": "Search QVeris for tools matching a capability query.",
+      "status": "implemented",
+      "payload_schema": {
+        "type": "object",
+        "required": ["query"],
+        "properties": {
+          "query": {"type": "string"},
+          "limit": {"type": "integer", "minimum": 1, "maximum": 20},
+          "timeout_seconds": {"type": "integer", "minimum": 1, "maximum": 120}
+        }
+      },
+      "result_schema": {"type": "object"},
+      "example": {"query": "real-time market news API", "limit": 5},
+      "upstream_dependencies": ["QVERIS_API_KEY", "node", "https://qveris.ai/api/v1"],
+      "freshness_policy": "QVeris search is evaluated at command runtime.",
+      "error_behavior": ["query_required", "qveris_search_failed"]
+    },
+    {
+      "name": "get-by-ids",
+      "description": "Fetch QVeris tool metadata by tool IDs.",
+      "status": "implemented",
+      "payload_schema": {
+        "type": "object",
+        "required": ["tool_ids"],
+        "properties": {
+          "tool_ids": {
+            "oneOf": [
+              {"type": "string"},
+              {"type": "array", "items": {"type": "string"}}
+            ]
+          },
+          "search_id": {"type": "string"},
+          "timeout_seconds": {"type": "integer", "minimum": 1, "maximum": 120}
+        }
+      },
+      "result_schema": {"type": "object"},
+      "example": {"tool_ids": ["example.tool.id"]},
+      "upstream_dependencies": ["QVERIS_API_KEY", "node", "https://qveris.ai/api/v1"],
+      "freshness_policy": "QVeris metadata is evaluated at command runtime.",
+      "error_behavior": ["tool_ids_required", "qveris_get_by_ids_failed"]
+    },
+    {
+      "name": "execute",
+      "description": "Execute a selected QVeris tool with explicit parameters.",
+      "status": "implemented",
+      "payload_schema": {
+        "type": "object",
+        "required": ["tool_id", "search_id"],
+        "properties": {
+          "tool_id": {"type": "string"},
+          "search_id": {"type": "string"},
+          "parameters": {"type": "object"},
+          "max_response_size": {"type": "integer", "minimum": 1},
+          "timeout_seconds": {"type": "integer", "minimum": 1, "maximum": 300}
+        }
+      },
+      "result_schema": {"type": "object"},
+      "example": {"tool_id": "example.tool.id", "search_id": "search-id", "parameters": {}},
+      "upstream_dependencies": ["QVERIS_API_KEY", "node", "https://qveris.ai/api/v1"],
+      "freshness_policy": "QVeris execution is evaluated at command runtime.",
+      "error_behavior": ["tool_id_required", "search_id_required", "qveris_execute_failed"]
+    }
+  ]
 }

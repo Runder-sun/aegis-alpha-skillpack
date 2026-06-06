@@ -7,10 +7,15 @@ import subprocess
 from pathlib import Path
 from typing import Any
 import signal
+from datetime import datetime, timezone
 
 
 def _workspace_dir() -> Path:
     return Path(os.environ.get("AEGIS_ALPHA_WORKSPACE") or os.path.expanduser("~/.aegis-alpha/workspace"))
+
+
+def _now() -> str:
+    return datetime.now(timezone.utc).isoformat()
 
 
 def _load_manifest(base: Path) -> dict:
@@ -20,6 +25,50 @@ def _load_manifest(base: Path) -> dict:
 
 def _pid_path() -> Path:
     return _workspace_dir() / "memory" / "jin10" / "daemon.pid"
+
+
+def _base_output(command: str, payload: dict[str, Any]) -> dict[str, Any]:
+    as_of = _now()
+    memory_dir = _workspace_dir() / "memory" / "jin10"
+    return {
+        "package": "jin10-feed",
+        "command": command,
+        "payload": payload,
+        "as_of": as_of,
+        "freshness": {
+            "status": "current",
+            "as_of": as_of,
+            "policy": "Jin10 feed data is collected at command runtime or daemon runtime",
+        },
+        "ok": True,
+        "decision_allowed": False,
+        "requires_human_confirmation": True,
+        "max_action_level": "data_only",
+        "source": ["https://www.jin10.com/"],
+        "sources": ["https://www.jin10.com/"],
+        "artifacts": [
+            str(memory_dir / "snapshot.json"),
+            str(memory_dir / "news.jsonl"),
+            str(memory_dir / "daemon.pid"),
+        ],
+        "warnings": [],
+        "errors": [],
+        "missing_critical_inputs": [],
+        "result": {},
+    }
+
+
+def _fail(command: str, payload: dict[str, Any], errors: list[str], raw: str = "") -> dict[str, Any]:
+    output = _base_output(command, payload)
+    output["ok"] = False
+    output["freshness"]["status"] = "unavailable"
+    output["errors"] = errors
+    output["missing_critical_inputs"] = errors
+    output["result"] = {
+        "note": "Jin10 feed data is unavailable; do not infer market news from an empty result.",
+        "raw": raw,
+    }
+    return output
 
 
 def _is_running(pid: int) -> bool:
@@ -108,18 +157,26 @@ def _daemon_status() -> dict:
     return {"status": "running" if _is_running(pid) else "not_running", "pid": pid}
 
 
-def _build_result(command: str, payload: dict) -> dict:
+def _build_result(command: str, payload: dict[str, Any]) -> dict[str, Any]:
+    output = _base_output(command, payload)
     if command == "jin10-snapshot":
         limit = payload.get("limit", 50)
         res = _run_node([f"--once", f"--limit={int(limit)}"])
-        return res
+        if not res.get("ok"):
+            return _fail(command, payload, ["jin10_snapshot_failed"], str(res.get("raw") or ""))
+        data = res.get("data") if isinstance(res.get("data"), dict) else {}
+        output["result"] = data
+        return output
     if command == "jin10-daemon-start":
-        return _daemon_start()
+        output["result"] = _daemon_start()
+        return output
     if command == "jin10-daemon-stop":
-        return _daemon_stop()
+        output["result"] = _daemon_stop()
+        return output
     if command == "jin10-daemon-status":
-        return _daemon_status()
-    return {"note": "command not implemented"}
+        output["result"] = _daemon_status()
+        return output
+    return _fail(command, payload, [f"unimplemented_command:{command}"])
 
 
 def main() -> int:
@@ -135,14 +192,8 @@ def main() -> int:
         raise SystemExit(f"unknown command: {args.command}")
 
     payload = json.loads(args.payload or "{}")
-    result = _build_result(args.command, payload)
-
-    print(json.dumps({
-        "package": "jin10-feed",
-        "command": args.command,
-        "payload": payload,
-        "result": result,
-    }, ensure_ascii=False))
+    output = _build_result(args.command, payload)
+    print(json.dumps(output, ensure_ascii=False))
     return 0
 
 

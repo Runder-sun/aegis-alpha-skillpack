@@ -10,9 +10,18 @@ All commands return an initialization envelope:
   "command": "<command>",
   "payload": {},
   "ok": true,
+  "as_of": "<utc-runtime>",
+  "freshness": {
+    "status": "current",
+    "as_of": "<utc-runtime>",
+    "policy": "initialization state and plan are evaluated at command runtime"
+  },
   "decision_allowed": false,
   "requires_human_confirmation": true,
   "max_action_level": "configuration_only",
+  "source": ["<workspace>/config/runtime-profile.json"],
+  "sources": ["<workspace>/config/runtime-profile.json"],
+  "artifacts": [],
   "warnings": [],
   "errors": [],
   "missing_critical_inputs": [],
