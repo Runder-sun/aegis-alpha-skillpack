@@ -18,6 +18,27 @@ Build candidates from multiple sources rather than one static list:
 - price/volume sympathy moves and relative strength
 - user-supplied seeds
 
+## Coverage-Aware Flow
+
+Before refreshing a theme stock pool, decide the coverage target. Do not force a
+single tool path.
+
+1. Identify required markets and nodes from the user's request.
+2. Inspect current candidates by node and market.
+3. Mark coverage gaps explicitly.
+4. Choose expansion tools based on the gap:
+   agent-native research for open discovery, user leads for known names,
+   Tushare for A-share verification and structured data, LongBridge/LongPort for
+   Hong Kong and overseas quote/identity verification, and public filings or
+   company pages for business exposure.
+5. Record discovered candidates with `record-theme-candidates`.
+6. Refresh the stock pool only after candidates exist.
+
+The bundled AI infrastructure chain template is an ontology/schema example and
+test fixture. It can guide node names and scoring fields, but it is not a
+complete global universe and must not be used to imply that uncovered markets
+have no candidates.
+
 ## Candidate Relationship Types
 
 Classify the relationship to the theme:
@@ -74,5 +95,8 @@ Use `theme-chain-screening` for canonical chain-map candidates. Use regular
 - Do not promote candidates based only on a theme label.
 - Do not treat low PE as sufficient; require evidence that the valuation model
   can change.
+- Do not treat a template or fixture candidate list as a completed market scan.
+- If requested markets are missing, report coverage gaps instead of filling them
+  with unrelated candidates.
 - Keep all outputs research-only and route selected candidates to
   `equity-research` before any paper plan.

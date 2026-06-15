@@ -28,7 +28,9 @@ def _load_manifest(base: Path) -> dict:
 
 
 def _load_global_theme_map(base: Path) -> tuple[dict[str, Any], str | None]:
-    path = base / "data" / "global-theme-map.json"
+    path = base / "data" / "theme-chain-template.ai-infrastructure.json"
+    if not path.exists():
+        path = base / "data" / "global-theme-map.json"
     try:
         payload = json.loads(path.read_text(encoding="utf-8"))
     except FileNotFoundError:
@@ -48,6 +50,14 @@ def _dynamic_theme_chain_map_path() -> Path:
 
 def _theme_stock_pool_path() -> Path:
     return _workspace_dir() / "memory" / "stock_pool" / "theme-stock-pool.json"
+
+
+def _coverage_plan_path() -> Path:
+    return _dynamic_theme_dir() / "coverage-plan.json"
+
+
+def _theme_candidates_path() -> Path:
+    return _dynamic_theme_dir() / "theme-candidates.jsonl"
 
 
 def _evidence_ledger_path() -> Path:
@@ -79,6 +89,29 @@ def _read_evidence_ledger() -> list[dict[str, Any]]:
         if isinstance(item, dict):
             rows.append(item)
     return rows
+
+
+def _read_jsonl(path: Path) -> list[dict[str, Any]]:
+    if not path.exists():
+        return []
+    rows: list[dict[str, Any]] = []
+    for line in path.read_text(encoding="utf-8").splitlines():
+        if not line.strip():
+            continue
+        try:
+            item = json.loads(line)
+        except Exception:
+            continue
+        if isinstance(item, dict):
+            rows.append(item)
+    return rows
+
+
+def _append_jsonl(path: Path, rows: list[dict[str, Any]]) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("a", encoding="utf-8") as fh:
+        for row in rows:
+            fh.write(json.dumps(row, ensure_ascii=False) + "\n")
 
 
 def _latest_prewarm() -> tuple[dict[str, Any], list[str]]:
@@ -362,11 +395,11 @@ def _theme_chain_candidates(theme_map: dict[str, Any], payload: dict[str, Any]) 
                     "repricing_model": node.get("repricing_model"),
                     "valuation_models": node.get("valuation_models") if isinstance(node.get("valuation_models"), list) else [],
                     "reason": f"{node.get('name')} / {node.get('repricing_model')}",
-                    "source": "global-theme-map" if payload_map is None else "payload.theme_map",
+                    "source": "theme-chain-template" if payload_map is None else "payload.theme_map",
                 })
                 candidates.append(candidate)
     scored = sorted((_score_theme_chain_candidate(candidate, payload) for candidate in candidates), key=lambda item: item.get("score", 0), reverse=True)
-    return scored, ["payload.theme_map"] if payload_map is not None else ["data/global-theme-map.json"]
+    return scored, ["payload.theme_map"] if payload_map is not None else ["data/theme-chain-template.ai-infrastructure.json"]
 
 
 def _score_candidates(candidates: list[dict[str, Any]], prewarm: dict[str, Any]) -> list[dict[str, Any]]:
@@ -438,6 +471,8 @@ def _theme_chain_screen(command: str, payload: dict[str, Any], base: Path) -> di
     output["warnings"] = [] if filtered else ["no_candidates_passed_filter"]
     output["result"] = {
         "theme": "AI Infrastructure",
+        "template_only": payload.get("template_only", True),
+        "note": "This command uses a bundled chain template/fixture. Do not treat it as a full market scan.",
         "candidates": filtered,
         "layers": layers,
         "node_summary": list(node_summary.values()),
@@ -454,39 +489,193 @@ def _theme_chain_screen(command: str, payload: dict[str, Any], base: Path) -> di
     return output
 
 
-def _load_active_theme_map(base: Path, payload: dict[str, Any]) -> tuple[dict[str, Any], list[str], str | None]:
+def _load_active_theme_map(payload: dict[str, Any]) -> tuple[dict[str, Any], list[str], str | None]:
     if isinstance(payload.get("theme_map"), dict):
         return payload["theme_map"], ["payload.theme_map"], None
     dynamic_map = _read_json_file(_dynamic_theme_chain_map_path(), {})
     if isinstance(dynamic_map, dict) and isinstance(dynamic_map.get("themes"), list) and dynamic_map.get("themes"):
         return dynamic_map, [str(_dynamic_theme_chain_map_path())], None
-    bundled, error = _load_global_theme_map(base)
-    if error:
-        return {}, [], error
-    return bundled, ["data/global-theme-map.json"], None
+    return {}, [], "theme_chain_map_missing"
 
 
 def _candidate_key(candidate: dict[str, Any]) -> str:
     return str(candidate.get("symbol") or candidate.get("code") or candidate.get("name") or "").upper()
 
 
+def _theme_nodes_from_map(theme_map: dict[str, Any], payload: dict[str, Any]) -> list[dict[str, Any]]:
+    themes = theme_map.get("themes") if isinstance(theme_map.get("themes"), list) else []
+    theme_filter = {str(item) for item in payload.get("theme_ids", [])} if isinstance(payload.get("theme_ids"), list) else set()
+    nodes: list[dict[str, Any]] = []
+    for theme in themes:
+        if not isinstance(theme, dict):
+            continue
+        theme_id = str(theme.get("id") or "")
+        if theme_filter and theme_id not in theme_filter:
+            continue
+        for node in theme.get("nodes") or []:
+            if isinstance(node, dict):
+                item = dict(node)
+                item["theme_id"] = theme_id
+                item["theme"] = theme.get("name")
+                nodes.append(item)
+    return nodes
+
+
+def _candidate_regions(candidates: list[dict[str, Any]]) -> set[str]:
+    return {str(item.get("region") or item.get("market_region") or "").upper() for item in candidates if item.get("region") or item.get("market_region")}
+
+
+def _normalize_candidate(candidate: dict[str, Any], payload: dict[str, Any]) -> dict[str, Any]:
+    now = _now()
+    item = dict(candidate)
+    default_theme_id = payload.get("theme_id")
+    if default_theme_id is None and isinstance(payload.get("theme_ids"), list) and payload.get("theme_ids"):
+        default_theme_id = payload["theme_ids"][0]
+    item.setdefault("theme_id", default_theme_id)
+    item.setdefault("source", candidate.get("source") or "agent_supplied")
+    item.setdefault("candidate_source_type", candidate.get("candidate_source_type") or "agent_native_research")
+    item.setdefault("discovered_at", now)
+    item.setdefault("last_seen_at", now)
+    item.setdefault("state", "candidate")
+    return item
+
+
+def _plan_theme_coverage(command: str, payload: dict[str, Any]) -> dict[str, Any]:
+    theme_map, sources, error = _load_active_theme_map(payload)
+    if error and not isinstance(payload.get("theme_map"), dict):
+        return _fail(command, payload, [error], ["write theme registry first or provide payload.theme_map"])
+    nodes = _theme_nodes_from_map(theme_map, payload)
+    if not nodes:
+        return _fail(command, payload, ["theme_nodes_missing"], ["write theme registry with chain nodes first"])
+
+    required_markets = [str(item).upper() for item in payload.get("required_markets", [])] if isinstance(payload.get("required_markets"), list) else ["CN", "HK", "US", "JP", "KR", "TW"]
+    candidate_rows = _read_jsonl(_theme_candidates_path())
+    node_plans = []
+    for node in nodes:
+        node_id = str(node.get("id") or "")
+        node_candidates = [
+            item for item in candidate_rows
+            if isinstance(item, dict)
+            and str(item.get("theme_id") or "") == str(node.get("theme_id") or "")
+            and (not node_id or str(item.get("chain_node_id") or item.get("node_id") or "") == node_id)
+        ]
+        covered = sorted(_candidate_regions(node_candidates))
+        gaps = [market for market in required_markets if market not in covered]
+        node_plans.append({
+            "theme_id": node.get("theme_id"),
+            "node_id": node_id,
+            "node_name": node.get("name"),
+            "candidate_count": len(node_candidates),
+            "covered_markets": covered,
+            "coverage_gaps": gaps,
+            "recommended_expansion": _recommended_expansion(gaps),
+        })
+
+    plan = {
+        "version": 1,
+        "updated_at": _now(),
+        "theme_ids": payload.get("theme_ids") if isinstance(payload.get("theme_ids"), list) else [],
+        "required_markets": required_markets,
+        "nodes": node_plans,
+        "coverage_complete": all(not node.get("coverage_gaps") for node in node_plans),
+        "policy": "Coverage planning is advisory. Agent chooses research tools based on user scope and gaps.",
+    }
+    _coverage_plan_path().parent.mkdir(parents=True, exist_ok=True)
+    _coverage_plan_path().write_text(json.dumps(plan, ensure_ascii=False, indent=2), encoding="utf-8")
+    output = _base_output(command, payload)
+    output["sources"] = sources + [str(_theme_candidates_path())]
+    output["artifacts"] = [str(_coverage_plan_path())]
+    output["warnings"] = [] if plan["coverage_complete"] else ["coverage_gaps_present"]
+    output["result"] = plan
+    return output
+
+
+def _recommended_expansion(gaps: list[str]) -> list[str]:
+    recs = []
+    if any(market in gaps for market in ("CN", "HK")):
+        recs.append("agent_native_research")
+    if "CN" in gaps:
+        recs.append("tushare_verify")
+    if "HK" in gaps:
+        recs.append("longbridge_verify")
+    if any(market in gaps for market in ("US", "JP", "KR", "TW")):
+        recs.append("agent_native_research")
+        recs.append("market_data_verify")
+    return sorted(set(recs))
+
+
+def _record_theme_candidates(command: str, payload: dict[str, Any]) -> dict[str, Any]:
+    candidates = payload.get("candidates") if isinstance(payload.get("candidates"), list) else []
+    normalized = [_normalize_candidate(item, payload) for item in candidates if isinstance(item, dict)]
+    if not normalized:
+        plan = _read_json_file(_coverage_plan_path(), {})
+        output = _fail(command, payload, ["theme_candidates_missing"], ["provide agent-discovered candidates or run coverage planning"])
+        output["result"]["coverage_plan"] = plan if isinstance(plan, dict) else {}
+        return output
+    _append_jsonl(_theme_candidates_path(), normalized)
+    output = _base_output(command, payload)
+    output["sources"] = ["payload.candidates"]
+    output["artifacts"] = [str(_theme_candidates_path())]
+    output["result"] = {
+        "recorded": normalized,
+        "recorded_count": len(normalized),
+        "candidate_ledger_path": str(_theme_candidates_path()),
+    }
+    return output
+
+
+def _candidate_rows_for_refresh(payload: dict[str, Any]) -> tuple[list[dict[str, Any]], list[str]]:
+    payload_candidates = payload.get("candidates") if isinstance(payload.get("candidates"), list) else []
+    if payload_candidates:
+        return [_normalize_candidate(item, payload) for item in payload_candidates if isinstance(item, dict)], ["payload.candidates"]
+    rows = _read_jsonl(_theme_candidates_path())
+    theme_filter = {str(item) for item in payload.get("theme_ids", [])} if isinstance(payload.get("theme_ids"), list) else set()
+    node_filter = {str(item) for item in payload.get("node_ids", [])} if isinstance(payload.get("node_ids"), list) else set()
+    region_filter = {str(item).upper() for item in payload.get("regions", [])} if isinstance(payload.get("regions"), list) else set()
+    filtered = []
+    for row in rows:
+        if not isinstance(row, dict):
+            continue
+        if theme_filter and str(row.get("theme_id") or "") not in theme_filter:
+            continue
+        node_id = str(row.get("chain_node_id") or row.get("node_id") or "")
+        if node_filter and node_id not in node_filter:
+            continue
+        region = str(row.get("region") or row.get("market_region") or "").upper()
+        if region_filter and region not in region_filter:
+            continue
+        filtered.append(row)
+    return filtered, [str(_theme_candidates_path())]
+
+
+def _score_theme_candidate(candidate: dict[str, Any], payload: dict[str, Any]) -> dict[str, Any]:
+    if any(key in candidate for key in ("ai_infra_exposure", "bottleneck_score", "model_shift_score", "forward_pe")):
+        return _score_theme_chain_candidate(candidate, payload)
+    evidence_quality = _float(candidate.get("evidence_quality")) or 0.0
+    exposure = _float(candidate.get("theme_exposure")) or _float(candidate.get("ai_infra_exposure")) or 50.0
+    verification = 80.0 if candidate.get("verified_by") or candidate.get("market_data_verified") else 45.0
+    confidence = (_float(candidate.get("confidence")) or 0.5) * 100
+    score = exposure * 0.35 + evidence_quality * 0.25 + verification * 0.2 + confidence * 0.2
+    enriched = dict(candidate)
+    enriched["score"] = round(max(0, min(100, score)), 2)
+    enriched["score_breakdown"] = {
+        "theme_exposure": round(exposure, 2),
+        "evidence_quality": round(evidence_quality, 2),
+        "verification": round(verification, 2),
+        "confidence": round(confidence, 2),
+    }
+    return enriched
+
+
 def _refresh_theme_stock_pool(command: str, payload: dict[str, Any], base: Path) -> dict[str, Any]:
-    theme_map, sources, error = _load_active_theme_map(base, payload)
-    if error:
-        return _fail(command, payload, [error])
-    candidates, local_sources = _theme_chain_candidates(theme_map, payload)
-    warnings: list[str] = []
-    if not candidates and str(_dynamic_theme_chain_map_path()) in sources and not isinstance(payload.get("theme_map"), dict):
-        bundled, bundled_error = _load_global_theme_map(base)
-        if not bundled_error:
-            candidates, local_sources = _theme_chain_candidates(bundled, payload)
-            sources = ["data/global-theme-map.json"]
-            warnings.append("dynamic_theme_chain_map_has_no_candidates; used bundled canonical map")
+    del base
+    candidates, sources = _candidate_rows_for_refresh(payload)
     min_score = float(payload.get("min_score", 0))
     max_candidates = int(payload.get("max_candidates", 120))
-    filtered = [candidate for candidate in candidates if candidate.get("score", 0) >= min_score]
+    scored = sorted((_score_theme_candidate(candidate, payload) for candidate in candidates), key=lambda item: item.get("score", 0), reverse=True)
+    filtered = [candidate for candidate in scored if candidate.get("score", 0) >= min_score]
     if not filtered:
-        return _fail(command, payload, ["theme_stock_pool_candidates_missing"], ["write theme registry or relax filters"])
+        return _fail(command, payload, ["theme_stock_pool_candidates_missing"], ["record theme candidates first; do not infer an empty opportunity set"])
 
     existing_doc = _read_json_file(_theme_stock_pool_path(), {"candidates": []})
     if not isinstance(existing_doc, dict) or not isinstance(existing_doc.get("candidates"), list):
@@ -502,7 +691,14 @@ def _refresh_theme_stock_pool(command: str, payload: dict[str, Any], base: Path)
         enriched.update(candidate)
         enriched.setdefault("first_seen_at", now)
         enriched["last_seen_at"] = now
-        enriched["state"] = "core" if candidate.get("score", 0) >= 75 else "watchlist" if candidate.get("score", 0) >= 55 else "candidate"
+        if candidate.get("state") in {"core", "watchlist", "rejected", "stale"}:
+            enriched["state"] = candidate.get("state")
+        elif candidate.get("score", 0) >= 75:
+            enriched["state"] = "core"
+        elif candidate.get("score", 0) >= 55:
+            enriched["state"] = "watchlist"
+        else:
+            enriched["state"] = "candidate"
         enriched["evidence_ids"] = candidate.get("evidence_ids") if isinstance(candidate.get("evidence_ids"), list) else enriched.get("evidence_ids", [])
         if key not in existing_by_key:
             additions.append(enriched)
@@ -511,16 +707,15 @@ def _refresh_theme_stock_pool(command: str, payload: dict[str, Any], base: Path)
     pool = {
         "version": 1,
         "updated_at": now,
-        "source_theme_map": sources + local_sources,
+        "source_candidates": sources,
         "candidates": sorted(existing_by_key.values(), key=lambda item: item.get("score", 0), reverse=True),
         "policy": "Research-only theme stock pool. Send candidates to equity-research before paper trade planning.",
     }
     _theme_stock_pool_path().parent.mkdir(parents=True, exist_ok=True)
     _theme_stock_pool_path().write_text(json.dumps(pool, ensure_ascii=False, indent=2), encoding="utf-8")
     output = _base_output(command, payload)
-    output["sources"] = sources + local_sources
+    output["sources"] = sources
     output["artifacts"] = [str(_theme_stock_pool_path())]
-    output["warnings"] = warnings
     output["result"] = {
         "added": additions,
         "added_count": len(additions),
@@ -753,6 +948,10 @@ def _run(command: str, payload: dict[str, Any], prewarm: dict[str, Any], sources
         return _company_evidence_collect(command, payload, prewarm, sources)
     if command == "theme-chain-screening":
         return _theme_chain_screen(command, payload, base)
+    if command == "plan-theme-coverage":
+        return _plan_theme_coverage(command, payload)
+    if command == "record-theme-candidates":
+        return _record_theme_candidates(command, payload)
     if command == "refresh-theme-stock-pool":
         return _refresh_theme_stock_pool(command, payload, base)
     if command == "batch-theme-research":

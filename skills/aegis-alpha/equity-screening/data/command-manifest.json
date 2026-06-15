@@ -354,7 +354,7 @@
     },
     {
       "name": "theme-chain-screening",
-      "description": "Expand a canonical global AI infrastructure theme map into candidate stocks, then rank re-rating potential.",
+      "description": "Use the bundled AI infrastructure chain template/fixture to score example candidates; not a full market scan.",
       "status": "implemented",
       "legacy_functions": [
         "theme_chain_screening"
@@ -366,11 +366,9 @@
         "$ref": "#/$defs/screening_result"
       },
       "upstream_dependencies": [
-        "data/global-theme-map.json or payload.theme_map",
-        "memory/prewarm/nightly-prewarm-*.json when used",
-        "memory/stock_pool artifacts when used"
+        "data/theme-chain-template.ai-infrastructure.json or payload.theme_map"
       ],
-      "freshness_policy": "Theme-chain freshness is inherited from the canonical theme map, explicit payload theme map, and latest prewarm artifact when used.",
+      "freshness_policy": "Template freshness is static and for schema/ontology/testing; real stock pools require recorded candidates.",
       "error_behavior": [
         "theme_chain_map_missing",
         "theme_chain_map_invalid_json",
@@ -393,13 +391,88 @@
         "$ref": "#/$defs/screening_result"
       },
       "upstream_dependencies": [
-        "memory/dynamic_themes/theme-chain-map.json or data/global-theme-map.json",
+        "memory/dynamic_themes/theme-chain-map.json",
+        "memory/dynamic_themes/theme-candidates.jsonl when present"
+      ],
+      "freshness_policy": "Coverage freshness is inherited from the current theme-chain map and recorded candidate ledger.",
+      "error_behavior": [
+        "theme_chain_map_missing",
+        "theme_nodes_missing",
+        "theme_candidates_missing"
+      ],
+      "example": {
+        "theme_ids": [
+          "ai-infrastructure"
+        ],
+        "required_markets": [
+          "CN",
+          "HK",
+          "US",
+          "JP",
+          "KR",
+          "TW"
+        ]
+      },
+      "name": "plan-theme-coverage",
+      "description": "Plan node and market coverage for a dynamic theme before refreshing the stock pool.",
+      "legacy_functions": [
+        "plan_theme_coverage"
+      ]
+    },
+    {
+      "status": "implemented",
+      "payload_schema": {
+        "$ref": "#/$defs/theme_chain_screen_payload"
+      },
+      "result_schema": {
+        "$ref": "#/$defs/screening_result"
+      },
+      "upstream_dependencies": [
+        "memory/dynamic_themes/theme-chain-map.json",
+        "memory/dynamic_themes/theme-candidates.jsonl when present"
+      ],
+      "freshness_policy": "Coverage freshness is inherited from the current theme-chain map and recorded candidate ledger.",
+      "error_behavior": [
+        "theme_chain_map_missing",
+        "theme_nodes_missing",
+        "theme_candidates_missing"
+      ],
+      "example": {
+        "theme_ids": [
+          "ai-infrastructure"
+        ],
+        "required_markets": [
+          "CN",
+          "HK",
+          "US",
+          "JP",
+          "KR",
+          "TW"
+        ]
+      },
+      "name": "record-theme-candidates",
+      "description": "Append agent-discovered or user-supplied theme candidates to the candidate ledger.",
+      "legacy_functions": [
+        "record_theme_candidates"
+      ]
+    },
+    {
+      "status": "implemented",
+      "payload_schema": {
+        "$ref": "#/$defs/theme_chain_screen_payload"
+      },
+      "result_schema": {
+        "$ref": "#/$defs/screening_result"
+      },
+      "upstream_dependencies": [
+        "memory/dynamic_themes/theme-candidates.jsonl or payload.candidates",
         "memory/dynamic_themes/evidence-ledger.jsonl when auditing",
         "memory/stock_pool/theme-stock-pool.json when used"
       ],
-      "freshness_policy": "Theme stock pool freshness is inherited from the dynamic theme registry, theme-chain map, evidence ledger, and explicit payload filters.",
+      "freshness_policy": "Theme stock pool freshness is inherited from recorded candidates, evidence ledger, explicit payload candidates, and verification metadata.",
       "error_behavior": [
         "theme_stock_pool_candidates_missing",
+        "theme_candidates_missing",
         "theme_stock_pool_missing",
         "theme_stock_pool_invalid_schema",
         "theme_stock_pool_audit_failed"
@@ -425,13 +498,14 @@
         "$ref": "#/$defs/screening_result"
       },
       "upstream_dependencies": [
-        "memory/dynamic_themes/theme-chain-map.json or data/global-theme-map.json",
+        "memory/dynamic_themes/theme-candidates.jsonl or payload.candidates",
         "memory/dynamic_themes/evidence-ledger.jsonl when auditing",
         "memory/stock_pool/theme-stock-pool.json when used"
       ],
-      "freshness_policy": "Theme stock pool freshness is inherited from the dynamic theme registry, theme-chain map, evidence ledger, and explicit payload filters.",
+      "freshness_policy": "Theme stock pool freshness is inherited from recorded candidates, evidence ledger, explicit payload candidates, and verification metadata.",
       "error_behavior": [
         "theme_stock_pool_candidates_missing",
+        "theme_candidates_missing",
         "theme_stock_pool_missing",
         "theme_stock_pool_invalid_schema",
         "theme_stock_pool_audit_failed"
@@ -457,13 +531,14 @@
         "$ref": "#/$defs/screening_result"
       },
       "upstream_dependencies": [
-        "memory/dynamic_themes/theme-chain-map.json or data/global-theme-map.json",
+        "memory/dynamic_themes/theme-candidates.jsonl or payload.candidates",
         "memory/dynamic_themes/evidence-ledger.jsonl when auditing",
         "memory/stock_pool/theme-stock-pool.json when used"
       ],
-      "freshness_policy": "Theme stock pool freshness is inherited from the dynamic theme registry, theme-chain map, evidence ledger, and explicit payload filters.",
+      "freshness_policy": "Theme stock pool freshness is inherited from recorded candidates, evidence ledger, explicit payload candidates, and verification metadata.",
       "error_behavior": [
         "theme_stock_pool_candidates_missing",
+        "theme_candidates_missing",
         "theme_stock_pool_missing",
         "theme_stock_pool_invalid_schema",
         "theme_stock_pool_audit_failed"

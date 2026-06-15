@@ -18,6 +18,8 @@ scoring, persistence, and audit; they do not replace semantic theme judgment.
 Use `record-theme-signals` to bind evidence, then `write-theme-registry` to
 persist `memory/dynamic_themes/theme-registry.json`,
 `theme-chain-map.json`, and `evidence-ledger.jsonl`.
+When routing to screening, describe the desired node/market coverage and any
+known gaps. Do not imply that missing candidates mean no opportunity.
 
 ## Runtime
 

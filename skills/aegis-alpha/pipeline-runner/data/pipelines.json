@@ -376,7 +376,7 @@
     {
       "id": "theme-discovery-daily",
       "label": "每日动态主题发现",
-      "description": "每日动态主题闭环 (信号记录 → 主题注册 → 主题股池刷新 → 股池审计 → 深挖队列)",
+      "description": "每日动态主题闭环 (信号记录 → 主题注册 → 覆盖规划 → 候选记录 → 股池刷新 → 审计 → 深挖队列)",
       "steps": [
         {
           "package": "execution-automation",
@@ -404,6 +404,18 @@
         },
         {
           "package": "equity-screening",
+          "command": "plan-theme-coverage",
+          "optional": false,
+          "note": "规划主题节点和市场覆盖，暴露缺口"
+        },
+        {
+          "package": "equity-screening",
+          "command": "record-theme-candidates",
+          "optional": false,
+          "note": "记录 agent 发现或用户提供的候选；无候选时 fail-closed"
+        },
+        {
+          "package": "equity-screening",
           "command": "refresh-theme-stock-pool",
           "optional": false,
           "note": "刷新主题候选股池"
@@ -425,7 +437,7 @@
     {
       "id": "theme-discovery-weekly",
       "label": "周度主题和股池维护",
-      "description": "周度动态主题维护 (主线复盘 → 注册表更新 → 股池刷新 → 质量门控 → 研究队列)",
+      "description": "周度动态主题维护 (主线复盘 → 注册表更新 → 覆盖规划 → 候选记录 → 股池刷新 → 质量门控 → 研究队列)",
       "steps": [
         {
           "package": "execution-automation",
@@ -444,6 +456,18 @@
           "command": "write-theme-registry",
           "optional": false,
           "note": "根据本周证据更新动态主题注册表"
+        },
+        {
+          "package": "equity-screening",
+          "command": "plan-theme-coverage",
+          "optional": false,
+          "note": "规划主题节点和市场覆盖，暴露缺口"
+        },
+        {
+          "package": "equity-screening",
+          "command": "record-theme-candidates",
+          "optional": false,
+          "note": "记录本周新增候选；无候选时 fail-closed"
         },
         {
           "package": "equity-screening",

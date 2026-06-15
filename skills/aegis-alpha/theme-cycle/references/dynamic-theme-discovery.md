@@ -20,11 +20,14 @@ evidence judgment; scripts should only normalize, persist, score, and audit.
 5. Decompose the theme into chain nodes: demand driver, upstream bottleneck,
    core enabler, manufacturing/integration, distribution/customer, and
    substitutes/risks.
-6. Assign lifecycle state and trend score.
-7. Bind evidence. A theme without evidence can be `seed` only.
-8. Route validated nodes to `equity-screening` for candidate discovery.
-9. Send top candidates to `equity-research`; keep paper-only safety.
-10. Revisit outcomes through `quality-gate`, `report-evolution`, and
+6. State the desired coverage scope when it matters: nodes, markets, source
+   types, and known gaps. Keep this as a research plan, not a stock conclusion.
+7. Assign lifecycle state and trend score.
+8. Bind evidence. A theme without evidence can be `seed` only.
+9. Route validated nodes to `equity-screening` for coverage planning and
+   candidate discovery.
+10. Send top candidates to `equity-research`; keep paper-only safety.
+11. Revisit outcomes through `quality-gate`, `report-evolution`, and
     `advice-lifecycle`.
 
 ## Lifecycle States
@@ -71,6 +74,9 @@ A theme is a mainline candidate only when at least three are true:
 - Do not treat price action alone as industry evidence.
 - Do not call a theme `emerging` or higher without evidence links or supplied
   source artifacts.
+- Do not treat an ontology/template as a complete candidate universe.
+- Do not infer that a market has no candidates merely because the current
+  theme-chain map has no candidates for that market.
 - If evidence is stale or contradictory, keep the theme as `seed`, `fading`, or
   `invalidated`.
 - All outputs are research-only.

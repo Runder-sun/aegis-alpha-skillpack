@@ -45,7 +45,12 @@ All commands return:
 | `company-evidence-collect` | implemented | `code`/`name`/`query` plus payload evidence or prewarm | matching reports/news evidence |
 | `stock-screening` | implemented | `candidates` or valid prewarm snapshot | scored candidate list |
 | `stock-screening-v2` | implemented | same as `stock-screening` | scored candidate list |
-| `theme-chain-screening` | implemented | `data/global-theme-map.json` or `payload.theme_map`, optional `theme_ids`/`node_ids`/`regions`/`max_forward_pe` | global theme-chain candidate list, score layers, node summary |
+| `theme-chain-screening` | implemented | `data/theme-chain-template.ai-infrastructure.json` or `payload.theme_map`, optional `theme_ids`/`node_ids`/`regions`/`max_forward_pe` | template/fixture candidate list, score layers, node summary |
+| `plan-theme-coverage` | implemented | dynamic `theme-chain-map.json`, optional `theme_ids`/`required_markets` | node/market coverage plan and gap list |
+| `record-theme-candidates` | implemented | payload `candidates` from agent research, user input, or provider verification | appended `theme-candidates.jsonl` ledger rows |
+| `refresh-theme-stock-pool` | implemented | recorded theme candidates or explicit payload candidates | refreshed `theme-stock-pool.json` artifact |
+| `theme-stock-pool-audit` | implemented | theme stock pool and evidence ledger | evidence/staleness audit |
+| `batch-theme-research` | implemented | theme stock pool | equity-research prompt queue |
 | `layered-stock-screening` | implemented | candidates or prewarm snapshot | `core`, `watchlist`, `reject` layers |
 | `leader-source-harvest` | implemented | candidates or prewarm snapshot, optional `min_score` | high-scoring leaders |
 | `stock-rating` | implemented | one candidate object or top-level candidate fields | score and grade |

@@ -15,6 +15,10 @@ For theme-driven discovery, read
 classify candidates from theme nodes, suppliers, customers, peers, constituents,
 filings, news, and market co-movement. Scripts normalize, score, persist, and
 audit the candidate set; they do not replace evidence reasoning.
+Use coverage-aware judgment before refreshing a theme stock pool: determine
+which nodes and markets the user needs, inspect current candidate coverage, and
+then choose suitable tools. Do not treat bundled templates as complete market
+coverage.
 
 ## Runtime
 
@@ -29,10 +33,16 @@ otherwise it uses `~/.aegis-alpha/workspace`.
 - `company-evidence-collect`: collect matching company news/research evidence
   from payload `news`/`reports` or prewarm data.
 - `stock-screening`, `stock-screening-v2`: score and filter candidates.
-- `theme-chain-screening`: expand the canonical global AI infrastructure theme
-  map into candidate stocks and rank re-rating potential.
+- `theme-chain-screening`: score the bundled AI infrastructure chain
+  template/fixture or `payload.theme_map`; use it for ontology/schema examples,
+  not as a full market scan.
+- `plan-theme-coverage`: write a node/market coverage plan before candidate
+  expansion.
+- `record-theme-candidates`: persist agent-discovered, user-supplied, or
+  provider-verified candidates to the theme candidate ledger.
 - `refresh-theme-stock-pool`: refresh
-  `memory/stock_pool/theme-stock-pool.json` from the dynamic theme-chain map.
+  `memory/stock_pool/theme-stock-pool.json` from recorded candidates or
+  explicit `payload.candidates`.
 - `batch-theme-research`: prepare `equity-research` deep-dive prompts from the
   theme stock pool.
 - `theme-stock-pool-audit`: fail-closed audit for evidence coverage and stale
@@ -61,8 +71,9 @@ Prefer explicit payload candidates when available:
 Without payload candidates, screening commands require a valid latest
 `memory/prewarm/nightly-prewarm-*.json` containing `hhxg_snapshot` market data.
 
-For global theme-chain research, use the bundled
-`data/global-theme-map.json` or provide `payload.theme_map`:
+For theme-chain template scoring, use the bundled
+`data/theme-chain-template.ai-infrastructure.json` or provide
+`payload.theme_map`:
 
 ```json
 {
@@ -96,7 +107,8 @@ Theme-chain screening scores use:
 
 It returns candidates with `chain_node`, `repricing_model`,
 `valuation_models`, score breakdowns, and `core`/`watchlist`/`expensive_or_risk`
-layers.
+layers. Treat this output as a template/fixture unless candidates were supplied
+from live research or a verified candidate ledger.
 
 The output is a research shortlist, not a trading recommendation. Send selected
 candidates to `equity-research` for fundamentals/valuation and then to
@@ -109,4 +121,7 @@ candidates to `equity-research` for fundamentals/valuation and then to
 - Corrupt local stock pool state returns `ok=false`; do not overwrite it.
 - Do not promote theme candidates based only on a label; require evidence before
   `validated`, `watchlist`, or `core`.
+- Do not infer market coverage from a bundled template. If A-share, Hong Kong,
+  US, Japan, Korea, Taiwan, or any requested market is not covered, report a
+  coverage gap and choose tools only if the user/task requires expansion.
 - Never treat missing data as an empty opportunity set.

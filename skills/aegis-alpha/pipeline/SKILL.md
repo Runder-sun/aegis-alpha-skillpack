@@ -18,6 +18,9 @@ choose between template discovery and execution internals.
 Dynamic theme discovery can be a pipeline template, but it is only one workflow
 type. Keep scheduled theme discovery, stock-pool refresh, report generation,
 portfolio review, and quality checks as separate auditable pipelines.
+Theme discovery pipelines are semi-automated research workflows. If coverage
+planning finds missing markets or nodes, report the gap and gather/record
+candidates before refreshing the stock pool; do not fill gaps from templates.
 
 ## Commands
 

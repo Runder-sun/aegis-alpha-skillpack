@@ -236,9 +236,10 @@ def run_smoke(workspace: Path) -> dict[str, Any]:
         "min_score": 55,
     })
     checks.append(_check(
-        "equity-screening theme-chain-screening ranks global AI infrastructure map",
+        "equity-screening theme-chain-screening scores AI infrastructure template",
         theme_chain_screening.get("ok") is True
         and theme_chain_screening.get("decision_allowed") is False
+        and theme_chain_screening.get("result", {}).get("template_only") is True
         and theme_chain_screening.get("result", {}).get("count", 0) >= 1
         and "watchlist" in theme_chain_screening.get("result", {}).get("layers", {}),
         theme_chain_screening,
@@ -284,6 +285,62 @@ def run_smoke(workspace: Path) -> dict[str, Any]:
         and any("theme-registry.json" in path for path in theme_registry.get("artifacts", []))
         and any("theme-chain-map.json" in path for path in theme_registry.get("artifacts", [])),
         theme_registry,
+    ))
+
+    coverage_plan = _run(workspace, "equity-screening", "plan-theme-coverage", {
+        "theme_ids": ["ai-infrastructure"],
+        "required_markets": ["US", "KR", "TW"],
+    })
+    checks.append(_check(
+        "equity-screening plan-theme-coverage writes coverage plan",
+        coverage_plan.get("ok") is True
+        and any("coverage-plan.json" in path for path in coverage_plan.get("artifacts", []))
+        and coverage_plan.get("result", {}).get("coverage_complete") is False,
+        coverage_plan,
+    ))
+
+    theme_pool_missing = _run(workspace, "equity-screening", "refresh-theme-stock-pool", {
+        "theme_ids": ["ai-infrastructure"],
+        "min_score": 55,
+    })
+    checks.append(_check(
+        "equity-screening refresh-theme-stock-pool fails closed without recorded candidates",
+        theme_pool_missing.get("ok") is False
+        and "theme_stock_pool_candidates_missing" in theme_pool_missing.get("errors", []),
+        theme_pool_missing,
+    ))
+
+    record_candidates = _run(workspace, "equity-screening", "record-theme-candidates", {
+        "theme_ids": ["ai-infrastructure"],
+        "candidates": [
+            {
+                "symbol": "000660.KS",
+                "name": "SK Hynix",
+                "region": "KR",
+                "chain_node_id": "hbm-dram",
+                "theme_exposure": 95,
+                "evidence_quality": 80,
+                "confidence": 0.85,
+                "verified_by": ["agent_native_research"],
+            },
+            {
+                "symbol": "MU",
+                "name": "Micron Technology",
+                "region": "US",
+                "chain_node_id": "hbm-dram",
+                "theme_exposure": 90,
+                "evidence_quality": 80,
+                "confidence": 0.82,
+                "verified_by": ["agent_native_research"],
+            },
+        ],
+    })
+    checks.append(_check(
+        "equity-screening record-theme-candidates writes candidate ledger",
+        record_candidates.get("ok") is True
+        and record_candidates.get("result", {}).get("recorded_count") == 2
+        and any("theme-candidates.jsonl" in path for path in record_candidates.get("artifacts", [])),
+        record_candidates,
     ))
 
     theme_pool = _run(workspace, "equity-screening", "refresh-theme-stock-pool", {
