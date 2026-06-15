@@ -517,6 +517,8 @@ def _normalize_symbol_key(symbol: Any, region: Any = None) -> str:
                 market = "KR"
             else:
                 market = suffix
+            if market == "HK" and code.isdigit():
+                code = code.zfill(4)
             return f"{market}:{code}"
     if market == "US":
         return f"US:{raw}"
@@ -591,8 +593,11 @@ def _merge_candidate_records(existing: dict[str, Any], incoming: dict[str, Any])
     providers = []
     for item in (existing, incoming):
         providers.extend(item.get("provider_route") if isinstance(item.get("provider_route"), list) else [])
-        if item.get("verified_by"):
-            providers.append(item.get("verified_by"))
+        verified_by = item.get("verified_by")
+        if isinstance(verified_by, list):
+            providers.extend(verified_by)
+        elif verified_by:
+            providers.append(verified_by)
     if providers:
         merged["provider_route"] = _list_add_unique([], providers)
     return merged

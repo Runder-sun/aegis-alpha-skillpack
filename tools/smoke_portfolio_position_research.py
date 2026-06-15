@@ -348,6 +348,16 @@ def run_smoke(workspace: Path) -> dict[str, Any]:
                 "verified_by": ["agent_native_research"],
             },
             {
+                "symbol": "000660",
+                "name": "SK hynix",
+                "region": "KR",
+                "chain_node_id": "hbm-dram-storage",
+                "theme_exposure": 96,
+                "evidence_quality": 82,
+                "confidence": 0.86,
+                "verified_by": ["public_quote"],
+            },
+            {
                 "symbol": "MU",
                 "name": "Micron Technology",
                 "region": "US",
@@ -367,12 +377,102 @@ def run_smoke(workspace: Path) -> dict[str, Any]:
                 "confidence": 0.84,
                 "verified_by": ["public_quote"],
             },
+            {
+                "symbol": "992.HK",
+                "name": "Lenovo Group",
+                "region": "HK",
+                "chain_node_id": "ai-server-odm",
+                "theme_exposure": 82,
+                "evidence_quality": 72,
+                "confidence": 0.74,
+                "verified_by": ["longbridge_quote"],
+            },
+            {
+                "symbol": "992",
+                "name": "联想集团",
+                "region": "HK",
+                "chain_node_id": "ai-server-odm",
+                "theme_exposure": 83,
+                "evidence_quality": 74,
+                "confidence": 0.75,
+                "verified_by": ["hk_public_quote"],
+            },
+            {
+                "symbol": "300308.SZ",
+                "name": "中际旭创",
+                "region": "CN",
+                "chain_node_id": "optical-interconnect",
+                "theme_exposure": 90,
+                "evidence_quality": 78,
+                "confidence": 0.78,
+                "verified_by": ["longbridge_quote"],
+            },
+            {
+                "symbol": "300308",
+                "name": "中际旭创",
+                "region": "CN",
+                "chain_node_id": "optical-interconnect",
+                "theme_exposure": 91,
+                "evidence_quality": 80,
+                "confidence": 0.79,
+                "verified_by": ["tushare"],
+            },
+            {
+                "symbol": "6981.T",
+                "name": "Murata Manufacturing",
+                "region": "JP",
+                "chain_node_id": "mlcc-passives",
+                "theme_exposure": 84,
+                "evidence_quality": 70,
+                "confidence": 0.70,
+                "verified_by": ["public_web_identity_delayed_quote"],
+            },
+            {
+                "symbol": "6981",
+                "name": "村田制作所",
+                "region": "JP",
+                "chain_node_id": "mlcc-passives",
+                "theme_exposure": 85,
+                "evidence_quality": 72,
+                "confidence": 0.72,
+                "verified_by": ["jpx_identity"],
+            },
+            {
+                "symbol": "2330.TW",
+                "name": "TSMC",
+                "region": "TW",
+                "chain_node_id": "advanced-packaging",
+                "theme_exposure": 92,
+                "evidence_quality": 84,
+                "confidence": 0.82,
+                "verified_by": ["company_ir"],
+            },
+            {
+                "symbol": "2330",
+                "name": "台积电",
+                "region": "TW",
+                "chain_node_id": "advanced-packaging",
+                "theme_exposure": 93,
+                "evidence_quality": 85,
+                "confidence": 0.83,
+                "verified_by": ["twse_identity"],
+            },
+            {
+                "symbol": "TSM.US",
+                "name": "TSMC ADR",
+                "region": "US",
+                "chain_node_id": "advanced-packaging",
+                "theme_exposure": 88,
+                "evidence_quality": 76,
+                "confidence": 0.76,
+                "verified_by": ["public_quote"],
+            },
         ],
     })
     checks.append(_check(
         "equity-screening record-theme-candidates writes candidate ledger",
         record_candidates.get("ok") is True
-        and record_candidates.get("result", {}).get("recorded_count") == 3
+        and record_candidates.get("result", {}).get("recorded_count") == 13
         and any("theme-candidates.jsonl" in path for path in record_candidates.get("artifacts", [])),
         record_candidates,
     ))
@@ -384,9 +484,16 @@ def run_smoke(workspace: Path) -> dict[str, Any]:
     checks.append(_check(
         "equity-screening refresh-theme-stock-pool writes deduped dynamic theme pool",
         theme_pool.get("ok") is True
-        and theme_pool.get("result", {}).get("pool_count") == 2
-        and sum(1 for item in theme_pool.get("result", {}).get("top_candidates", []) if item.get("canonical_key") == "US:MU") == 1
+        and theme_pool.get("result", {}).get("pool_count") == 7
+        and all(
+            sum(1 for item in theme_pool.get("result", {}).get("top_candidates", []) if item.get("canonical_key") == key) == 1
+            for key in ("KR:000660", "US:MU", "HK:0992", "CN:300308", "JP:6981", "TW:2330", "US:TSM")
+        )
         and any("MU" in item.get("aliases", []) and "MU.US" in item.get("aliases", []) for item in theme_pool.get("result", {}).get("top_candidates", []))
+        and any("992" in item.get("aliases", []) and "992.HK" in item.get("aliases", []) for item in theme_pool.get("result", {}).get("top_candidates", []))
+        and any("300308" in item.get("aliases", []) and "300308.SZ" in item.get("aliases", []) for item in theme_pool.get("result", {}).get("top_candidates", []))
+        and any("6981" in item.get("aliases", []) and "6981.T" in item.get("aliases", []) for item in theme_pool.get("result", {}).get("top_candidates", []))
+        and any("2330" in item.get("aliases", []) and "2330.TW" in item.get("aliases", []) for item in theme_pool.get("result", {}).get("top_candidates", []))
         and any("theme-stock-pool.json" in path for path in theme_pool.get("artifacts", [])),
         theme_pool,
     ))
