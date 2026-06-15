@@ -124,10 +124,15 @@ Aegis Alpha 要正常工作，必须有基础行情数据来源。不同市场�
 | 市场 | 推荐配置 | 获取地址 | 用途 |
 |---|---|---|---|
 | A 股/中国市场 | `TUSHARE_TOKEN` | <https://tushare.pro> | A 股行情、指数、日历、资金和基础市场数据 |
-| 港股/美股/海外市场 | LongBridge / LongPort | <https://open.longbridge.com/skill/> | 海外行情、报价和历史数据 |
-| 海外备用 | `FINNHUB_API_KEY` | <https://finnhub.io> | LongBridge 不可用时的备用行情来源 |
+| 港股/美股/部分海外市场 | LongBridge / LongPort | <https://open.longbridge.com/skill/> | 支持市场的报价、历史数据和证券身份校验 |
+| 日股/韩股/台股等 LongBridge 未覆盖市场 | 交易所页面、公司 IR、公开延迟报价页；需要实时行情时配置区域 provider | JPX/KRX/TWSE、公司 IR、公开金融网站 | 证券身份、上市地、延迟报价校验；不等于实时盘口 |
+| 海外备用 | `FINNHUB_API_KEY` 或其他区域行情 API | <https://finnhub.io> 等 | LongBridge 不适用或不可用时的补充行情来源 |
 
 如果没有完成行情数据配置，Aegis Alpha 不能算完整初始化。
+
+注意：某个 provider 返回空结果，不一定代表股票不存在。比如 LongBridge
+不覆盖某些日股、韩股或台股时，Aegis Alpha 应改用 JPX/KRX/TWSE、公司 IR
+或公开延迟报价页做身份校验，并在结果中写明校验范围。
 
 ### 可选配置
 
@@ -376,10 +381,16 @@ Aegis Alpha needs a baseline market data source before it is fully initialized:
 | Market | Recommended setup | Where to get it | Purpose |
 |---|---|---|---|
 | A-share / China | `TUSHARE_TOKEN` | <https://tushare.pro> | A-share quotes, indices, calendars, capital flow, and market data |
-| Hong Kong / US / overseas | LongBridge / LongPort | <https://open.longbridge.com/skill/> | Overseas quotes and historical data |
-| Overseas fallback | `FINNHUB_API_KEY` | <https://finnhub.io> | Backup source when LongBridge is unavailable |
+| Hong Kong / US / selected overseas markets | LongBridge / LongPort | <https://open.longbridge.com/skill/> | Quotes, historical data, and security identity checks for supported markets |
+| Japan / Korea / Taiwan and other markets outside LongBridge coverage | exchange pages, company IR, public delayed quote pages; add a regional provider for realtime quotes | JPX/KRX/TWSE, company IR, public finance sites | identity, listing venue, and delayed quote checks; not realtime order-book data |
+| Overseas fallback | `FINNHUB_API_KEY` or another regional market API | <https://finnhub.io> and related provider sites | Supplemental data when LongBridge is unavailable or inapplicable |
 
 Without market data, Aegis Alpha is not fully initialized.
+
+Note: an empty result from one provider is not proof that a security does not
+exist. If LongBridge does not cover Japan, Korea, or Taiwan in the current
+setup, Aegis Alpha should verify those names through JPX/KRX/TWSE, company IR,
+or public delayed quote pages and state the verification scope.
 
 ### Optional Setup
 

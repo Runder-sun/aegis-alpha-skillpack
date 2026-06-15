@@ -35,6 +35,31 @@ Commands read from the latest nightly prewarm JSON under
 `memory/prewarm/nightly-prewarm-*.json`. They do not call live providers at
 dispatch time and do not substitute one provider for another silently.
 
+## Provider Applicability
+
+Provider availability is market-specific. A provider can be correctly
+configured and still be inapplicable to a requested market. Do not treat an
+empty response from an inapplicable provider as a negative security check.
+
+Default routing guidance:
+
+- A-share / China: use Tushare for structured data; LongBridge may verify
+  quotes when the account has China permissions.
+- Hong Kong: use LongBridge when available; fall back to HKEX, company IR, or
+  public delayed quote pages for identity checks.
+- United States: use LongBridge when available; fall back to SEC/company IR or
+  public delayed quote pages for identity checks.
+- Japan: use JPX listed-company search, company IR, or public delayed quote
+  pages unless a region-specific provider is configured.
+- Korea: use KRX/Seoul exchange sources, company IR, or public delayed quote
+  pages unless a region-specific provider is configured.
+- Taiwan: use TWSE, company IR, or public delayed quote pages unless a
+  region-specific provider is configured.
+
+When a fallback is used, record both `verified_by` and `verification_scope`.
+For example, `public_web_identity_delayed_quote` proves identity/listing and
+delayed quote availability, not realtime order-book access.
+
 ## Commands
 
 | command | status | key source field | failure behavior |

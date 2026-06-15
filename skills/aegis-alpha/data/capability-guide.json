@@ -5,7 +5,7 @@
     "first_run_brief": [
       "Aegis Alpha is a research-only investment workflow pack. It can help with market desk reviews, macro and theme analysis, equity screening, equity research, portfolio/risk review, paper-only trade planning, advice lifecycle tracking, quant validation, report review, and scheduled research workflows.",
       "It never enables live trading, order execution, allocation authorization, or executable investment advice. All outputs remain research and evidence workflow outputs.",
-      "Full initialization requires the global market_data baseline. A-share and China market data use TUSHARE_TOKEN from https://tushare.pro. Overseas market data should prefer LongBridge / LongPort from https://open.longbridge.com/skill/. Finnhub at https://finnhub.io is only a fallback when LongBridge is unavailable.",
+      "Full initialization requires the global market_data baseline. A-share and China market data use TUSHARE_TOKEN from https://tushare.pro. LongBridge / LongPort from https://open.longbridge.com/skill/ is preferred for supported Hong Kong, US, China, and account-enabled markets. Markets outside configured coverage, such as Japan, Korea, or Taiwan in some LongBridge setups, need exchange/company IR/public quote verification or a region-specific provider. Finnhub at https://finnhub.io is only a fallback where it covers the requested market.",
       "Optional API groups unlock better search, document parsing, market intelligence, and external push. Each optional group can be configured, explicitly skipped, or disabled. Deferred choices keep initialization incomplete.",
       "Prewarm seeds an initial auditable cache artifact after providers are configured. It is an installation/runtime health step, not a separate public user skill and not a recurring automation by itself.",
       "Heartbeat is the recurring automation choice. It may create future prewarm or market review jobs, but only after the agent explains exact jobs, schedules, runtime location, and receives explicit approval.",
@@ -15,8 +15,8 @@
       {
         "item": "market_data",
         "required": "required globally",
-        "unlocks": "A-share, Hong Kong, US, and overseas market data baseline; quotes; daily bars; historical series; screening and quant inputs.",
-        "setup": "Tushare TUSHARE_TOKEN at https://tushare.pro; LongBridge / LongPort at https://open.longbridge.com/skill/; Finnhub fallback at https://finnhub.io.",
+        "unlocks": "A-share, Hong Kong, US, supported overseas market data baseline; quotes; daily bars; historical series; screening and quant inputs; explicit identity verification routes for uncovered markets.",
+        "setup": "Tushare TUSHARE_TOKEN at https://tushare.pro; LongBridge / LongPort at https://open.longbridge.com/skill/ for supported markets; Finnhub or region-specific providers for covered fallback markets; exchange/company IR/public quote pages for identity checks when APIs are unavailable.",
         "completion_condition": "TUSHARE_TOKEN is configured and either LongBridge/LongPort credentials, an authenticated LongBridge CLI session, or FINNHUB_API_KEY is available.",
         "if_skipped": "Aegis Alpha is not fully initialized. Market-sensitive workflows must stay in setup guidance or fail closed."
       },
@@ -80,7 +80,7 @@
     "step_prompt_templates": {
       "capabilities": "First explain the first_run_brief and configuration_matrix in concise user-facing language. Then ask which product experience or preset the user wants to initialize.",
       "runtime_profile": "Explain the preset choices and required axes: data_providers, cache_policy, manual_input, portfolio_source, heartbeat. Ask the user to choose or explicitly accept recommended defaults.",
-      "market_data": "Explain that market_data is globally required, list Tushare, LongBridge/LongPort, and Finnhub fallback setup URLs, describe the completion condition, then ask whether to configure now or provide existing credentials.",
+      "market_data": "Explain that market_data is globally required, list Tushare, LongBridge/LongPort, and Finnhub or region-specific fallback setup URLs, clarify that provider coverage is market/account specific, describe the completion condition, then ask whether to configure now or provide existing credentials.",
       "optional_api_groups": "For each optional group, explain what it unlocks, setup URL, completion condition, and skipped behavior. Ask configure, skip/disable, or defer for one group at a time.",
       "prewarm": "Explain that prewarm runs once to seed an initial auditable cache and check provider/runtime health. Ask whether to run it now, skip, accept partial, or defer.",
       "heartbeat": "Explain none, manual, daily-prewarm, market-heartbeat, and full. If automation is requested, list exact jobs and schedules before asking for approval to create them.",
@@ -146,7 +146,7 @@
         "longbridge": "https://open.longbridge.com/skill/",
         "finnhub_fallback": "https://finnhub.io"
       },
-      "unlocks": ["A-share market data via $tushare", "overseas market data via $longbridge / LongPort", "quotes", "daily bars", "historical series", "fundamentals", "screening data", "quant inputs"],
+      "unlocks": ["A-share market data via $tushare", "supported overseas market data via $longbridge / LongPort", "market-specific identity verification routes for uncovered markets", "quotes", "daily bars", "historical series", "fundamentals", "screening data", "quant inputs"],
       "required_when": "Always required before Aegis Alpha is considered fully initialized.",
       "without_api": "Initialization must treat market data as missing. Do not run market-sensitive workflows as fully configured; only provide setup guidance or fail closed."
     },
@@ -181,8 +181,8 @@
         "longbridge": "https://open.longbridge.com/skill/",
         "finnhub_fallback": "https://finnhub.io"
       },
-      "unlocks": ["A-share market data via $tushare", "overseas market data via $longbridge / LongPort", "quotes", "daily bars", "historical series", "fundamentals", "screening data", "quant inputs"],
-      "required_when": "Always required as the global market-data baseline. A-share/China data should follow the $tushare skill token convention (`TUSHARE_TOKEN`); overseas market data should prefer the $longbridge / LongPort convention, either via `LONGPORT_APP_KEY`, `LONGPORT_APP_SECRET`, and `LONGPORT_ACCESS_TOKEN`, or via an authenticated LongBridge CLI session verified by `longbridge auth status`. `FINNHUB_API_KEY` is only a fallback.",
+      "unlocks": ["A-share market data via $tushare", "supported overseas market data via $longbridge / LongPort", "market-specific identity verification routes for uncovered markets", "quotes", "daily bars", "historical series", "fundamentals", "screening data", "quant inputs"],
+      "required_when": "Always required as the global market-data baseline. A-share/China data should follow the $tushare skill token convention (`TUSHARE_TOKEN`). Hong Kong, US, China, and account-enabled markets should prefer the $longbridge / LongPort convention, either via `LONGPORT_APP_KEY`, `LONGPORT_APP_SECRET`, and `LONGPORT_ACCESS_TOKEN`, or via an authenticated LongBridge CLI session verified by `longbridge auth status`. Japan, Korea, Taiwan, or other markets outside configured coverage require exchange/company IR/public quote verification or a region-specific provider. `FINNHUB_API_KEY` is only a fallback where it covers the requested market.",
       "without_api": "Do not fabricate structured data. Initialization is incomplete until market_data is configured; market-sensitive workflows must fail closed or stay in setup guidance mode."
     },
     "market_intel": {

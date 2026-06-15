@@ -299,6 +299,30 @@ def run_smoke(workspace: Path) -> dict[str, Any]:
         coverage_plan,
     ))
 
+    demand_driver_plan = _run(workspace, "equity-screening", "plan-theme-coverage", {
+        "theme_ids": ["ai-infrastructure"],
+        "required_markets": ["US", "KR", "TW"],
+        "theme_map": {
+            "themes": [{
+                "id": "ai-infrastructure",
+                "name": "AI Infrastructure",
+                "nodes": [
+                    {"id": "hyperscaler-capex", "name": "Hyperscaler capex", "role": "demand_driver"},
+                    {"id": "hbm-dram", "name": "HBM / DRAM", "role": "upstream_bottleneck"},
+                ],
+            }]
+        },
+    })
+    demand_nodes = demand_driver_plan.get("result", {}).get("nodes", [])
+    demand_node = next((node for node in demand_nodes if node.get("node_id") == "hyperscaler-capex"), {})
+    checks.append(_check(
+        "equity-screening plan-theme-coverage treats capex as evidence node",
+        demand_driver_plan.get("ok") is True
+        and demand_node.get("coverage_kind") == "demand_driver_evidence"
+        and demand_node.get("coverage_gaps") == [],
+        demand_driver_plan,
+    ))
+
     theme_pool_missing = _run(workspace, "equity-screening", "refresh-theme-stock-pool", {
         "theme_ids": ["ai-infrastructure"],
         "min_score": 55,
@@ -333,12 +357,22 @@ def run_smoke(workspace: Path) -> dict[str, Any]:
                 "confidence": 0.82,
                 "verified_by": ["agent_native_research"],
             },
+            {
+                "symbol": "MU.US",
+                "name": "Micron",
+                "region": "US",
+                "chain_node_id": "hbm-dram-storage",
+                "theme_exposure": 92,
+                "evidence_quality": 82,
+                "confidence": 0.84,
+                "verified_by": ["public_quote"],
+            },
         ],
     })
     checks.append(_check(
         "equity-screening record-theme-candidates writes candidate ledger",
         record_candidates.get("ok") is True
-        and record_candidates.get("result", {}).get("recorded_count") == 2
+        and record_candidates.get("result", {}).get("recorded_count") == 3
         and any("theme-candidates.jsonl" in path for path in record_candidates.get("artifacts", [])),
         record_candidates,
     ))
@@ -348,9 +382,11 @@ def run_smoke(workspace: Path) -> dict[str, Any]:
         "min_score": 55,
     })
     checks.append(_check(
-        "equity-screening refresh-theme-stock-pool writes dynamic theme pool",
+        "equity-screening refresh-theme-stock-pool writes deduped dynamic theme pool",
         theme_pool.get("ok") is True
-        and theme_pool.get("result", {}).get("pool_count", 0) >= 1
+        and theme_pool.get("result", {}).get("pool_count") == 2
+        and sum(1 for item in theme_pool.get("result", {}).get("top_candidates", []) if item.get("canonical_key") == "US:MU") == 1
+        and any("MU" in item.get("aliases", []) and "MU.US" in item.get("aliases", []) for item in theme_pool.get("result", {}).get("top_candidates", []))
         and any("theme-stock-pool.json" in path for path in theme_pool.get("artifacts", [])),
         theme_pool,
     ))

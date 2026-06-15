@@ -498,8 +498,117 @@ def _load_active_theme_map(payload: dict[str, Any]) -> tuple[dict[str, Any], lis
     return {}, [], "theme_chain_map_missing"
 
 
+def _normalize_symbol_key(symbol: Any, region: Any = None) -> str:
+    raw = str(symbol or "").strip().upper()
+    if not raw:
+        return ""
+    raw = raw.replace(" ", "")
+    market = str(region or "").strip().upper()
+    if raw.startswith("."):
+        return raw
+    if "." in raw:
+        code, suffix = raw.rsplit(".", 1)
+        if suffix in {"US", "HK", "SH", "SZ", "T", "KS", "KQ", "TW"}:
+            if suffix in {"SH", "SZ"}:
+                market = "CN"
+            elif suffix == "T":
+                market = "JP"
+            elif suffix in {"KS", "KQ"}:
+                market = "KR"
+            else:
+                market = suffix
+            return f"{market}:{code}"
+    if market == "US":
+        return f"US:{raw}"
+    if market == "HK":
+        return f"HK:{raw.zfill(4)}" if raw.isdigit() else f"HK:{raw}"
+    if market == "CN":
+        return f"CN:{raw}"
+    if market == "JP":
+        return f"JP:{raw}"
+    if market == "KR":
+        return f"KR:{raw}"
+    if market == "TW":
+        return f"TW:{raw}"
+    return raw
+
+
 def _candidate_key(candidate: dict[str, Any]) -> str:
-    return str(candidate.get("symbol") or candidate.get("code") or candidate.get("name") or "").upper()
+    symbol = candidate.get("symbol") or candidate.get("code")
+    if symbol:
+        return _normalize_symbol_key(symbol, candidate.get("region") or candidate.get("market_region"))
+    theme = str(candidate.get("theme_id") or "").strip().lower()
+    name = str(candidate.get("name") or "").strip().upper()
+    return f"NAME:{theme}:{name}" if name else ""
+
+
+def _list_add_unique(values: list[Any], additions: list[Any]) -> list[Any]:
+    out: list[Any] = []
+    seen: set[str] = set()
+    for value in values + additions:
+        if value in (None, ""):
+            continue
+        key = json.dumps(value, ensure_ascii=False, sort_keys=True) if isinstance(value, (dict, list)) else str(value)
+        if key in seen:
+            continue
+        seen.add(key)
+        out.append(value)
+    return out
+
+
+def _merge_candidate_records(existing: dict[str, Any], incoming: dict[str, Any]) -> dict[str, Any]:
+    if not existing:
+        merged = dict(incoming)
+    else:
+        old_score = _float(existing.get("score")) or 0.0
+        new_score = _float(incoming.get("score")) or 0.0
+        primary, secondary = (incoming, existing) if new_score >= old_score else (existing, incoming)
+        merged = dict(secondary)
+        merged.update(primary)
+        for key in ("verified_by", "market_data_verified", "verification_status", "verification_scope", "quote_source_url", "quote_source_name"):
+            if incoming.get(key) not in (None, "", []):
+                merged[key] = incoming.get(key)
+            elif existing.get(key) not in (None, "", []):
+                merged[key] = existing.get(key)
+    aliases = []
+    for item in (existing, incoming):
+        aliases.extend(item.get("aliases") if isinstance(item.get("aliases"), list) else [])
+        for key in ("symbol", "code", "name"):
+            if item.get(key):
+                aliases.append(item.get(key))
+    merged["aliases"] = _list_add_unique([], aliases)
+    node_ids = []
+    for item in (existing, incoming):
+        node_ids.extend(item.get("chain_node_ids") if isinstance(item.get("chain_node_ids"), list) else [])
+        node = item.get("chain_node_id") or item.get("node_id")
+        if node:
+            node_ids.append(node)
+    merged["chain_node_ids"] = _list_add_unique([], node_ids)
+    evidence_ids = []
+    for item in (existing, incoming):
+        evidence_ids.extend(item.get("evidence_ids") if isinstance(item.get("evidence_ids"), list) else [])
+    merged["evidence_ids"] = _list_add_unique([], evidence_ids)
+    providers = []
+    for item in (existing, incoming):
+        providers.extend(item.get("provider_route") if isinstance(item.get("provider_route"), list) else [])
+        if item.get("verified_by"):
+            providers.append(item.get("verified_by"))
+    if providers:
+        merged["provider_route"] = _list_add_unique([], providers)
+    return merged
+
+
+def _is_equity_candidate_node(node: dict[str, Any]) -> bool:
+    mode = str(node.get("coverage_mode") or node.get("candidate_mode") or "").lower()
+    if mode in {"evidence_only", "demand_driver", "non_equity"}:
+        return False
+    role = str(node.get("role") or "").lower()
+    if role in {"demand_driver", "macro_driver", "customer_budget", "capex_driver"}:
+        return False
+    node_id = str(node.get("id") or "").lower()
+    if "hyperscaler" in node_id or node_id.endswith("-capex") or "capex" in node_id:
+        return False
+    return True
 
 
 def _theme_nodes_from_map(theme_map: dict[str, Any], payload: dict[str, Any]) -> list[dict[str, Any]]:
@@ -553,6 +662,7 @@ def _plan_theme_coverage(command: str, payload: dict[str, Any]) -> dict[str, Any
     node_plans = []
     for node in nodes:
         node_id = str(node.get("id") or "")
+        equity_candidate_node = _is_equity_candidate_node(node)
         node_candidates = [
             item for item in candidate_rows
             if isinstance(item, dict)
@@ -560,15 +670,20 @@ def _plan_theme_coverage(command: str, payload: dict[str, Any]) -> dict[str, Any
             and (not node_id or str(item.get("chain_node_id") or item.get("node_id") or "") == node_id)
         ]
         covered = sorted(_candidate_regions(node_candidates))
-        gaps = [market for market in required_markets if market not in covered]
+        gaps = [market for market in required_markets if market not in covered] if equity_candidate_node else []
         node_plans.append({
             "theme_id": node.get("theme_id"),
             "node_id": node_id,
             "node_name": node.get("name"),
+            "coverage_kind": "equity_candidates" if equity_candidate_node else "demand_driver_evidence",
             "candidate_count": len(node_candidates),
             "covered_markets": covered,
             "coverage_gaps": gaps,
-            "recommended_expansion": _recommended_expansion(gaps),
+            "recommended_expansion": _recommended_expansion(gaps) if equity_candidate_node else [
+                "track_customer_capex_guidance",
+                "track_cloud_budget_commentary",
+                "bind demand evidence; do not force market-by-market stock candidates",
+            ],
         })
 
     plan = {
@@ -598,9 +713,14 @@ def _recommended_expansion(gaps: list[str]) -> list[str]:
         recs.append("tushare_verify")
     if "HK" in gaps:
         recs.append("longbridge_verify")
-    if any(market in gaps for market in ("US", "JP", "KR", "TW")):
+    if "US" in gaps:
         recs.append("agent_native_research")
-        recs.append("market_data_verify")
+        recs.append("longbridge_or_public_quote_verify")
+    if any(market in gaps for market in ("JP", "KR", "TW")):
+        recs.append("agent_native_research")
+        recs.append("official_exchange_or_company_ir_verify")
+        recs.append("public_web_delayed_quote_verify")
+        recs.append("optional_region_specific_market_data_provider")
     return sorted(set(recs))
 
 
@@ -680,15 +800,22 @@ def _refresh_theme_stock_pool(command: str, payload: dict[str, Any], base: Path)
     existing_doc = _read_json_file(_theme_stock_pool_path(), {"candidates": []})
     if not isinstance(existing_doc, dict) or not isinstance(existing_doc.get("candidates"), list):
         return _fail(command, payload, ["theme_stock_pool_invalid_schema"])
-    existing_by_key = {_candidate_key(item): item for item in existing_doc.get("candidates", []) if isinstance(item, dict) and _candidate_key(item)}
+    existing_by_key: dict[str, dict[str, Any]] = {}
+    for item in existing_doc.get("candidates", []):
+        if not isinstance(item, dict):
+            continue
+        key = _candidate_key(item)
+        if not key:
+            continue
+        existing_by_key[key] = _merge_candidate_records(existing_by_key.get(key, {}), item)
     additions = []
     now = _now()
     for candidate in filtered[:max_candidates]:
         key = _candidate_key(candidate)
         if not key:
             continue
-        enriched = dict(existing_by_key.get(key, {}))
-        enriched.update(candidate)
+        was_new = key not in existing_by_key
+        enriched = _merge_candidate_records(existing_by_key.get(key, {}), candidate)
         enriched.setdefault("first_seen_at", now)
         enriched["last_seen_at"] = now
         if candidate.get("state") in {"core", "watchlist", "rejected", "stale"}:
@@ -699,8 +826,8 @@ def _refresh_theme_stock_pool(command: str, payload: dict[str, Any], base: Path)
             enriched["state"] = "watchlist"
         else:
             enriched["state"] = "candidate"
-        enriched["evidence_ids"] = candidate.get("evidence_ids") if isinstance(candidate.get("evidence_ids"), list) else enriched.get("evidence_ids", [])
-        if key not in existing_by_key:
+        enriched["canonical_key"] = key
+        if was_new:
             additions.append(enriched)
         existing_by_key[key] = enriched
 

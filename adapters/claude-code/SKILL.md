@@ -63,11 +63,14 @@ Before asking the user to configure API keys, read
 `../.aegis-alpha-core/data/capability-guide.json` or the generated
 `profile.onboarding` block. Explain that `market_data` is globally required:
 `TUSHARE_TOKEN` for A-share/China data via `$tushare`, and LongBridge/LongPort
-for overseas data via `$longbridge`: either `LONGPORT_APP_KEY`,
-`LONGPORT_APP_SECRET`, and `LONGPORT_ACCESS_TOKEN`, or an installed and
-authenticated LongBridge CLI session verified by `longbridge auth status`.
-`FINNHUB_API_KEY` is only a fallback. Include setup URLs when asking for
-credentials, especially LongBridge `https://open.longbridge.com/skill/` and
+for supported Hong Kong, US, China, and account-enabled markets via
+`$longbridge`: either `LONGPORT_APP_KEY`, `LONGPORT_APP_SECRET`, and
+`LONGPORT_ACCESS_TOKEN`, or an installed and authenticated LongBridge CLI
+session verified by `longbridge auth status`. Japan, Korea, Taiwan, or other
+markets outside configured coverage require exchange/company IR/public quote
+verification or a region-specific provider. `FINNHUB_API_KEY` is only a
+fallback where it covers the requested market. Include setup URLs when asking
+for credentials, especially LongBridge `https://open.longbridge.com/skill/` and
 Tushare `https://tushare.pro`; use `capability-guide.json` `setup_urls` for
 other API groups. Then explain which other API groups are recommended or
 optional for the selected preset. Do not ask the user to choose raw API names
