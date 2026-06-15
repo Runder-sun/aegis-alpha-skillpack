@@ -428,6 +428,12 @@
         },
         {
           "package": "equity-screening",
+          "command": "theme-maintenance-review",
+          "optional": false,
+          "note": "生成覆盖缺口、降级建议、分层排序和验证队列"
+        },
+        {
+          "package": "equity-screening",
           "command": "batch-theme-research",
           "optional": true,
           "note": "生成 equity-research 深挖队列"
@@ -480,6 +486,12 @@
           "command": "theme-stock-pool-audit",
           "optional": false,
           "note": "股池证据和陈旧度审计"
+        },
+        {
+          "package": "equity-screening",
+          "command": "theme-maintenance-review",
+          "optional": false,
+          "note": "生成周度维护工作队列"
         },
         {
           "package": "quality-gate",

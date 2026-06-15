@@ -554,6 +554,38 @@
       "legacy_functions": [
         "theme_stock_pool_audit"
       ]
+    },
+    {
+      "status": "implemented",
+      "payload_schema": {
+        "$ref": "#/$defs/theme_chain_screen_payload"
+      },
+      "result_schema": {
+        "$ref": "#/$defs/screening_result"
+      },
+      "upstream_dependencies": [
+        "memory/stock_pool/theme-stock-pool.json",
+        "memory/dynamic_themes/coverage-plan.json"
+      ],
+      "freshness_policy": "Maintenance freshness is inherited from the current coverage plan, theme stock pool, candidate evidence, and verification metadata.",
+      "error_behavior": [
+        "theme_stock_pool_missing",
+        "coverage_plan_missing",
+        "theme_candidates_missing"
+      ],
+      "example": {
+        "theme_ids": [
+          "ai-infrastructure"
+        ],
+        "layer_limit": 5,
+        "max_gap_tasks": 10,
+        "verification_limit": 10
+      },
+      "name": "theme-maintenance-review",
+      "description": "Generate a research-only dynamic theme maintenance work queue: coverage-gap discovery tasks, stale/downgrade suggestions, layered rankings, and verification tasks.",
+      "legacy_functions": [
+        "theme_maintenance_review"
+      ]
     }
   ],
   "$defs": {

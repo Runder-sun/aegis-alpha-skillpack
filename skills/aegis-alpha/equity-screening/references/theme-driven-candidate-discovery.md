@@ -40,6 +40,30 @@ test fixture. It can guide node names and scoring fields, but it is not a
 complete global universe and must not be used to imply that uncovered markets
 have no candidates.
 
+## Maintenance Loop
+
+Use the maintenance loop when the user asks whether the dynamic theme system can
+keep discovering, refreshing, downgrading, and validating theme candidates over
+time.
+
+1. Run `plan-theme-coverage` to expose node/market gaps.
+2. Use agent-native research and available APIs to discover candidates and bind
+   evidence; do not rely on a static seed list.
+3. Record candidates with `record-theme-candidates`.
+4. Run `refresh-theme-stock-pool` to normalize symbols, deduplicate listings,
+   and score the current pool.
+5. Run `theme-stock-pool-audit` to fail closed on missing evidence or stale
+   state.
+6. Run `theme-maintenance-review` to generate the next work queue:
+   coverage-gap search tasks, stale/downgrade suggestions, layered rankings,
+   and verification tasks.
+7. Send selected names or verification tasks to `equity-research` for deep
+   validation before changing state to `watchlist` or `core`.
+
+Do not automatically mutate candidate state from maintenance output alone. Treat
+`theme-maintenance-review` as a decision-support queue for the agent and user:
+apply changes only after evidence review or explicit confirmation.
+
 ## Provider Applicability
 
 Do not interpret an empty quote result from an inapplicable provider as evidence

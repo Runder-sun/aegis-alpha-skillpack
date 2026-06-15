@@ -47,6 +47,10 @@ otherwise it uses `~/.aegis-alpha/workspace`.
   theme stock pool.
 - `theme-stock-pool-audit`: fail-closed audit for evidence coverage and stale
   theme candidates.
+- `theme-maintenance-review`: generate coverage-gap search tasks,
+  stale/downgrade suggestions, layered rankings, and verification tasks for the
+  dynamic theme stock pool. Use it as an agent work queue; it does not mutate
+  candidate state by itself.
 - `layered-stock-screening`: split screened candidates into `core`,
   `watchlist`, and `reject`.
 - `leader-source-harvest`: return high-scoring leaders for source tracking.
@@ -109,6 +113,13 @@ It returns candidates with `chain_node`, `repricing_model`,
 `valuation_models`, score breakdowns, and `core`/`watchlist`/`expensive_or_risk`
 layers. Treat this output as a template/fixture unless candidates were supplied
 from live research or a verified candidate ledger.
+
+Dynamic theme maintenance should be agent-led: use `plan-theme-coverage` to
+expose missing nodes/markets, discover candidates with research tools, record
+and refresh the pool, audit it, then run `theme-maintenance-review` to decide
+what needs discovery, verification, downgrade review, or deeper
+`equity-research`. Do not silently apply status changes from the maintenance
+review; bind evidence or ask for confirmation first.
 
 The output is a research shortlist, not a trading recommendation. Send selected
 candidates to `equity-research` for fundamentals/valuation and then to

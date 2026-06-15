@@ -506,6 +506,23 @@ def run_smoke(workspace: Path) -> dict[str, Any]:
         theme_pool_audit,
     ))
 
+    theme_maintenance = _run(workspace, "equity-screening", "theme-maintenance-review", {
+        "theme_ids": ["ai-infrastructure"],
+        "layer_limit": 3,
+        "max_gap_tasks": 5,
+        "verification_limit": 5,
+    })
+    checks.append(_check(
+        "equity-screening theme-maintenance-review writes dynamic maintenance queue",
+        theme_maintenance.get("ok") is True
+        and any("theme-maintenance-review.json" in path for path in theme_maintenance.get("artifacts", []))
+        and isinstance(theme_maintenance.get("result", {}).get("coverage_gap_tasks"), list)
+        and isinstance(theme_maintenance.get("result", {}).get("layered_rankings"), dict)
+        and isinstance(theme_maintenance.get("result", {}).get("verification_tasks"), list)
+        and theme_maintenance.get("result", {}).get("summary", {}).get("candidate_count", 0) >= 1,
+        theme_maintenance,
+    ))
+
     theme_research_batch = _run(workspace, "equity-screening", "batch-theme-research", {"limit": 3})
     checks.append(_check(
         "equity-screening batch-theme-research prepares deep-dive queue",

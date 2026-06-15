@@ -56,6 +56,10 @@ def _coverage_plan_path() -> Path:
     return _dynamic_theme_dir() / "coverage-plan.json"
 
 
+def _theme_maintenance_review_path() -> Path:
+    return _dynamic_theme_dir() / "theme-maintenance-review.json"
+
+
 def _theme_candidates_path() -> Path:
     return _dynamic_theme_dir() / "theme-candidates.jsonl"
 
@@ -940,6 +944,231 @@ def _theme_stock_pool_audit(command: str, payload: dict[str, Any]) -> dict[str, 
     return output
 
 
+def _candidate_score(candidate: dict[str, Any]) -> float:
+    return _float(candidate.get("score")) or 0.0
+
+
+def _days_since(value: Any) -> int | None:
+    if not value:
+        return None
+    try:
+        dt = datetime.fromisoformat(str(value).replace("Z", "+00:00"))
+    except Exception:
+        return None
+    now = datetime.now(timezone.utc)
+    if dt.tzinfo is None:
+        dt = dt.replace(tzinfo=timezone.utc)
+    return max(0, (now - dt).days)
+
+
+def _market_query_label(market: str) -> str:
+    return {
+        "CN": "A-share China",
+        "HK": "Hong Kong listed",
+        "US": "US listed",
+        "JP": "Japan listed",
+        "KR": "Korea listed",
+        "TW": "Taiwan listed",
+    }.get(market, market)
+
+
+def _coverage_search_tasks(plan: dict[str, Any], payload: dict[str, Any]) -> list[dict[str, Any]]:
+    max_tasks = int(payload.get("max_gap_tasks", 30))
+    theme_filter = {str(item) for item in payload.get("theme_ids", [])} if isinstance(payload.get("theme_ids"), list) else set()
+    tasks: list[dict[str, Any]] = []
+    for node in plan.get("nodes", []) if isinstance(plan.get("nodes"), list) else []:
+        if not isinstance(node, dict) or node.get("coverage_kind") != "equity_candidates":
+            continue
+        if theme_filter and str(node.get("theme_id") or "") not in theme_filter:
+            continue
+        node_id = str(node.get("node_id") or "")
+        node_name = str(node.get("node_name") or node_id)
+        for market in node.get("coverage_gaps", []) or []:
+            market = str(market).upper()
+            tasks.append({
+                "theme_id": node.get("theme_id"),
+                "node_id": node_id,
+                "node_name": node_name,
+                "market": market,
+                "query": f"AI infrastructure {node_name} {_market_query_label(market)} suppliers revenue orders listed companies",
+                "preferred_verification": _recommended_expansion([market]),
+                "expected_output": "candidate rows with symbol, region, chain_node_id, claim, source_url, verified_by, verification_scope",
+            })
+            if len(tasks) >= max_tasks:
+                return tasks
+    return tasks
+
+
+def _status_review(candidates: list[dict[str, Any]], payload: dict[str, Any]) -> list[dict[str, Any]]:
+    stale_days = int(payload.get("stale_days", 45))
+    downgrade_score = float(payload.get("downgrade_score", 55))
+    items: list[dict[str, Any]] = []
+    for candidate in candidates:
+        key = _candidate_key(candidate)
+        score = _candidate_score(candidate)
+        state = str(candidate.get("state") or "candidate")
+        evidence_quality = _float(candidate.get("evidence_quality")) or 0.0
+        last_days = _days_since(candidate.get("last_seen_at"))
+        reasons = []
+        suggested = state
+        if last_days is None:
+            reasons.append("last_seen_at_missing")
+            suggested = "candidate" if state in {"core", "watchlist"} else state
+        elif last_days > stale_days:
+            reasons.append(f"stale>{stale_days}d")
+            suggested = "stale"
+        if state in {"core", "watchlist"} and evidence_quality <= 0 and not candidate.get("evidence_ids"):
+            reasons.append("evidence_missing")
+            suggested = "candidate"
+        if score < downgrade_score and state in {"core", "watchlist"}:
+            reasons.append("score_below_threshold")
+            suggested = "candidate"
+        if str(candidate.get("relationship_type") or "") == "tourist":
+            reasons.append("tourist_exposure")
+            suggested = "rejected"
+        if reasons:
+            items.append({
+                "canonical_key": key,
+                "name": candidate.get("name"),
+                "symbol": candidate.get("symbol") or candidate.get("code"),
+                "region": candidate.get("region"),
+                "chain_node_id": candidate.get("chain_node_id"),
+                "current_state": state,
+                "suggested_state": suggested,
+                "score": score,
+                "reasons": reasons,
+            })
+    return sorted(items, key=lambda item: (item.get("suggested_state") != "rejected", item.get("score", 0)))
+
+
+def _layer_score(candidate: dict[str, Any], layer: str) -> float:
+    score = _candidate_score(candidate)
+    exposure = _float(candidate.get("theme_exposure")) or _float(candidate.get("ai_infra_exposure")) or 0.0
+    evidence = _float(candidate.get("evidence_quality")) or 0.0
+    bottleneck = _float(candidate.get("bottleneck_score")) or 0.0
+    model_shift = _float(candidate.get("model_shift_score")) or 0.0
+    forward_pe = _float(candidate.get("forward_pe"))
+    relationship = str(candidate.get("relationship_type") or "")
+    verified = 10.0 if candidate.get("verified_by") or candidate.get("market_data_verified") else 0.0
+    if layer == "valuation_rewrite":
+        pe_bonus = 20.0 if forward_pe is not None and forward_pe <= 20 else 8.0 if forward_pe is not None and forward_pe <= 35 else 0.0
+        return score * 0.35 + model_shift * 0.25 + evidence * 0.2 + pe_bonus + verified
+    if layer == "bottleneck_scarcity":
+        rel_bonus = 15.0 if relationship == "bottleneck_supplier" else 8.0 if relationship == "core_beneficiary" else 0.0
+        return score * 0.35 + bottleneck * 0.25 + exposure * 0.2 + evidence * 0.1 + rel_bonus
+    if layer == "platform_quality":
+        rel_bonus = 18.0 if relationship == "platform" else 8.0 if relationship == "core_beneficiary" else 0.0
+        return score * 0.45 + exposure * 0.25 + evidence * 0.15 + rel_bonus + verified
+    if layer == "diffusion_catchup":
+        rel_bonus = 16.0 if relationship in {"derivative_beneficiary", "adjacent"} else 6.0
+        return score * 0.3 + exposure * 0.25 + evidence * 0.25 + rel_bonus
+    if layer == "cycle_to_infrastructure":
+        node = str(candidate.get("chain_node_id") or "")
+        node_bonus = 16.0 if any(token in node for token in ("hbm", "dram", "nand", "storage", "pcb", "mlcc", "packaging")) else 0.0
+        return score * 0.35 + model_shift * 0.2 + evidence * 0.2 + exposure * 0.15 + node_bonus
+    return score
+
+
+def _layered_theme_rankings(candidates: list[dict[str, Any]], payload: dict[str, Any]) -> dict[str, list[dict[str, Any]]]:
+    limit = int(payload.get("layer_limit", 10))
+    layers = {
+        "valuation_rewrite": "dynamic valuation still has room while AI infrastructure exposure is being reclassified",
+        "bottleneck_scarcity": "scarce components, materials, capacity, or qualification barriers",
+        "platform_quality": "high-quality platform or ecosystem control with strong evidence",
+        "diffusion_catchup": "second-order beneficiaries where evidence is improving",
+        "cycle_to_infrastructure": "cyclical businesses being repriced as infrastructure bottlenecks",
+    }
+    ranked: dict[str, list[dict[str, Any]]] = {}
+    usable = [item for item in candidates if str(item.get("state") or "") in {"core", "watchlist", "candidate", "validated"}]
+    for layer, description in layers.items():
+        rows = []
+        for candidate in usable:
+            rows.append({
+                "canonical_key": candidate.get("canonical_key") or _candidate_key(candidate),
+                "name": candidate.get("name"),
+                "symbol": candidate.get("symbol") or candidate.get("code"),
+                "region": candidate.get("region"),
+                "chain_node_id": candidate.get("chain_node_id"),
+                "state": candidate.get("state"),
+                "base_score": _candidate_score(candidate),
+                "layer_score": round(_layer_score(candidate, layer), 2),
+                "description": description,
+            })
+        ranked[layer] = sorted(rows, key=lambda item: item.get("layer_score", 0), reverse=True)[:limit]
+    return ranked
+
+
+def _verification_tasks(candidates: list[dict[str, Any]], payload: dict[str, Any]) -> list[dict[str, Any]]:
+    limit = int(payload.get("verification_limit", 30))
+    tasks: list[dict[str, Any]] = []
+    for candidate in candidates:
+        gaps = []
+        if not candidate.get("verified_by"):
+            gaps.append("identity_or_quote_verification")
+        if not candidate.get("source_url"):
+            gaps.append("source_url")
+        if (_float(candidate.get("evidence_quality")) or 0.0) < 60:
+            gaps.append("direct_exposure_evidence")
+        if not candidate.get("verification_scope"):
+            gaps.append("verification_scope")
+        if gaps:
+            tasks.append({
+                "canonical_key": candidate.get("canonical_key") or _candidate_key(candidate),
+                "name": candidate.get("name"),
+                "symbol": candidate.get("symbol") or candidate.get("code"),
+                "region": candidate.get("region"),
+                "chain_node_id": candidate.get("chain_node_id"),
+                "gaps": gaps,
+                "query": f"{candidate.get('name') or candidate.get('symbol')} AI infrastructure revenue orders customer segment disclosure",
+            })
+            if len(tasks) >= limit:
+                break
+    return tasks
+
+
+def _theme_maintenance_review(command: str, payload: dict[str, Any]) -> dict[str, Any]:
+    pool = _read_json_file(_theme_stock_pool_path(), {})
+    if not isinstance(pool, dict) or not isinstance(pool.get("candidates"), list):
+        return _fail(command, payload, ["theme_stock_pool_missing"])
+    plan = _read_json_file(_coverage_plan_path(), {})
+    if not isinstance(plan, dict) or not plan.get("nodes"):
+        return _fail(command, payload, ["coverage_plan_missing"], ["run plan-theme-coverage first"])
+    theme_filter = {str(item) for item in payload.get("theme_ids", [])} if isinstance(payload.get("theme_ids"), list) else set()
+    candidates = [
+        item for item in pool.get("candidates", [])
+        if isinstance(item, dict) and (not theme_filter or str(item.get("theme_id") or "") in theme_filter)
+    ]
+    if not candidates:
+        return _fail(command, payload, ["theme_candidates_missing"], ["refresh theme stock pool first"])
+    report = {
+        "version": 1,
+        "updated_at": _now(),
+        "theme_ids": sorted(theme_filter) if theme_filter else sorted({str(item.get("theme_id") or "") for item in candidates if item.get("theme_id")}),
+        "summary": {
+            "candidate_count": len(candidates),
+            "coverage_gap_task_count": 0,
+            "status_review_count": 0,
+            "verification_task_count": 0,
+        },
+        "coverage_gap_tasks": _coverage_search_tasks(plan, payload),
+        "status_review": _status_review(candidates, payload),
+        "layered_rankings": _layered_theme_rankings(candidates, payload),
+        "verification_tasks": _verification_tasks(candidates, payload),
+        "policy": "Research-only maintenance review. It proposes discovery, verification, and status-review tasks; it does not authorize trades or silently mutate candidate states.",
+    }
+    report["summary"]["coverage_gap_task_count"] = len(report["coverage_gap_tasks"])
+    report["summary"]["status_review_count"] = len(report["status_review"])
+    report["summary"]["verification_task_count"] = len(report["verification_tasks"])
+    _theme_maintenance_review_path().parent.mkdir(parents=True, exist_ok=True)
+    _theme_maintenance_review_path().write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
+    output = _base_output(command, payload)
+    output["sources"] = [str(_theme_stock_pool_path()), str(_coverage_plan_path())]
+    output["artifacts"] = [str(_theme_maintenance_review_path())]
+    output["warnings"] = [] if not report["status_review"] else ["status_review_actions_present"]
+    output["result"] = report
+    return output
+
+
 def _stock_rating(command: str, payload: dict[str, Any], prewarm: dict[str, Any]) -> dict[str, Any]:
     candidate = payload.get("candidate") if isinstance(payload.get("candidate"), dict) else dict(payload)
     if not candidate.get("name") and not candidate.get("code"):
@@ -1090,6 +1319,8 @@ def _run(command: str, payload: dict[str, Any], prewarm: dict[str, Any], sources
         return _batch_theme_research(command, payload)
     if command == "theme-stock-pool-audit":
         return _theme_stock_pool_audit(command, payload)
+    if command == "theme-maintenance-review":
+        return _theme_maintenance_review(command, payload)
     if command == "layered-stock-screening":
         return _screen(command, payload, prewarm, sources, layered=True)
     if command == "leader-source-harvest":
