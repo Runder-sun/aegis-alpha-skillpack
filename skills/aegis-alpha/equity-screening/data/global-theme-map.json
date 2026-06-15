@@ -1,0 +1,95 @@
+{
+  "schema_version": 1,
+  "updated_at": "2026-06-15",
+  "description": "Canonical global AI infrastructure theme chain map for research-only candidate screening.",
+  "themes": [
+    {
+      "id": "ai-infrastructure",
+      "name": "AI Infrastructure",
+      "thesis": "AI capex is converting selected cyclical hardware, component, storage, and manufacturing businesses into infrastructure bottleneck candidates.",
+      "nodes": [
+        {
+          "id": "hbm-dram",
+          "name": "HBM / high-end DRAM",
+          "role": "memory bottleneck",
+          "repricing_model": "cycle_pb_to_growth_pe",
+          "valuation_models": ["forward_pe", "cycle_normalized_earnings", "pb"],
+          "candidates": [
+            {"symbol": "000660.KS", "name": "SK Hynix", "region": "KR", "market": "KRX", "forward_pe": 8.0, "ai_infra_exposure": 95, "bottleneck_score": 95, "model_shift_score": 95, "evidence_quality": 80},
+            {"symbol": "MU", "name": "Micron Technology", "region": "US", "market": "NASDAQ", "forward_pe": 10.0, "ai_infra_exposure": 90, "bottleneck_score": 90, "model_shift_score": 90, "evidence_quality": 80}
+          ]
+        },
+        {
+          "id": "nand-ssd-storage",
+          "name": "NAND / SSD / data storage",
+          "role": "AI data storage infrastructure",
+          "repricing_model": "commodity_storage_to_ai_data_infrastructure",
+          "valuation_models": ["forward_pe", "cycle_normalized_earnings", "ev_ebit"],
+          "candidates": [
+            {"symbol": "SNDK", "name": "SanDisk", "region": "US", "market": "NASDAQ", "forward_pe": 10.0, "ai_infra_exposure": 78, "bottleneck_score": 70, "model_shift_score": 85, "evidence_quality": 65},
+            {"symbol": "WDC", "name": "Western Digital", "region": "US", "market": "NASDAQ", "forward_pe": 34.0, "ai_infra_exposure": 75, "bottleneck_score": 70, "model_shift_score": 75, "evidence_quality": 65},
+            {"symbol": "STX", "name": "Seagate Technology", "region": "US", "market": "NASDAQ", "forward_pe": 36.0, "ai_infra_exposure": 75, "bottleneck_score": 70, "model_shift_score": 75, "evidence_quality": 65}
+          ]
+        },
+        {
+          "id": "ai-server-odm",
+          "name": "AI server ODM / rack integration",
+          "role": "AI server manufacturing platform",
+          "repricing_model": "low_margin_assembly_to_ai_server_platform",
+          "valuation_models": ["forward_pe", "ev_ebit", "operating_margin_upgrade"],
+          "candidates": [
+            {"symbol": "3231.TW", "name": "Wistron", "region": "TW", "market": "TWSE", "forward_pe": 11.0, "ai_infra_exposure": 85, "bottleneck_score": 65, "model_shift_score": 85, "evidence_quality": 70},
+            {"symbol": "2382.TW", "name": "Quanta Computer", "region": "TW", "market": "TWSE", "forward_pe": 15.0, "ai_infra_exposure": 88, "bottleneck_score": 70, "model_shift_score": 82, "evidence_quality": 75},
+            {"symbol": "2317.TW", "name": "Hon Hai / Foxconn", "region": "TW", "market": "TWSE", "forward_pe": 15.0, "ai_infra_exposure": 78, "bottleneck_score": 65, "model_shift_score": 75, "evidence_quality": 75},
+            {"symbol": "SMCI", "name": "Super Micro Computer", "region": "US", "market": "NASDAQ", "forward_pe": 15.0, "ai_infra_exposure": 90, "bottleneck_score": 70, "model_shift_score": 80, "evidence_quality": 55, "risk_flags": ["governance_or_accounting_risk"]}
+          ]
+        },
+        {
+          "id": "optical-interconnect",
+          "name": "Optical interconnect / transceivers",
+          "role": "AI datacenter network bandwidth",
+          "repricing_model": "telecom_cycle_to_ai_datacenter_interconnect",
+          "valuation_models": ["forward_pe", "ev_sales", "gross_margin_upgrade"],
+          "candidates": [
+            {"symbol": "COHR", "name": "Coherent", "region": "US", "market": "NYSE", "forward_pe": 54.0, "ai_infra_exposure": 85, "bottleneck_score": 80, "model_shift_score": 75, "evidence_quality": 70, "risk_flags": ["already_rerated"]},
+            {"symbol": "LITE", "name": "Lumentum", "region": "US", "market": "NASDAQ", "forward_pe": 57.0, "ai_infra_exposure": 82, "bottleneck_score": 75, "model_shift_score": 75, "evidence_quality": 65, "risk_flags": ["already_rerated"]}
+          ]
+        },
+        {
+          "id": "power-cooling",
+          "name": "Power / cooling / datacenter electrical infrastructure",
+          "role": "AI power density infrastructure",
+          "repricing_model": "industrial_power_to_ai_datacenter_infrastructure",
+          "valuation_models": ["forward_pe", "ev_ebitda", "backlog_conversion"],
+          "candidates": [
+            {"symbol": "VRT", "name": "Vertiv", "region": "US", "market": "NYSE", "forward_pe": 45.0, "ai_infra_exposure": 90, "bottleneck_score": 82, "model_shift_score": 80, "evidence_quality": 75, "risk_flags": ["already_rerated"]},
+            {"symbol": "2308.TW", "name": "Delta Electronics", "region": "TW", "market": "TWSE", "forward_pe": 30.0, "ai_infra_exposure": 70, "bottleneck_score": 65, "model_shift_score": 65, "evidence_quality": 65}
+          ]
+        },
+        {
+          "id": "passives-mlcc",
+          "name": "MLCC / passive components",
+          "role": "AI server power stability components",
+          "repricing_model": "electronic_component_cycle_to_ai_server_component",
+          "valuation_models": ["forward_pe", "sotp", "normal_margin"],
+          "candidates": [
+            {"symbol": "6981.T", "name": "Murata Manufacturing", "region": "JP", "market": "TSE", "forward_pe": 50.0, "ai_infra_exposure": 65, "bottleneck_score": 70, "model_shift_score": 65, "evidence_quality": 75, "risk_flags": ["already_rerated"]},
+            {"symbol": "6762.T", "name": "TDK", "region": "JP", "market": "TSE", "forward_pe": 28.0, "ai_infra_exposure": 55, "bottleneck_score": 60, "model_shift_score": 55, "evidence_quality": 60},
+            {"symbol": "6976.T", "name": "Taiyo Yuden", "region": "JP", "market": "TSE", "forward_pe": 22.0, "ai_infra_exposure": 55, "bottleneck_score": 58, "model_shift_score": 60, "evidence_quality": 55}
+          ]
+        },
+        {
+          "id": "advanced-packaging-materials",
+          "name": "Advanced packaging materials / ABF / substrates",
+          "role": "AI accelerator package substrate bottleneck",
+          "repricing_model": "electronics_material_to_ai_packaging_bottleneck",
+          "valuation_models": ["sotp", "forward_pe", "cycle_normalized_margin"],
+          "candidates": [
+            {"symbol": "2802.T", "name": "Ajinomoto", "region": "JP", "market": "TSE", "forward_pe": 32.0, "ai_infra_exposure": 45, "bottleneck_score": 85, "model_shift_score": 70, "evidence_quality": 70},
+            {"symbol": "4062.T", "name": "Ibiden", "region": "JP", "market": "TSE", "forward_pe": 24.0, "ai_infra_exposure": 70, "bottleneck_score": 78, "model_shift_score": 70, "evidence_quality": 65}
+          ]
+        }
+      ]
+    }
+  ]
+}

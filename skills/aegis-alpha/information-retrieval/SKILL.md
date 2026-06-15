@@ -16,6 +16,11 @@ lower-level `search-layer`, `content-extract`, `mineru-extract`, and
 `research-tools` packages so agents do not need to choose between overlapping
 retrieval skills.
 
+For theme research, retrieve evidence for claims, not just links. Extract the
+claim, source type, affected theme/company, timestamp, and confidence, then pass
+the evidence to `market-intel`, `theme-cycle`, `equity-screening`, or
+`equity-research` as needed.
+
 ## Commands
 
 ### research-search

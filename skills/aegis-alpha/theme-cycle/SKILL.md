@@ -10,6 +10,12 @@ Use this package after `macro-regime` and before `equity-screening` when the
 task needs theme discovery, lifecycle tracking, event impact analysis, or a
 Themesurfer market gate.
 
+For dynamic theme discovery or emerging sub-track work, use the LLM-led workflow
+in `references/dynamic-theme-discovery.md`. The agent should collect and
+cluster evidence, name candidate themes, decompose chain nodes, assign lifecycle
+state, and only then persist or route candidates. Scripts are for state,
+scoring, persistence, and audit; they do not replace semantic theme judgment.
+
 ## Runtime
 
 Run commands through `scripts/dispatch.py` with `--command <name>` and optional
@@ -54,4 +60,5 @@ new ideas, but they do not authorize portfolio changes.
 - Missing market risk inputs returns `ok=false` for Themesurfer checks.
 - Missing theme store returns `ok=false` for tracker and weekly stats.
 - Missing event/news inputs returns `ok=false` for event analysis.
+- Do not upgrade a theme beyond `seed` without bound evidence.
 - Never treat missing theme data as no active themes or permission to rotate.

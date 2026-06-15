@@ -10,6 +10,12 @@ Use this package when the task is about candidate stock discovery, universe
 construction, leader harvesting, preliminary screening, or maintaining the
 local screening pool before deeper `equity-research`.
 
+For theme-driven discovery, read
+`references/theme-driven-candidate-discovery.md`. The LLM should discover and
+classify candidates from theme nodes, suppliers, customers, peers, constituents,
+filings, news, and market co-movement. Scripts normalize, score, persist, and
+audit the candidate set; they do not replace evidence reasoning.
+
 ## Runtime
 
 Run commands through `scripts/dispatch.py` with `--command <name>` and optional
@@ -23,6 +29,8 @@ otherwise it uses `~/.aegis-alpha/workspace`.
 - `company-evidence-collect`: collect matching company news/research evidence
   from payload `news`/`reports` or prewarm data.
 - `stock-screening`, `stock-screening-v2`: score and filter candidates.
+- `theme-chain-screening`: expand the canonical global AI infrastructure theme
+  map into candidate stocks and rank re-rating potential.
 - `layered-stock-screening`: split screened candidates into `core`,
   `watchlist`, and `reject`.
 - `leader-source-harvest`: return high-scoring leaders for source tracking.
@@ -47,6 +55,18 @@ Prefer explicit payload candidates when available:
 Without payload candidates, screening commands require a valid latest
 `memory/prewarm/nightly-prewarm-*.json` containing `hhxg_snapshot` market data.
 
+For global theme-chain research, use the bundled
+`data/global-theme-map.json` or provide `payload.theme_map`:
+
+```json
+{
+  "theme_ids": ["ai-infrastructure"],
+  "node_ids": ["nand-ssd-storage", "ai-server-odm"],
+  "max_forward_pe": 20,
+  "min_score": 55
+}
+```
+
 ## Outputs
 
 All commands return a common JSON envelope with `ok`, `decision_allowed`,
@@ -60,6 +80,18 @@ Screening scores use these factors:
 - information support: 25%
 - market sentiment: 20%
 
+Theme-chain screening scores use:
+
+- valuation/forward-PE cheapness: 30%
+- AI infrastructure exposure: 20%
+- bottleneck strength: 20%
+- valuation model shift potential: 20%
+- evidence quality: 10%
+
+It returns candidates with `chain_node`, `repricing_model`,
+`valuation_models`, score breakdowns, and `core`/`watchlist`/`expensive_or_risk`
+layers.
+
 The output is a research shortlist, not a trading recommendation. Send selected
 candidates to `equity-research` for fundamentals/valuation and then to
 `trade-planning` only for paper-only plans.
@@ -69,4 +101,6 @@ candidates to `equity-research` for fundamentals/valuation and then to
 - Missing candidates and missing prewarm snapshot return `ok=false`.
 - Missing evidence source for company evidence collection returns `ok=false`.
 - Corrupt local stock pool state returns `ok=false`; do not overwrite it.
+- Do not promote theme candidates based only on a label; require evidence before
+  `validated`, `watchlist`, or `core`.
 - Never treat missing data as an empty opportunity set.

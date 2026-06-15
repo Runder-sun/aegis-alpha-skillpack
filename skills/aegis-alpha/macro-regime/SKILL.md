@@ -9,6 +9,11 @@ metadata: {"openclaw": {"skillKey": "macro-regime", "packageProfile": "invest-co
 Use this package when the task needs upstream market regime context before theme
 selection, screening, portfolio risk review, or paper-only trade planning.
 
+For dynamic theme work, use macro outputs as a gate rather than a discovery
+substitute. Strong regime can increase theme-expression confidence; weak regime
+can downgrade aggressiveness, but it does not by itself validate or invalidate
+an industry theme.
+
 ## Runtime
 
 Run commands through `scripts/dispatch.py` with `--command <name>` and optional

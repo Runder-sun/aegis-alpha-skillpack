@@ -351,6 +351,38 @@
           }
         ]
       }
+    },
+    {
+      "name": "theme-chain-screening",
+      "description": "Expand a canonical global AI infrastructure theme map into candidate stocks, then rank re-rating potential.",
+      "status": "implemented",
+      "legacy_functions": [
+        "theme_chain_screening"
+      ],
+      "payload_schema": {
+        "$ref": "#/$defs/theme_chain_screen_payload"
+      },
+      "result_schema": {
+        "$ref": "#/$defs/screening_result"
+      },
+      "upstream_dependencies": [
+        "data/global-theme-map.json or payload.theme_map",
+        "memory/prewarm/nightly-prewarm-*.json when used",
+        "memory/stock_pool artifacts when used"
+      ],
+      "freshness_policy": "Theme-chain freshness is inherited from the canonical theme map, explicit payload theme map, and latest prewarm artifact when used.",
+      "error_behavior": [
+        "theme_chain_map_missing",
+        "theme_chain_map_invalid_json",
+        "theme_chain_candidates_missing",
+        "prewarm_snapshot_missing"
+      ],
+      "example": {
+        "max_forward_pe": 20,
+        "theme_ids": [
+          "ai-infrastructure"
+        ]
+      }
     }
   ],
   "$defs": {
@@ -533,6 +565,39 @@
         },
         "missing_critical_inputs": {
           "type": "array"
+        }
+      }
+    },
+    "theme_chain_screen_payload": {
+      "type": "object",
+      "properties": {
+        "theme_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "node_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "regions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "max_forward_pe": {
+          "type": "number"
+        },
+        "min_score": {
+          "type": "number",
+          "default": 0
+        },
+        "theme_map": {
+          "type": "object"
         }
       }
     }

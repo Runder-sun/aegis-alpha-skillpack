@@ -15,6 +15,10 @@ Use this as the default public entry for scheduled investment workflows. It
 wraps `pipeline-runner` and `pipeline-orchestrator` so agents do not need to
 choose between template discovery and execution internals.
 
+Dynamic theme discovery can be a pipeline template, but it is only one workflow
+type. Keep scheduled theme discovery, stock-pool refresh, report generation,
+portfolio review, and quality checks as separate auditable pipelines.
+
 ## Commands
 
 ### pipeline-list

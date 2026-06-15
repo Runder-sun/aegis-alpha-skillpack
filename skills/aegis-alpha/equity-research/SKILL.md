@@ -9,6 +9,12 @@ metadata: {"openclaw": {"skillKey": "equity-research", "packageProfile": "invest
 This package follows the OpenClaw-compatible skill protocol and keeps all runnable
 components inside this workspace folder for agent-side editing and optimization.
 
+When a company comes from a theme-chain, re-rating screen, or theme stock pool,
+read `references/valuation-model-router.md` before valuation. The agent must
+state the old valuation model, proposed model, evidence for the shift, missing
+inputs, sensitivity, and invalidation conditions. Scripts validate metrics and
+compose research sections; the LLM chooses the model and explains why.
+
 ## Package Layout
 - `scripts/`: deterministic dispatch scripts for command execution and validation.
 - `references/`: command contracts and cross-package boundaries.

@@ -45,6 +45,7 @@ All commands return:
 | `company-evidence-collect` | implemented | `code`/`name`/`query` plus payload evidence or prewarm | matching reports/news evidence |
 | `stock-screening` | implemented | `candidates` or valid prewarm snapshot | scored candidate list |
 | `stock-screening-v2` | implemented | same as `stock-screening` | scored candidate list |
+| `theme-chain-screening` | implemented | `data/global-theme-map.json` or `payload.theme_map`, optional `theme_ids`/`node_ids`/`regions`/`max_forward_pe` | global theme-chain candidate list, score layers, node summary |
 | `layered-stock-screening` | implemented | candidates or prewarm snapshot | `core`, `watchlist`, `reject` layers |
 | `leader-source-harvest` | implemented | candidates or prewarm snapshot, optional `min_score` | high-scoring leaders |
 | `stock-rating` | implemented | one candidate object or top-level candidate fields | score and grade |
@@ -65,6 +66,22 @@ Common accepted fields:
 - `research_hits`
 - `reason`
 - `source`
+
+Theme-chain candidates may also include:
+
+- `symbol`
+- `region`
+- `market`
+- `forward_pe`
+- `ai_infra_exposure`
+- `bottleneck_score`
+- `model_shift_score`
+- `evidence_quality`
+- `chain_node`
+- `chain_role`
+- `repricing_model`
+- `valuation_models`
+- `risk_flags`
 
 ## Failure Example
 

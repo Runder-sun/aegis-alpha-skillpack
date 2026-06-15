@@ -9,6 +9,12 @@ metadata: {"openclaw": {"skillKey": "market-intel", "packageProfile": "invest-co
 Use this package when the task needs market intelligence or event context before
 macro, theme, equity, or paper-only trade planning.
 
+When supporting dynamic theme discovery, extract theme signals rather than only
+summaries: catalyst type, theme hint, affected companies, chain-node hint,
+source, timestamp, confidence, and what claim the evidence supports. Pass those
+signals to `theme-cycle`; keep this package a general intelligence layer, not a
+theme registry.
+
 ## Runtime
 
 Run commands through `scripts/dispatch.py` with `--command <name>` and optional

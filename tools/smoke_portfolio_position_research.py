@@ -230,6 +230,20 @@ def run_smoke(workspace: Path) -> dict[str, Any]:
         layered_screening,
     ))
 
+    theme_chain_screening = _run(workspace, "equity-screening", "theme-chain-screening", {
+        "theme_ids": ["ai-infrastructure"],
+        "max_forward_pe": 20,
+        "min_score": 55,
+    })
+    checks.append(_check(
+        "equity-screening theme-chain-screening ranks global AI infrastructure map",
+        theme_chain_screening.get("ok") is True
+        and theme_chain_screening.get("decision_allowed") is False
+        and theme_chain_screening.get("result", {}).get("count", 0) >= 1
+        and "watchlist" in theme_chain_screening.get("result", {}).get("layers", {}),
+        theme_chain_screening,
+    ))
+
     rating = _run(workspace, "equity-screening", "stock-rating", {
         "candidate": {"name": "贵州茅台", "theme": "消费", "net_yi": 5, "news_hits": 2, "research_hits": 1}
     })

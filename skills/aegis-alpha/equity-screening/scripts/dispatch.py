@@ -27,6 +27,17 @@ def _load_manifest(base: Path) -> dict:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
+def _load_global_theme_map(base: Path) -> tuple[dict[str, Any], str | None]:
+    path = base / "data" / "global-theme-map.json"
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except FileNotFoundError:
+        return {}, "theme_chain_map_missing"
+    except Exception:
+        return {}, "theme_chain_map_invalid_json"
+    return (payload if isinstance(payload, dict) else {}), None
+
+
 def _latest_prewarm() -> tuple[dict[str, Any], list[str]]:
     prewarm_dir = _workspace_dir() / "memory" / "prewarm"
     if not prewarm_dir.exists():
@@ -233,6 +244,88 @@ def _score_candidate(candidate: dict[str, Any], sentiment_index: float | None) -
     return enriched
 
 
+def _score_theme_chain_candidate(candidate: dict[str, Any], payload: dict[str, Any]) -> dict[str, Any]:
+    forward_pe = _float(candidate.get("forward_pe"))
+    ai_exposure = _float(candidate.get("ai_infra_exposure")) or 0.0
+    bottleneck = _float(candidate.get("bottleneck_score")) or 0.0
+    model_shift = _float(candidate.get("model_shift_score")) or 0.0
+    evidence = _float(candidate.get("evidence_quality")) or 0.0
+    max_forward_pe = _float(payload.get("max_forward_pe"))
+    if forward_pe is None:
+        valuation = 35.0
+    elif max_forward_pe is not None and max_forward_pe > 0:
+        valuation = max(min((max_forward_pe - forward_pe) / max_forward_pe, 1), 0) * 100
+    else:
+        valuation = 100 if forward_pe <= 12 else 80 if forward_pe <= 18 else 60 if forward_pe <= 25 else 35 if forward_pe <= 40 else 15
+    score = valuation * 0.3 + ai_exposure * 0.2 + bottleneck * 0.2 + model_shift * 0.2 + evidence * 0.1
+    risks = candidate.get("risk_flags") if isinstance(candidate.get("risk_flags"), list) else []
+    risk_penalty = 0
+    if "already_rerated" in risks:
+        risk_penalty += 10
+    if "governance_or_accounting_risk" in risks:
+        risk_penalty += 12
+    enriched = dict(candidate)
+    enriched["score"] = round(max(0, min(100, score - risk_penalty)), 2)
+    enriched["score_breakdown"] = {
+        "valuation": round(valuation, 2),
+        "ai_infra_exposure": round(ai_exposure, 2),
+        "bottleneck": round(bottleneck, 2),
+        "model_shift": round(model_shift, 2),
+        "evidence_quality": round(evidence, 2),
+        "risk_penalty": -risk_penalty,
+    }
+    return enriched
+
+
+def _theme_chain_candidates(theme_map: dict[str, Any], payload: dict[str, Any]) -> tuple[list[dict[str, Any]], list[str]]:
+    payload_map = payload.get("theme_map") if isinstance(payload.get("theme_map"), dict) else None
+    active_map = payload_map or theme_map
+    themes = active_map.get("themes") if isinstance(active_map.get("themes"), list) else []
+    theme_filter = {str(item) for item in payload.get("theme_ids", [])} if isinstance(payload.get("theme_ids"), list) else set()
+    node_filter = {str(item) for item in payload.get("node_ids", [])} if isinstance(payload.get("node_ids"), list) else set()
+    region_filter = {str(item).upper() for item in payload.get("regions", [])} if isinstance(payload.get("regions"), list) else set()
+    max_forward_pe = _float(payload.get("max_forward_pe"))
+    candidates: list[dict[str, Any]] = []
+    for theme in themes:
+        if not isinstance(theme, dict):
+            continue
+        theme_id = str(theme.get("id") or "")
+        if theme_filter and theme_id not in theme_filter:
+            continue
+        nodes = theme.get("nodes") if isinstance(theme.get("nodes"), list) else []
+        for node in nodes:
+            if not isinstance(node, dict):
+                continue
+            node_id = str(node.get("id") or "")
+            if node_filter and node_id not in node_filter:
+                continue
+            for item in node.get("candidates") or []:
+                if not isinstance(item, dict):
+                    continue
+                region = str(item.get("region") or "").upper()
+                if region_filter and region not in region_filter:
+                    continue
+                forward_pe = _float(item.get("forward_pe"))
+                if max_forward_pe is not None and forward_pe is not None and forward_pe > max_forward_pe:
+                    continue
+                candidate = dict(item)
+                candidate.update({
+                    "theme": theme.get("name"),
+                    "theme_id": theme_id,
+                    "theme_thesis": theme.get("thesis"),
+                    "chain_node": node.get("name"),
+                    "chain_node_id": node_id,
+                    "chain_role": node.get("role"),
+                    "repricing_model": node.get("repricing_model"),
+                    "valuation_models": node.get("valuation_models") if isinstance(node.get("valuation_models"), list) else [],
+                    "reason": f"{node.get('name')} / {node.get('repricing_model')}",
+                    "source": "global-theme-map" if payload_map is None else "payload.theme_map",
+                })
+                candidates.append(candidate)
+    scored = sorted((_score_theme_chain_candidate(candidate, payload) for candidate in candidates), key=lambda item: item.get("score", 0), reverse=True)
+    return scored, ["payload.theme_map"] if payload_map is not None else ["data/global-theme-map.json"]
+
+
 def _score_candidates(candidates: list[dict[str, Any]], prewarm: dict[str, Any]) -> list[dict[str, Any]]:
     market = _snapshot(prewarm).get("market")
     sentiment = _float(market.get("sentiment_index")) if isinstance(market, dict) else None
@@ -270,6 +363,51 @@ def _screen(command: str, payload: dict[str, Any], prewarm: dict[str, Any], sour
     output["sources"] = sources + local_sources
     output["warnings"] = [] if filtered else ["no_candidates_passed_filter"]
     output["result"] = result
+    return output
+
+
+def _theme_chain_screen(command: str, payload: dict[str, Any], base: Path) -> dict[str, Any]:
+    theme_map, error = _load_global_theme_map(base)
+    if error and not isinstance(payload.get("theme_map"), dict):
+        return _fail(command, payload, [error])
+    candidates, local_sources = _theme_chain_candidates(theme_map, payload)
+    if not candidates:
+        return _fail(command, payload, ["theme_chain_candidates_missing"], ["adjust node_ids, regions, or max_forward_pe"])
+    min_score = float(payload.get("min_score", 0))
+    filtered = [candidate for candidate in candidates if candidate.get("score", 0) >= min_score]
+    layers = {
+        "core": [c for c in filtered if c.get("score", 0) >= 75],
+        "watchlist": [c for c in filtered if 55 <= c.get("score", 0) < 75],
+        "expensive_or_risk": [c for c in filtered if c.get("score", 0) < 55],
+    }
+    node_summary: dict[str, dict[str, Any]] = {}
+    for candidate in filtered:
+        node_id = str(candidate.get("chain_node_id") or "unknown")
+        bucket = node_summary.setdefault(node_id, {
+            "chain_node": candidate.get("chain_node"),
+            "count": 0,
+            "top_score": 0,
+        })
+        bucket["count"] += 1
+        bucket["top_score"] = max(bucket["top_score"], candidate.get("score", 0))
+    output = _base_output(command, payload)
+    output["sources"] = local_sources
+    output["warnings"] = [] if filtered else ["no_candidates_passed_filter"]
+    output["result"] = {
+        "theme": "AI Infrastructure",
+        "candidates": filtered,
+        "layers": layers,
+        "node_summary": list(node_summary.values()),
+        "count": len(filtered),
+        "total_input": len(candidates),
+        "score_schema": {
+            "valuation": 0.3,
+            "ai_infra_exposure": 0.2,
+            "bottleneck": 0.2,
+            "model_shift": 0.2,
+            "evidence_quality": 0.1,
+        },
+    }
     return output
 
 
@@ -406,11 +544,13 @@ def _company_evidence_collect(command: str, payload: dict[str, Any], prewarm: di
     return output
 
 
-def _run(command: str, payload: dict[str, Any], prewarm: dict[str, Any], sources: list[str]) -> dict[str, Any]:
+def _run(command: str, payload: dict[str, Any], prewarm: dict[str, Any], sources: list[str], base: Path) -> dict[str, Any]:
     if command == "board-universe-sync":
         return _board_universe_sync(command, payload, prewarm, sources)
     if command == "company-evidence-collect":
         return _company_evidence_collect(command, payload, prewarm, sources)
+    if command == "theme-chain-screening":
+        return _theme_chain_screen(command, payload, base)
     if command == "layered-stock-screening":
         return _screen(command, payload, prewarm, sources, layered=True)
     if command == "leader-source-harvest":
@@ -445,7 +585,7 @@ def main() -> int:
         if not isinstance(payload, dict):
             raise ValueError("payload_must_be_object")
         prewarm, sources = _latest_prewarm()
-        output = _run(args.command, payload, prewarm, sources)
+        output = _run(args.command, payload, prewarm, sources, package_root)
     except ValueError as exc:
         output = _fail(args.command, {}, [str(exc)])
 

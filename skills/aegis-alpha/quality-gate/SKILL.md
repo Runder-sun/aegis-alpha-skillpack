@@ -9,6 +9,11 @@ metadata: {"openclaw": {"skillKey": "quality-gate", "packageProfile": "invest-co
 This package follows the OpenClaw-compatible skill protocol and keeps all runnable
 components inside this workspace folder for agent-side editing and optimization.
 
+For dynamic theme and stock-pool workflows, quality checks should audit evidence
+coverage, stale themes, stale candidates, over-promoted lifecycle states, and
+valuation/crowding mismatches. These checks support the theme system but should
+not replace the package's broader nightly quality and backtest duties.
+
 ## Package Layout
 - `scripts/`: deterministic dispatch scripts for command execution and validation.
 - `references/`: command contracts and cross-package boundaries.
