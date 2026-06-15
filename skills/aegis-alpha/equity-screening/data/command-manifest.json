@@ -383,6 +383,102 @@
           "ai-infrastructure"
         ]
       }
+    },
+    {
+      "status": "implemented",
+      "payload_schema": {
+        "$ref": "#/$defs/theme_chain_screen_payload"
+      },
+      "result_schema": {
+        "$ref": "#/$defs/screening_result"
+      },
+      "upstream_dependencies": [
+        "memory/dynamic_themes/theme-chain-map.json or data/global-theme-map.json",
+        "memory/dynamic_themes/evidence-ledger.jsonl when auditing",
+        "memory/stock_pool/theme-stock-pool.json when used"
+      ],
+      "freshness_policy": "Theme stock pool freshness is inherited from the dynamic theme registry, theme-chain map, evidence ledger, and explicit payload filters.",
+      "error_behavior": [
+        "theme_stock_pool_candidates_missing",
+        "theme_stock_pool_missing",
+        "theme_stock_pool_invalid_schema",
+        "theme_stock_pool_audit_failed"
+      ],
+      "example": {
+        "theme_ids": [
+          "ai-infrastructure"
+        ],
+        "min_score": 55
+      },
+      "name": "refresh-theme-stock-pool",
+      "description": "Refresh the dynamic theme stock pool from the current theme-chain map and score candidate re-rating potential.",
+      "legacy_functions": [
+        "refresh_theme_stock_pool"
+      ]
+    },
+    {
+      "status": "implemented",
+      "payload_schema": {
+        "$ref": "#/$defs/theme_chain_screen_payload"
+      },
+      "result_schema": {
+        "$ref": "#/$defs/screening_result"
+      },
+      "upstream_dependencies": [
+        "memory/dynamic_themes/theme-chain-map.json or data/global-theme-map.json",
+        "memory/dynamic_themes/evidence-ledger.jsonl when auditing",
+        "memory/stock_pool/theme-stock-pool.json when used"
+      ],
+      "freshness_policy": "Theme stock pool freshness is inherited from the dynamic theme registry, theme-chain map, evidence ledger, and explicit payload filters.",
+      "error_behavior": [
+        "theme_stock_pool_candidates_missing",
+        "theme_stock_pool_missing",
+        "theme_stock_pool_invalid_schema",
+        "theme_stock_pool_audit_failed"
+      ],
+      "example": {
+        "theme_ids": [
+          "ai-infrastructure"
+        ],
+        "min_score": 55
+      },
+      "name": "batch-theme-research",
+      "description": "Prepare a research batch from the dynamic theme stock pool for equity-research deep dives.",
+      "legacy_functions": [
+        "batch_theme_research"
+      ]
+    },
+    {
+      "status": "implemented",
+      "payload_schema": {
+        "$ref": "#/$defs/theme_chain_screen_payload"
+      },
+      "result_schema": {
+        "$ref": "#/$defs/screening_result"
+      },
+      "upstream_dependencies": [
+        "memory/dynamic_themes/theme-chain-map.json or data/global-theme-map.json",
+        "memory/dynamic_themes/evidence-ledger.jsonl when auditing",
+        "memory/stock_pool/theme-stock-pool.json when used"
+      ],
+      "freshness_policy": "Theme stock pool freshness is inherited from the dynamic theme registry, theme-chain map, evidence ledger, and explicit payload filters.",
+      "error_behavior": [
+        "theme_stock_pool_candidates_missing",
+        "theme_stock_pool_missing",
+        "theme_stock_pool_invalid_schema",
+        "theme_stock_pool_audit_failed"
+      ],
+      "example": {
+        "theme_ids": [
+          "ai-infrastructure"
+        ],
+        "min_score": 55
+      },
+      "name": "theme-stock-pool-audit",
+      "description": "Audit the dynamic theme stock pool for evidence coverage, staleness, and fail-closed usability.",
+      "legacy_functions": [
+        "theme_stock_pool_audit"
+      ]
     }
   ],
   "$defs": {

@@ -38,6 +38,49 @@ def _load_global_theme_map(base: Path) -> tuple[dict[str, Any], str | None]:
     return (payload if isinstance(payload, dict) else {}), None
 
 
+def _dynamic_theme_dir() -> Path:
+    return _workspace_dir() / "memory" / "dynamic_themes"
+
+
+def _dynamic_theme_chain_map_path() -> Path:
+    return _dynamic_theme_dir() / "theme-chain-map.json"
+
+
+def _theme_stock_pool_path() -> Path:
+    return _workspace_dir() / "memory" / "stock_pool" / "theme-stock-pool.json"
+
+
+def _evidence_ledger_path() -> Path:
+    return _dynamic_theme_dir() / "evidence-ledger.jsonl"
+
+
+def _read_json_file(path: Path, default: Any) -> Any:
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except FileNotFoundError:
+        return default
+    except Exception:
+        return default
+    return payload if payload is not None else default
+
+
+def _read_evidence_ledger() -> list[dict[str, Any]]:
+    path = _evidence_ledger_path()
+    if not path.exists():
+        return []
+    rows: list[dict[str, Any]] = []
+    for line in path.read_text(encoding="utf-8").splitlines():
+        if not line.strip():
+            continue
+        try:
+            item = json.loads(line)
+        except Exception:
+            continue
+        if isinstance(item, dict):
+            rows.append(item)
+    return rows
+
+
 def _latest_prewarm() -> tuple[dict[str, Any], list[str]]:
     prewarm_dir = _workspace_dir() / "memory" / "prewarm"
     if not prewarm_dir.exists():
@@ -411,6 +454,165 @@ def _theme_chain_screen(command: str, payload: dict[str, Any], base: Path) -> di
     return output
 
 
+def _load_active_theme_map(base: Path, payload: dict[str, Any]) -> tuple[dict[str, Any], list[str], str | None]:
+    if isinstance(payload.get("theme_map"), dict):
+        return payload["theme_map"], ["payload.theme_map"], None
+    dynamic_map = _read_json_file(_dynamic_theme_chain_map_path(), {})
+    if isinstance(dynamic_map, dict) and isinstance(dynamic_map.get("themes"), list) and dynamic_map.get("themes"):
+        return dynamic_map, [str(_dynamic_theme_chain_map_path())], None
+    bundled, error = _load_global_theme_map(base)
+    if error:
+        return {}, [], error
+    return bundled, ["data/global-theme-map.json"], None
+
+
+def _candidate_key(candidate: dict[str, Any]) -> str:
+    return str(candidate.get("symbol") or candidate.get("code") or candidate.get("name") or "").upper()
+
+
+def _refresh_theme_stock_pool(command: str, payload: dict[str, Any], base: Path) -> dict[str, Any]:
+    theme_map, sources, error = _load_active_theme_map(base, payload)
+    if error:
+        return _fail(command, payload, [error])
+    candidates, local_sources = _theme_chain_candidates(theme_map, payload)
+    warnings: list[str] = []
+    if not candidates and str(_dynamic_theme_chain_map_path()) in sources and not isinstance(payload.get("theme_map"), dict):
+        bundled, bundled_error = _load_global_theme_map(base)
+        if not bundled_error:
+            candidates, local_sources = _theme_chain_candidates(bundled, payload)
+            sources = ["data/global-theme-map.json"]
+            warnings.append("dynamic_theme_chain_map_has_no_candidates; used bundled canonical map")
+    min_score = float(payload.get("min_score", 0))
+    max_candidates = int(payload.get("max_candidates", 120))
+    filtered = [candidate for candidate in candidates if candidate.get("score", 0) >= min_score]
+    if not filtered:
+        return _fail(command, payload, ["theme_stock_pool_candidates_missing"], ["write theme registry or relax filters"])
+
+    existing_doc = _read_json_file(_theme_stock_pool_path(), {"candidates": []})
+    if not isinstance(existing_doc, dict) or not isinstance(existing_doc.get("candidates"), list):
+        return _fail(command, payload, ["theme_stock_pool_invalid_schema"])
+    existing_by_key = {_candidate_key(item): item for item in existing_doc.get("candidates", []) if isinstance(item, dict) and _candidate_key(item)}
+    additions = []
+    now = _now()
+    for candidate in filtered[:max_candidates]:
+        key = _candidate_key(candidate)
+        if not key:
+            continue
+        enriched = dict(existing_by_key.get(key, {}))
+        enriched.update(candidate)
+        enriched.setdefault("first_seen_at", now)
+        enriched["last_seen_at"] = now
+        enriched["state"] = "core" if candidate.get("score", 0) >= 75 else "watchlist" if candidate.get("score", 0) >= 55 else "candidate"
+        enriched["evidence_ids"] = candidate.get("evidence_ids") if isinstance(candidate.get("evidence_ids"), list) else enriched.get("evidence_ids", [])
+        if key not in existing_by_key:
+            additions.append(enriched)
+        existing_by_key[key] = enriched
+
+    pool = {
+        "version": 1,
+        "updated_at": now,
+        "source_theme_map": sources + local_sources,
+        "candidates": sorted(existing_by_key.values(), key=lambda item: item.get("score", 0), reverse=True),
+        "policy": "Research-only theme stock pool. Send candidates to equity-research before paper trade planning.",
+    }
+    _theme_stock_pool_path().parent.mkdir(parents=True, exist_ok=True)
+    _theme_stock_pool_path().write_text(json.dumps(pool, ensure_ascii=False, indent=2), encoding="utf-8")
+    output = _base_output(command, payload)
+    output["sources"] = sources + local_sources
+    output["artifacts"] = [str(_theme_stock_pool_path())]
+    output["warnings"] = warnings
+    output["result"] = {
+        "added": additions,
+        "added_count": len(additions),
+        "pool_count": len(pool["candidates"]),
+        "top_candidates": pool["candidates"][:20],
+    }
+    return output
+
+
+def _batch_theme_research(command: str, payload: dict[str, Any]) -> dict[str, Any]:
+    pool = _read_json_file(_theme_stock_pool_path(), {})
+    if not isinstance(pool, dict) or not isinstance(pool.get("candidates"), list):
+        return _fail(command, payload, ["theme_stock_pool_missing"])
+    states = {str(item) for item in payload.get("states", [])} if isinstance(payload.get("states"), list) else {"core", "watchlist"}
+    limit = int(payload.get("limit", 12))
+    candidates = [
+        item for item in pool.get("candidates", [])
+        if isinstance(item, dict) and str(item.get("state") or "") in states
+    ]
+    candidates = sorted(candidates, key=lambda item: item.get("score", 0), reverse=True)[:limit]
+    if not candidates:
+        return _fail(command, payload, ["theme_research_candidates_missing"])
+    prompts = []
+    for candidate in candidates:
+        prompts.append({
+            "package": "equity-research",
+            "command": "narrative-analysis",
+            "symbol": candidate.get("symbol") or candidate.get("code"),
+            "name": candidate.get("name"),
+            "theme_id": candidate.get("theme_id"),
+            "chain_node_id": candidate.get("chain_node_id"),
+            "prompt": (
+                "Read valuation-model-router.md. Validate theme exposure, evidence, "
+                "old/new valuation model, sensitivity, and invalidation conditions."
+            ),
+        })
+    output = _base_output(command, payload)
+    output["sources"] = [str(_theme_stock_pool_path())]
+    output["result"] = {
+        "research_batch": prompts,
+        "count": len(prompts),
+        "note": "This command prepares research prompts; it does not execute valuation or authorize trades.",
+    }
+    return output
+
+
+def _theme_stock_pool_audit(command: str, payload: dict[str, Any]) -> dict[str, Any]:
+    pool = _read_json_file(_theme_stock_pool_path(), {})
+    if not isinstance(pool, dict) or not isinstance(pool.get("candidates"), list):
+        return _fail(command, payload, ["theme_stock_pool_missing"])
+    ledger = _read_evidence_ledger()
+    evidence_ids = {str(item.get("id")) for item in ledger if isinstance(item, dict) and item.get("id")}
+    stale_days = int(payload.get("stale_days", 45))
+    now = datetime.now(timezone.utc)
+    failures = []
+    warnings = []
+    for candidate in pool.get("candidates", []):
+        if not isinstance(candidate, dict):
+            continue
+        key = _candidate_key(candidate)
+        ids = [str(item) for item in candidate.get("evidence_ids", [])] if isinstance(candidate.get("evidence_ids"), list) else []
+        missing_ids = [item for item in ids if item not in evidence_ids]
+        if candidate.get("state") in {"core", "watchlist"} and not (ids or candidate.get("evidence_quality")):
+            failures.append({"candidate": key, "reason": "evidence_missing"})
+        if missing_ids:
+            warnings.append({"candidate": key, "reason": "evidence_ids_not_in_ledger", "ids": missing_ids})
+        last_seen = candidate.get("last_seen_at")
+        try:
+            last_dt = datetime.fromisoformat(str(last_seen).replace("Z", "+00:00"))
+            if (now - last_dt).days > stale_days:
+                warnings.append({"candidate": key, "reason": "stale_candidate", "last_seen_at": last_seen})
+        except Exception:
+            warnings.append({"candidate": key, "reason": "last_seen_at_missing_or_invalid"})
+    output = _base_output(command, payload)
+    output["sources"] = [str(_theme_stock_pool_path()), str(_evidence_ledger_path())]
+    output["warnings"] = [json.dumps(item, ensure_ascii=False) for item in warnings[:20]]
+    output["result"] = {
+        "ok_to_use_pool": not failures,
+        "candidate_count": len(pool.get("candidates", [])),
+        "failure_count": len(failures),
+        "warning_count": len(warnings),
+        "failures": failures[:20],
+        "warnings": warnings[:20],
+    }
+    if failures:
+        output["ok"] = False
+        output["errors"] = ["theme_stock_pool_audit_failed"]
+        output["missing_critical_inputs"] = ["theme_stock_pool_audit_failed"]
+        output["freshness"]["status"] = "unavailable"
+    return output
+
+
 def _stock_rating(command: str, payload: dict[str, Any], prewarm: dict[str, Any]) -> dict[str, Any]:
     candidate = payload.get("candidate") if isinstance(payload.get("candidate"), dict) else dict(payload)
     if not candidate.get("name") and not candidate.get("code"):
@@ -551,6 +753,12 @@ def _run(command: str, payload: dict[str, Any], prewarm: dict[str, Any], sources
         return _company_evidence_collect(command, payload, prewarm, sources)
     if command == "theme-chain-screening":
         return _theme_chain_screen(command, payload, base)
+    if command == "refresh-theme-stock-pool":
+        return _refresh_theme_stock_pool(command, payload, base)
+    if command == "batch-theme-research":
+        return _batch_theme_research(command, payload)
+    if command == "theme-stock-pool-audit":
+        return _theme_stock_pool_audit(command, payload)
     if command == "layered-stock-screening":
         return _screen(command, payload, prewarm, sources, layered=True)
     if command == "leader-source-harvest":

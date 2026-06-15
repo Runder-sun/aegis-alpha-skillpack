@@ -244,6 +244,76 @@ def run_smoke(workspace: Path) -> dict[str, Any]:
         theme_chain_screening,
     ))
 
+    theme_signals = _run(workspace, "theme-cycle", "record-theme-signals", {
+        "signals": [
+            {
+                "theme_hint": "AI Infrastructure",
+                "node_hint": "HBM DRAM",
+                "companies": ["SK Hynix", "Micron"],
+                "catalyst_type": "earnings_call",
+                "claim": "AI server demand is lifting HBM and DRAM pricing power.",
+                "source_url": "https://example.com/hbm-note",
+                "as_of": "2026-06-04",
+                "confidence": 0.8,
+            },
+            {
+                "theme_hint": "AI Infrastructure",
+                "node_hint": "AI Server ODM",
+                "companies": ["Quanta", "Wistron"],
+                "catalyst_type": "supply_chain",
+                "claim": "AI server buildout is increasing ODM order visibility.",
+                "source_url": "https://example.com/odm-note",
+                "as_of": "2026-06-04",
+                "confidence": 0.7,
+            },
+        ]
+    })
+    checks.append(_check(
+        "theme-cycle record-theme-signals writes evidence ledger",
+        theme_signals.get("ok") is True
+        and theme_signals.get("result", {}).get("signal_count") == 2
+        and any("evidence-ledger.jsonl" in path for path in theme_signals.get("artifacts", [])),
+        theme_signals,
+    ))
+
+    theme_registry = _run(workspace, "theme-cycle", "write-theme-registry", {})
+    checks.append(_check(
+        "theme-cycle write-theme-registry writes registry and chain map",
+        theme_registry.get("ok") is True
+        and theme_registry.get("result", {}).get("updated", 0) >= 1
+        and any("theme-registry.json" in path for path in theme_registry.get("artifacts", []))
+        and any("theme-chain-map.json" in path for path in theme_registry.get("artifacts", [])),
+        theme_registry,
+    ))
+
+    theme_pool = _run(workspace, "equity-screening", "refresh-theme-stock-pool", {
+        "theme_ids": ["ai-infrastructure"],
+        "min_score": 55,
+    })
+    checks.append(_check(
+        "equity-screening refresh-theme-stock-pool writes dynamic theme pool",
+        theme_pool.get("ok") is True
+        and theme_pool.get("result", {}).get("pool_count", 0) >= 1
+        and any("theme-stock-pool.json" in path for path in theme_pool.get("artifacts", [])),
+        theme_pool,
+    ))
+
+    theme_pool_audit = _run(workspace, "equity-screening", "theme-stock-pool-audit", {})
+    checks.append(_check(
+        "equity-screening theme-stock-pool-audit validates usable pool",
+        theme_pool_audit.get("ok") is True
+        and theme_pool_audit.get("result", {}).get("ok_to_use_pool") is True,
+        theme_pool_audit,
+    ))
+
+    theme_research_batch = _run(workspace, "equity-screening", "batch-theme-research", {"limit": 3})
+    checks.append(_check(
+        "equity-screening batch-theme-research prepares deep-dive queue",
+        theme_research_batch.get("ok") is True
+        and theme_research_batch.get("result", {}).get("count", 0) >= 1,
+        theme_research_batch,
+    ))
+
     rating = _run(workspace, "equity-screening", "stock-rating", {
         "candidate": {"name": "贵州茅台", "theme": "消费", "net_yi": 5, "news_hits": 2, "research_hits": 1}
     })

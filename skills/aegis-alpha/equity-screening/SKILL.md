@@ -31,6 +31,12 @@ otherwise it uses `~/.aegis-alpha/workspace`.
 - `stock-screening`, `stock-screening-v2`: score and filter candidates.
 - `theme-chain-screening`: expand the canonical global AI infrastructure theme
   map into candidate stocks and rank re-rating potential.
+- `refresh-theme-stock-pool`: refresh
+  `memory/stock_pool/theme-stock-pool.json` from the dynamic theme-chain map.
+- `batch-theme-research`: prepare `equity-research` deep-dive prompts from the
+  theme stock pool.
+- `theme-stock-pool-audit`: fail-closed audit for evidence coverage and stale
+  theme candidates.
 - `layered-stock-screening`: split screened candidates into `core`,
   `watchlist`, and `reject`.
 - `leader-source-harvest`: return high-scoring leaders for source tracking.

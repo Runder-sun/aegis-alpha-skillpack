@@ -372,6 +372,104 @@
           "note": "推送报告"
         }
       ]
+    },
+    {
+      "id": "theme-discovery-daily",
+      "label": "每日动态主题发现",
+      "description": "每日动态主题闭环 (信号记录 → 主题注册 → 主题股池刷新 → 股池审计 → 深挖队列)",
+      "steps": [
+        {
+          "package": "execution-automation",
+          "command": "nightly-prewarm",
+          "optional": true,
+          "note": "可选数据预热，自动任务中建议先运行"
+        },
+        {
+          "package": "market-intel",
+          "command": "daily-news-scan",
+          "optional": true,
+          "note": "新闻/政策/事件信号输入"
+        },
+        {
+          "package": "theme-cycle",
+          "command": "record-theme-signals",
+          "optional": false,
+          "note": "记录结构化主题信号到证据账本"
+        },
+        {
+          "package": "theme-cycle",
+          "command": "write-theme-registry",
+          "optional": false,
+          "note": "更新动态主题注册表和主题链图"
+        },
+        {
+          "package": "equity-screening",
+          "command": "refresh-theme-stock-pool",
+          "optional": false,
+          "note": "刷新主题候选股池"
+        },
+        {
+          "package": "equity-screening",
+          "command": "theme-stock-pool-audit",
+          "optional": false,
+          "note": "审计证据覆盖、陈旧度和可用性"
+        },
+        {
+          "package": "equity-screening",
+          "command": "batch-theme-research",
+          "optional": true,
+          "note": "生成 equity-research 深挖队列"
+        }
+      ]
+    },
+    {
+      "id": "theme-discovery-weekly",
+      "label": "周度主题和股池维护",
+      "description": "周度动态主题维护 (主线复盘 → 注册表更新 → 股池刷新 → 质量门控 → 研究队列)",
+      "steps": [
+        {
+          "package": "execution-automation",
+          "command": "weekly-prewarm",
+          "optional": true,
+          "note": "周度数据预热"
+        },
+        {
+          "package": "theme-cycle",
+          "command": "themesurfer-weekly-stats",
+          "optional": true,
+          "note": "统计主题生命周期变化"
+        },
+        {
+          "package": "theme-cycle",
+          "command": "write-theme-registry",
+          "optional": false,
+          "note": "根据本周证据更新动态主题注册表"
+        },
+        {
+          "package": "equity-screening",
+          "command": "refresh-theme-stock-pool",
+          "optional": false,
+          "note": "刷新主题股池"
+        },
+        {
+          "package": "equity-screening",
+          "command": "theme-stock-pool-audit",
+          "optional": false,
+          "note": "股池证据和陈旧度审计"
+        },
+        {
+          "package": "quality-gate",
+          "command": "nightly-quality-gate",
+          "optional": true,
+          "note": "复用质量门禁检查运行状态"
+        },
+        {
+          "package": "equity-screening",
+          "command": "batch-theme-research",
+          "optional": true,
+          "note": "生成下周深挖队列"
+        }
+      ]
     }
   ]
 }

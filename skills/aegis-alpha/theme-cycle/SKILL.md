@@ -15,6 +15,9 @@ in `references/dynamic-theme-discovery.md`. The agent should collect and
 cluster evidence, name candidate themes, decompose chain nodes, assign lifecycle
 state, and only then persist or route candidates. Scripts are for state,
 scoring, persistence, and audit; they do not replace semantic theme judgment.
+Use `record-theme-signals` to bind evidence, then `write-theme-registry` to
+persist `memory/dynamic_themes/theme-registry.json`,
+`theme-chain-map.json`, and `evidence-ledger.jsonl`.
 
 ## Runtime
 
@@ -25,6 +28,10 @@ otherwise it uses `~/.aegis-alpha/workspace`.
 ## Public Commands
 
 - `discover-themes`: active/weak theme discovery from prewarm sectors.
+- `record-theme-signals`: append structured theme evidence to the dynamic theme
+  evidence ledger.
+- `write-theme-registry`: persist the dynamic theme registry and theme-chain map
+  from bound evidence or LLM-supplied themes.
 - `sector-cycle-panorama`: strong/weak sector cycle snapshot.
 - `event-analysis`: map events/news to active themes and risk flags.
 - `theme-tracker`: read local `memory/themes.json` with optional filters.

@@ -27,6 +27,10 @@ def resolve_pipeline_id(command: str, payload: dict) -> str | None:
         return "market-review"
     if command == "pipeline-run-weekly":
         return "weekly"
+    if command == "pipeline-run-theme-discovery-daily":
+        return "theme-discovery-daily"
+    if command == "pipeline-run-theme-discovery-weekly":
+        return "theme-discovery-weekly"
     return None
 
 
@@ -42,7 +46,7 @@ def main() -> int:
     if args.command not in available:
         raise SystemExit(f"unknown command: {args.command}")
 
-    payload = json.loads(args.payload)
+    payload = json.loads(args.payload or "{}")
     pipelines = load_pipelines(package_root).get("pipelines", [])
     pipeline_index = {p.get("id"): p for p in pipelines if isinstance(p, dict)}
 

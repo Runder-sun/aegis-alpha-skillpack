@@ -2,11 +2,29 @@
   "package": "pipeline-runner",
   "description": "Pipeline templates for scheduled investment workflows.",
   "commands": [
-    {"name": "pipeline-list"},
-    {"name": "pipeline-run"},
-    {"name": "pipeline-run-nightly"},
-    {"name": "pipeline-run-morning"},
-    {"name": "pipeline-run-market-review"},
-    {"name": "pipeline-run-weekly"}
+    {
+      "name": "pipeline-list"
+    },
+    {
+      "name": "pipeline-run"
+    },
+    {
+      "name": "pipeline-run-nightly"
+    },
+    {
+      "name": "pipeline-run-morning"
+    },
+    {
+      "name": "pipeline-run-market-review"
+    },
+    {
+      "name": "pipeline-run-weekly"
+    },
+    {
+      "name": "pipeline-run-theme-discovery-daily"
+    },
+    {
+      "name": "pipeline-run-theme-discovery-weekly"
+    }
   ]
 }

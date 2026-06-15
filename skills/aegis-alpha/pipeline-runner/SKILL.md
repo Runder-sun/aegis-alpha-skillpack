@@ -45,6 +45,12 @@ Shortcut for `pipeline-run` with `pipeline_id=market-review`.
 ### pipeline-run-weekly
 Shortcut for `pipeline-run` with `pipeline_id=weekly`.
 
+### pipeline-run-theme-discovery-daily
+Shortcut for `pipeline-run` with `pipeline_id=theme-discovery-daily`.
+
+### pipeline-run-theme-discovery-weekly
+Shortcut for `pipeline-run` with `pipeline_id=theme-discovery-weekly`.
+
 ## Runtime Notes
 ### Data Sources
 - Reads `data/pipelines.json` for step definitions.

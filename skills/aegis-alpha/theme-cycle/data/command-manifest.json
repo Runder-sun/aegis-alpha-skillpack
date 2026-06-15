@@ -30,6 +30,54 @@
       "example": {}
     },
     {
+      "status": "implemented",
+      "payload_schema": {
+        "$ref": "#/$defs/theme_payload"
+      },
+      "result_schema": {
+        "$ref": "#/$defs/theme_result"
+      },
+      "upstream_dependencies": [
+        "payload.signals/themes or memory/prewarm/nightly-prewarm-*.json",
+        "memory/dynamic_themes/evidence-ledger.jsonl when writing registry"
+      ],
+      "freshness_policy": "Dynamic theme freshness is inherited from supplied evidence, latest prewarm artifact, and dynamic theme state artifacts.",
+      "error_behavior": [
+        "theme_signals_missing",
+        "theme_registry_inputs_missing"
+      ],
+      "example": {},
+      "name": "record-theme-signals",
+      "description": "Record structured LLM or prewarm-derived theme signals into the dynamic theme evidence ledger.",
+      "legacy_functions": [
+        "record_theme_signals"
+      ]
+    },
+    {
+      "status": "implemented",
+      "payload_schema": {
+        "$ref": "#/$defs/theme_payload"
+      },
+      "result_schema": {
+        "$ref": "#/$defs/theme_result"
+      },
+      "upstream_dependencies": [
+        "payload.signals/themes or memory/prewarm/nightly-prewarm-*.json",
+        "memory/dynamic_themes/evidence-ledger.jsonl when writing registry"
+      ],
+      "freshness_policy": "Dynamic theme freshness is inherited from supplied evidence, latest prewarm artifact, and dynamic theme state artifacts.",
+      "error_behavior": [
+        "theme_signals_missing",
+        "theme_registry_inputs_missing"
+      ],
+      "example": {},
+      "name": "write-theme-registry",
+      "description": "Persist the dynamic theme registry and theme-chain map from bound signals or LLM-supplied themes.",
+      "legacy_functions": [
+        "write_theme_registry"
+      ]
+    },
+    {
       "name": "event-analysis",
       "description": "Map supplied or prewarm events/news to active themes and risk flags.",
       "status": "implemented",

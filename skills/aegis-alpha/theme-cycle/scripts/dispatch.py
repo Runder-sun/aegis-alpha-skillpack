@@ -35,6 +35,22 @@ def _theme_store_path() -> Path:
     return _workspace_dir() / "memory" / "themes.json"
 
 
+def _dynamic_theme_dir() -> Path:
+    return _workspace_dir() / "memory" / "dynamic_themes"
+
+
+def _theme_registry_path() -> Path:
+    return _dynamic_theme_dir() / "theme-registry.json"
+
+
+def _theme_chain_map_path() -> Path:
+    return _dynamic_theme_dir() / "theme-chain-map.json"
+
+
+def _evidence_ledger_path() -> Path:
+    return _dynamic_theme_dir() / "evidence-ledger.jsonl"
+
+
 def _load_theme_store() -> dict:
     path = _theme_store_path()
     if not path.exists():
@@ -871,6 +887,237 @@ def _safe_float(value: Any) -> float | None:
         return None
 
 
+def _slug(text: Any) -> str:
+    raw = str(text or "").strip().lower()
+    raw = re.sub(r"[^a-z0-9\u4e00-\u9fff]+", "-", raw)
+    raw = raw.strip("-")
+    return raw or "unknown"
+
+
+def _read_json_file(path: Path, default: Any) -> Any:
+    try:
+        return json.loads(path.read_text(encoding="utf-8"))
+    except FileNotFoundError:
+        return default
+    except Exception:
+        return default
+
+
+def _read_evidence_ledger() -> list[dict[str, Any]]:
+    path = _evidence_ledger_path()
+    if not path.exists():
+        return []
+    rows: list[dict[str, Any]] = []
+    for line in path.read_text(encoding="utf-8").splitlines():
+        if not line.strip():
+            continue
+        try:
+            item = json.loads(line)
+        except Exception:
+            continue
+        if isinstance(item, dict):
+            rows.append(item)
+    return rows
+
+
+def _extract_signal_text(item: dict[str, Any]) -> str:
+    return " ".join(str(item.get(key) or "") for key in ("title", "summary", "content", "name", "theme", "label"))
+
+
+def _infer_theme_hint(text: str) -> str | None:
+    rules = [
+        ("AI Infrastructure", ["AI", "人工智能", "算力", "GPU", "数据中心", "HBM", "DRAM", "MLCC", "光模块", "服务器"]),
+        ("Power Grid And Energy Infrastructure", ["电力", "电网", "变压器", "储能", "新能源", "光伏", "风电", "电源"]),
+        ("Advanced Manufacturing Materials", ["材料", "光刻胶", "封装", "基板", "硅片", "玻璃基板", "先进封装"]),
+        ("Memory And Storage Cycle", ["存储", "DRAM", "NAND", "SSD", "HBM", "内存"]),
+        ("Geopolitics And Defense", ["地缘", "制裁", "军工", "国防", "冲突", "安全"]),
+    ]
+    for theme, keywords in rules:
+        if any(keyword.lower() in text.lower() for keyword in keywords):
+            return theme
+    return None
+
+
+def _extract_theme_signals(payload: dict[str, Any], prewarm: dict[str, Any], snapshot: dict[str, Any]) -> tuple[list[dict[str, Any]], list[str]]:
+    raw_signals = payload.get("signals")
+    if isinstance(raw_signals, list) and raw_signals:
+        signals = [item for item in raw_signals if isinstance(item, dict)]
+        return signals, ["payload.signals"]
+
+    signals: list[dict[str, Any]] = []
+    sources: list[str] = []
+    source_items: list[tuple[str, list[dict[str, Any]]]] = []
+    for key in ("tushare_news", "tushare_major_news", "news", "research_reports", "tushare_research_report", "jin10_important_news"):
+        items = prewarm.get(key)
+        if isinstance(items, list):
+            source_items.append((key, [item for item in items if isinstance(item, dict)]))
+    hot_themes = snapshot.get("hot_themes") if isinstance(snapshot.get("hot_themes"), list) else []
+    if hot_themes:
+        source_items.append(("hhxg_snapshot.hot_themes", [item for item in hot_themes if isinstance(item, dict)]))
+
+    for source_name, items in source_items:
+        for item in items[:30]:
+            text = _extract_signal_text(item)
+            theme_hint = item.get("theme") or item.get("name") or _infer_theme_hint(text)
+            if not theme_hint:
+                continue
+            signals.append({
+                "theme_hint": theme_hint,
+                "node_hint": item.get("node") or item.get("industry") or item.get("label"),
+                "companies": item.get("companies") or item.get("top_stocks") or [],
+                "catalyst_type": item.get("type") or item.get("category") or source_name,
+                "claim": item.get("summary") or item.get("title") or text[:160],
+                "source_url": item.get("url") or item.get("source_url"),
+                "source_name": source_name,
+                "as_of": item.get("date") or item.get("datetime") or datetime.now().strftime("%Y-%m-%d"),
+                "confidence": _safe_float(item.get("confidence")) or 0.45,
+            })
+            sources.append(source_name)
+
+    deduped: list[dict[str, Any]] = []
+    seen = set()
+    for signal in signals:
+        key = (str(signal.get("theme_hint")), str(signal.get("claim"))[:120], str(signal.get("source_name")))
+        if key in seen:
+            continue
+        seen.add(key)
+        deduped.append(signal)
+    return deduped[:80], sorted(set(sources))
+
+
+def _normalize_theme_signal(signal: dict[str, Any]) -> dict[str, Any]:
+    theme_hint = str(signal.get("theme_hint") or signal.get("theme") or "").strip()
+    claim = str(signal.get("claim") or signal.get("title") or signal.get("summary") or "").strip()
+    return {
+        "id": signal.get("id") or f"sig-{datetime.now(timezone.utc).strftime('%Y%m%d%H%M%S%f')}",
+        "theme_hint": theme_hint,
+        "theme_id": signal.get("theme_id") or _slug(theme_hint),
+        "node_hint": signal.get("node_hint") or signal.get("node"),
+        "companies": signal.get("companies") if isinstance(signal.get("companies"), list) else [],
+        "catalyst_type": signal.get("catalyst_type") or "unknown",
+        "claim": claim,
+        "source_url": signal.get("source_url") or signal.get("url"),
+        "source_name": signal.get("source_name") or signal.get("source") or "payload",
+        "as_of": signal.get("as_of") or datetime.now().strftime("%Y-%m-%d"),
+        "confidence": _safe_float(signal.get("confidence")) or 0.5,
+        "recorded_at": _now(),
+    }
+
+
+def _build_registry_from_signals(signals: list[dict[str, Any]], payload_themes: list[dict[str, Any]] | None = None) -> tuple[dict[str, Any], dict[str, Any]]:
+    by_theme: dict[str, list[dict[str, Any]]] = {}
+    for signal in signals:
+        theme_id = str(signal.get("theme_id") or _slug(signal.get("theme_hint")))
+        by_theme.setdefault(theme_id, []).append(signal)
+
+    payload_index = {}
+    for theme in payload_themes or []:
+        if isinstance(theme, dict):
+            payload_index[str(theme.get("id") or _slug(theme.get("name")))] = theme
+
+    themes: list[dict[str, Any]] = []
+    chain_themes: list[dict[str, Any]] = []
+    for theme_id, rows in sorted(by_theme.items()):
+        supplied = payload_index.get(theme_id, {})
+        source_types = sorted({str(row.get("source_name") or row.get("catalyst_type") or "unknown") for row in rows})
+        node_names = sorted({str(row.get("node_hint")) for row in rows if row.get("node_hint")})
+        evidence_count = len(rows)
+        score = round(min(100.0, evidence_count * 12 + len(source_types) * 8 + len(node_names) * 5), 2)
+        lifecycle = supplied.get("lifecycle")
+        if not lifecycle:
+            lifecycle = "accelerating" if score >= 70 else "emerging" if evidence_count >= 2 and len(source_types) >= 2 else "seed"
+        theme_name = supplied.get("name") or rows[0].get("theme_hint") or theme_id
+        theme_doc = {
+            "id": theme_id,
+            "name": theme_name,
+            "investment_question": supplied.get("investment_question") or supplied.get("thesis") or f"Is {theme_name} becoming an investable market theme?",
+            "lifecycle": lifecycle,
+            "trend_score": score,
+            "source_types": source_types,
+            "evidence_count": evidence_count,
+            "latest_signal_at": max(str(row.get("as_of") or "") for row in rows),
+            "chain_nodes": supplied.get("chain_nodes") if isinstance(supplied.get("chain_nodes"), list) else [
+                {"id": _slug(node), "name": node, "role": "unclassified", "candidates": []}
+                for node in node_names
+            ],
+            "evidence_ids": [row.get("id") for row in rows if row.get("id")],
+            "invalidation": supplied.get("invalidation") or ["evidence velocity fades", "core chain claim is contradicted"],
+        }
+        themes.append(theme_doc)
+        chain_themes.append({
+            "id": theme_id,
+            "name": theme_name,
+            "thesis": theme_doc["investment_question"],
+            "lifecycle": lifecycle,
+            "trend_score": score,
+            "nodes": theme_doc["chain_nodes"],
+            "evidence_ids": theme_doc["evidence_ids"],
+        })
+
+    registry = {
+        "version": 1,
+        "updated_at": _now(),
+        "themes": themes,
+        "policy": "LLM names themes and judges lifecycle; this registry preserves state and audit metadata.",
+    }
+    chain_map = {
+        "version": 1,
+        "updated_at": _now(),
+        "themes": chain_themes,
+        "source": "theme-cycle.write-theme-registry",
+    }
+    return registry, chain_map
+
+
+def _record_theme_signals(command: str, payload: dict[str, Any], prewarm: dict[str, Any], snapshot: dict[str, Any]) -> dict[str, Any]:
+    signals, sources = _extract_theme_signals(payload, prewarm, snapshot)
+    if not signals:
+        return {"signals": [], "source": sources, "errors": ["theme_signals_missing"]}
+    normalized = [_normalize_theme_signal(signal) for signal in signals]
+    path = _evidence_ledger_path()
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("a", encoding="utf-8") as fh:
+        for signal in normalized:
+            fh.write(json.dumps(signal, ensure_ascii=False) + "\n")
+    return {
+        "signals": normalized,
+        "signal_count": len(normalized),
+        "ledger_path": str(path),
+        "source": sources or ["payload.signals"],
+    }
+
+
+def _write_theme_registry(payload: dict[str, Any]) -> dict[str, Any]:
+    payload_signals = payload.get("signals") if isinstance(payload.get("signals"), list) else []
+    signals = [_normalize_theme_signal(signal) for signal in payload_signals if isinstance(signal, dict)] or _read_evidence_ledger()
+    payload_themes = payload.get("themes") if isinstance(payload.get("themes"), list) else []
+    if not signals and not payload_themes:
+        return {"updated": 0, "errors": ["theme_signals_or_themes_missing"]}
+    if payload_themes and not signals:
+        signals = []
+        for theme in payload_themes:
+            if not isinstance(theme, dict):
+                continue
+            signals.append(_normalize_theme_signal({
+                "theme_hint": theme.get("name") or theme.get("id"),
+                "theme_id": theme.get("id") or _slug(theme.get("name")),
+                "claim": theme.get("thesis") or theme.get("investment_question") or "LLM supplied theme",
+                "source_name": "payload.themes",
+                "confidence": theme.get("confidence") or 0.6,
+            }))
+    registry, chain_map = _build_registry_from_signals(signals, payload_themes)
+    _theme_registry_path().parent.mkdir(parents=True, exist_ok=True)
+    _theme_registry_path().write_text(json.dumps(registry, ensure_ascii=False, indent=2), encoding="utf-8")
+    _theme_chain_map_path().write_text(json.dumps(chain_map, ensure_ascii=False, indent=2), encoding="utf-8")
+    return {
+        "updated": len(registry.get("themes", [])),
+        "themes": registry.get("themes", []),
+        "registry_path": str(_theme_registry_path()),
+        "chain_map_path": str(_theme_chain_map_path()),
+        "source": ["payload.themes/signals" if payload_themes or payload_signals else "memory/dynamic_themes/evidence-ledger.jsonl"],
+    }
+
+
 def _market_risk(snapshot: dict[str, Any]) -> dict[str, Any]:
     market = snapshot.get("market") if isinstance(snapshot, dict) else {}
     if not isinstance(market, dict):
@@ -1062,9 +1309,17 @@ def _build_themesurfer_weekly_stats() -> dict[str, Any]:
 
 
 def _incomplete_reasons(command: str, result: dict[str, Any]) -> list[str]:
+    if result.get("errors"):
+        return [str(err) for err in result.get("errors", [])]
     if command == "discover-themes":
         if not result.get("themes") and not result.get("weak"):
             return ["theme_snapshot_missing"]
+    if command == "record-theme-signals":
+        if not result.get("signal_count"):
+            return ["theme_signals_missing"]
+    if command == "write-theme-registry":
+        if not result.get("updated"):
+            return ["theme_registry_inputs_missing"]
     if command == "sector-cycle-panorama":
         snapshot = result.get("cycle_snapshot") if isinstance(result.get("cycle_snapshot"), dict) else {}
         if not snapshot.get("strong") and not snapshot.get("weak"):
@@ -1105,6 +1360,9 @@ def _wrap_result(command: str, payload: dict[str, Any], result: dict[str, Any]) 
     output["sources"] = _normalize_sources(result.get("source"))
     if result.get("store_path"):
         output["artifacts"] = [str(result["store_path"])]
+    for key in ("ledger_path", "registry_path", "chain_map_path"):
+        if result.get(key):
+            output["artifacts"].append(str(result[key]))
     output["result"] = result
     return output
 
@@ -1119,6 +1377,12 @@ def _build_result(command: str, payload: dict[str, Any], prewarm: dict) -> dict:
             "weak": sectors.get("weak", []),
             "source": "hhxg_snapshot.sectors",
         }
+
+    if command == "record-theme-signals":
+        return _record_theme_signals(command, payload, prewarm, snapshot)
+
+    if command == "write-theme-registry":
+        return _write_theme_registry(payload)
 
     if command == "sector-cycle-panorama":
         sectors = _summarize_sectors(snapshot)

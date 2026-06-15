@@ -39,6 +39,12 @@ Run or dry-run the morning workflow.
 ### pipeline-run-weekly
 Run or dry-run the weekly workflow.
 
+### pipeline-run-theme-discovery-daily
+Run or dry-run the daily dynamic theme discovery workflow.
+
+### pipeline-run-theme-discovery-weekly
+Run or dry-run the weekly dynamic theme and stock-pool maintenance workflow.
+
 ## Safety
 
 - Push steps remain disabled unless `allow_push=true`.

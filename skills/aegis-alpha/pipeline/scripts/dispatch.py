@@ -15,6 +15,8 @@ PIPELINE_SHORTCUTS = {
     "pipeline-run-nightly": "nightly",
     "pipeline-run-morning": "morning",
     "pipeline-run-weekly": "weekly",
+    "pipeline-run-theme-discovery-daily": "theme-discovery-daily",
+    "pipeline-run-theme-discovery-weekly": "theme-discovery-weekly",
 }
 
 

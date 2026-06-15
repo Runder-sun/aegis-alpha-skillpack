@@ -170,6 +170,60 @@
         "dispatch_not_found",
         "pipeline_step_failed"
       ]
+    },
+    {
+      "status": "implemented",
+      "routes_to": "pipeline-orchestrator::pipeline-run",
+      "payload_schema": {
+        "$ref": "#/$defs/pipeline_payload"
+      },
+      "result_schema": {
+        "$ref": "#/$defs/facade_result"
+      },
+      "example": {
+        "dry_run": true
+      },
+      "upstream_dependencies": [
+        "pipeline-runner facade route",
+        "pipeline-orchestrator facade route",
+        "workspace skills"
+      ],
+      "freshness_policy": "Pipeline freshness is delegated to the routed pipeline artifact and step outputs.",
+      "error_behavior": [
+        "pipeline_not_found",
+        "delegate_failed",
+        "dispatch_not_found",
+        "pipeline_step_failed"
+      ],
+      "name": "pipeline-run-theme-discovery-daily",
+      "description": "Run or dry-run the daily dynamic theme discovery workflow."
+    },
+    {
+      "status": "implemented",
+      "routes_to": "pipeline-orchestrator::pipeline-run",
+      "payload_schema": {
+        "$ref": "#/$defs/pipeline_payload"
+      },
+      "result_schema": {
+        "$ref": "#/$defs/facade_result"
+      },
+      "example": {
+        "dry_run": true
+      },
+      "upstream_dependencies": [
+        "pipeline-runner facade route",
+        "pipeline-orchestrator facade route",
+        "workspace skills"
+      ],
+      "freshness_policy": "Pipeline freshness is delegated to the routed pipeline artifact and step outputs.",
+      "error_behavior": [
+        "pipeline_not_found",
+        "delegate_failed",
+        "dispatch_not_found",
+        "pipeline_step_failed"
+      ],
+      "name": "pipeline-run-theme-discovery-weekly",
+      "description": "Run or dry-run the weekly dynamic theme and stock-pool maintenance workflow."
     }
   ],
   "$defs": {
@@ -182,7 +236,9 @@
             "nightly",
             "morning",
             "market-review",
-            "weekly"
+            "weekly",
+            "theme-discovery-daily",
+            "theme-discovery-weekly"
           ]
         },
         "dry_run": {
